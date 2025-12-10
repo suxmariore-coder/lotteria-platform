@@ -15,7 +15,14 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
+    }
+
+    #lotteryPrice {
+      text-align: center;
+      margin-bottom: 14px;
+      color: #555;
+      font-size: 15px;
     }
 
     .grid {
@@ -116,7 +123,8 @@
 
 <body>
 
-<h1>Lotteria</h1>
+<h1 id="lotteryTitle">Caricamento...</h1>
+<div id="lotteryPrice"></div>
 
 <div id="grid" class="grid"></div>
 
@@ -143,20 +151,17 @@
 
   const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 
-  // 🔴 INCOLLA QUI LA **SUPABASE ANON PUBLIC KEY**
+  // 🔴 INCOLLA QUI LA SUPABASE ANON PUBLIC KEY
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-  /* ======================================================
-     LETTURA ID LOTTERIA DALLA URL (?id=...)
-     ====================================================== */
   const params = new URLSearchParams(window.location.search);
   const LOTTERY_ID = params.get("id");
 
-  console.log("🎯 LOTTERY_ID DALLA URL:", LOTTERY_ID);
+  console.log("🎯 LOTTERY_ID:", LOTTERY_ID);
 
   if (!LOTTERY_ID) {
     document.body.innerHTML = "<h2 style='text-align:center'>Lotteria non trovata</h2>";
-    throw new Error("Lottery ID mancante nella URL");
+    throw new Error("Lottery ID mancante");
   }
 
   const grid = document.getElementById("grid");
@@ -167,6 +172,30 @@
   const resetBtn = document.getElementById("resetBtn");
 
   let currentRow = null;
+
+  async function loadLotteryInfo() {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price`,
+      {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: "Bearer " + SUPABASE_ANON_KEY
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (!data.length) {
+      document.getElementById("lotteryTitle").textContent = "Lotteria non trovata";
+      return;
+    }
+
+    const lottery = data[0];
+    document.getElementById("lotteryTitle").textContent = lottery.title;
+    document.getElementById("lotteryPrice").textContent =
+      `Prezzo per numero: €${Number(lottery.ticket_price).toFixed(2)}`;
+  }
 
   async function loadNumbers() {
     const res = await fetch(
@@ -284,6 +313,7 @@
     loadNumbers();
   }
 
+  loadLotteryInfo();
   loadNumbers();
 </script>
 
