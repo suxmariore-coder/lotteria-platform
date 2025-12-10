@@ -157,12 +157,18 @@
           Prefer: "return=representation"
         },
         body: JSON.stringify({
-          title,
-          ticket_price: price,
-          total_numbers: 90,
-          payment_methods: methods,
-          paypal_email: paypalCheck.checked ? paypalEmail.value.trim() : null,
-          revolut_link: revolutCheck.checked ? revolutLink.value.trim() : null
+  title,
+  ticket_price: price,
+  total_numbers: 90,
+
+  // ✅ CAMPI OBBLIGATORI
+  owner_name: "creator",
+  admin_password_hash: "TEMP",
+
+  // ✅ MULTI PAGAMENTO
+  payment_methods: methods,
+  paypal_email: paypalCheck.checked ? paypalEmail.value.trim() : null,
+  revolut_link: revolutCheck.checked ? revolutLink.value.trim() : null
         })
       }
     );
