@@ -1,0 +1,2 @@
+# lotteria-platform
+Progetto lotteria
