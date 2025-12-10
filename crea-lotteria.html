@@ -159,11 +159,10 @@
         body: JSON.stringify({
   title,
   ticket_price: price,
-  total_numbers: 90,
 
   // ✅ CAMPI OBBLIGATORI
-  owner_name: "creator",
-  admin_password_hash: "TEMP",
+  min_number: 1,
+  max_number: 90,
 
   // ✅ MULTI PAGAMENTO
   payment_methods: methods,
