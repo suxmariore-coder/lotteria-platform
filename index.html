@@ -15,10 +15,9 @@
 
     h1, h3 {
       text-align: center;
-      margin: 4px 0;
+      margin: 6px 0;
     }
 
-    /* GRID */
     .grid {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
@@ -57,7 +56,6 @@
       word-break: break-word;
     }
 
-    /* MODAL */
     .modal {
       position: fixed;
       inset: 0;
@@ -105,7 +103,6 @@
       border: none;
       font-size: 15px;
       cursor: pointer;
-      pointer-events: auto !important;
     }
 
     .stripe { background: #6772e5; color: #fff; }
@@ -126,7 +123,6 @@
 
 <div id="grid" class="grid"></div>
 
-<!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h2 id="modalTitle"></h2>
@@ -135,7 +131,7 @@
 
     <div id="paymentSection" class="pay-buttons">
       <button class="btn stripe" onclick="payWithStripe()">💳 Carta (Stripe)</button>
-      <button class="btn paypal" onclick="comingSoon()">🟦 PayPal (prossimamente)</button>
+      <button class="btn paypal" onclick="comingSoon()">🟦 PayPal (presto)</button>
       <button class="btn revolut" onclick="comingSoon()">💚 Revolut (presto)</button>
     </div>
 
@@ -145,22 +141,24 @@
 </div>
 
 <script>
-console.log("VERSIONE INDEX – MULTI LOTTERIA");
+/* ================== CONFIG ================== */
 
-// PRENDO L’ID DAL LINK
+// ✅ URL DEL TUO PROGETTO SUPABASE
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+
+// ✅ **SOLO QUESTA KEY** → ANON PUBLIC KEY (quella che inizia con eyJ...)
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+
+// ID LOTTERIA PRESO DALLA URL
 const params = new URLSearchParams(window.location.search);
 const LOTTERY_ID = params.get("id");
 
-// 🔴 INSERISCI QUI LA TUA URL SUPABASE
-const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-
-// 🔴 INSERISCI QUI LA TUA ANON KEY
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-
 if (!LOTTERY_ID) {
-  document.body.innerHTML = "<h2>Errore: ID lotteria mancante nella URL.</h2>";
-  throw new Error("Lottery ID assente");
+  document.body.innerHTML = "<h2>ID lotteria mancante nella URL</h2>";
+  throw new Error("LOTTERY_ID mancante");
 }
+
+/* ================== ELEMENTI ================== */
 
 const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
@@ -171,14 +169,21 @@ const resetBtn = document.getElementById("resetBtn");
 
 let currentRow = null;
 
+/* ================== LOAD DATI ================== */
+
 async function loadLotteryDetails() {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price`,
-    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY } }
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY
+      }
+    }
   );
 
   const data = await res.json();
-  if (data.length === 0) return;
+  if (!data.length) return;
 
   document.getElementById("lottery-title").textContent = data[0].title;
   document.getElementById("lottery-price").textContent =
@@ -188,7 +193,12 @@ async function loadLotteryDetails() {
 async function loadNumbers() {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&select=id,number,status,buyer_name&order=number.asc`,
-    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY } }
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY
+      }
+    }
   );
 
   const data = await res.json();
@@ -205,6 +215,8 @@ async function loadNumbers() {
     grid.appendChild(d);
   });
 }
+
+/* ================== MODAL ================== */
 
 function openModal(row) {
   currentRow = row;
@@ -230,8 +242,10 @@ function closeModal() {
 }
 
 function comingSoon() {
-  alert("Metodo di pagamento in arrivo!");
+  alert("Metodo di pagamento in arrivo");
 }
+
+/* ================== STRIPE ================== */
 
 async function payWithStripe() {
   const name = nameField.value.trim();
@@ -247,13 +261,13 @@ async function payWithStripe() {
       headers: {
         "Content-Type": "application/json",
         apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY
       },
       body: JSON.stringify({
         lottery_id: LOTTERY_ID,
         number_id: currentRow.id,
-        buyer_name: name,
-      }),
+        buyer_name: name
+      })
     }
   );
 
@@ -266,6 +280,8 @@ async function payWithStripe() {
   window.location.href = data.url;
 }
 
+/* ================== RESET ================== */
+
 async function resetNumber() {
   const pwd = prompt("Password admin:");
   if (!pwd) return;
@@ -277,13 +293,13 @@ async function resetNumber() {
       headers: {
         "Content-Type": "application/json",
         apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY
       },
       body: JSON.stringify({
         lottery_id: LOTTERY_ID,
         number_id: currentRow.id,
-        admin_password: pwd,
-      }),
+        admin_password: pwd
+      })
     }
   );
 
@@ -295,6 +311,8 @@ async function resetNumber() {
   closeModal();
   loadNumbers();
 }
+
+/* ================== AVVIO ================== */
 
 loadLotteryDetails();
 loadNumbers();
