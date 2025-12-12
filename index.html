@@ -8,9 +8,9 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      padding: 16px;
       background: #f5f5f5;
       margin: 0;
-      padding: 16px;
     }
 
     h1, h3 {
@@ -24,7 +24,7 @@
       gap: 10px;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
       .grid { grid-template-columns: repeat(6, 1fr); }
     }
 
@@ -43,6 +43,7 @@
       flex-direction: column;
       justify-content: center;
       min-height: 58px;
+      user-select: none;
     }
 
     .available { background: #1e7e34; }
@@ -51,12 +52,13 @@
     .buyer {
       font-size: 11px;
       margin-top: 4px;
+      opacity: 0.9;
     }
 
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.55);
       display: none;
       align-items: center;
       justify-content: center;
@@ -68,7 +70,7 @@
     .modal-content {
       background: #fff;
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       border-radius: 12px;
       padding: 20px;
     }
@@ -84,11 +86,11 @@
     .btn {
       width: 100%;
       padding: 12px;
+      margin-top: 8px;
       border-radius: 6px;
       border: none;
       font-size: 15px;
       cursor: pointer;
-      margin-bottom: 8px;
     }
 
     .stripe { background: #6772e5; color: #fff; }
@@ -107,25 +109,23 @@
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3 id="modalTitle"></h3>
-
     <input id="nameField" placeholder="Il tuo nome" />
-
     <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
-    <button id="resetBtn" class="btn reset" style="display:none" onclick="resetNumber()">Reset numero</button>
+    <button id="resetBtn" class="btn reset" style="display:none" onclick="resetNumber()">Reset</button>
     <button class="btn cancel" onclick="closeModal()">Annulla</button>
   </div>
 </div>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const LOTTERY_ID = params.get("id");
-
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
+const params = new URLSearchParams(window.location.search);
+const LOTTERY_ID = params.get("id");
+
 if (!LOTTERY_ID) {
-  document.body.innerHTML = "<h2>ID lotteria mancante</h2>";
-  throw new Error("ID mancante");
+  document.body.innerHTML = "<h2>ID LOTTERIA MANCANTE</h2>";
+  throw new Error("Missing lottery id");
 }
 
 const grid = document.getElementById("grid");
@@ -143,7 +143,8 @@ async function loadLottery() {
   );
   const data = await res.json();
   document.getElementById("lottery-title").textContent = data[0].title;
-  document.getElementById("lottery-price").textContent = `€ ${data[0].ticket_price}`;
+  document.getElementById("lottery-price").textContent =
+    `Prezzo biglietto: € ${data[0].ticket_price}`;
 }
 
 async function loadNumbers() {
@@ -153,24 +154,74 @@ async function loadNumbers() {
   );
   const data = await res.json();
   grid.innerHTML = "";
-  data.forEach(n => {
+
+  data.forEach(row => {
     const d = document.createElement("div");
-    d.className = `number ${n.status}`;
-    d.innerHTML = `<div>${n.number}</div>${n.status==="sold" ? `<div class="buyer">${n.buyer_name||""}</div>` : ""}`;
-    d.onclick = () => openModal(n);
+    d.className = `number ${row.status}`;
+    d.innerHTML = `<div>${row.number}</div>${row.status === "sold" ? `<div class="buyer">${row.buyer_name || ""}</div>` : ""}`;
+    d.onclick = () => openModal(row);
     grid.appendChild(d);
   });
 }
 
 function openModal(row) {
   currentRow = row;
-  nameField.value = "";
+  modalTitle.textContent = row.status === "available"
+    ? `Acquista numero ${row.number}`
+    : `Reset numero ${row.number}`;
+
+  nameField.style.display = row.status === "available" ? "block" : "none";
   resetBtn.style.display = row.status === "sold" ? "block" : "none";
-  modalTitle.textContent = row.status === "sold" ? "Reset numero" : "Acquista numero";
   modal.classList.add("show");
 }
 
-function closeModal() { modal.classList.remove("show"); }
+function closeModal() {
+  modal.classList.remove("show");
+}
+
+async function payWithStripe() {
+  const name = nameField.value.trim();
+  if (!name) return alert("Inserisci il nome");
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name
+    })
+  });
+
+  const data = await res.json();
+  if (!data.url) return alert("Errore Stripe");
+
+  window.location.href = data.url;
+}
+
+async function resetNumber() {
+  const pwd = prompt("Password admin");
+  if (!pwd) return;
+
+  await fetch(`${SUPABASE_URL}/functions/v1/reset-number-admin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      admin_password: pwd
+    })
+  });
+
+  closeModal();
+  loadNumbers();
+}
 
 loadLottery();
 loadNumbers();
