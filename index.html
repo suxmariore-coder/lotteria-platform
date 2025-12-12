@@ -8,9 +8,9 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 16px;
       background: #f5f5f5;
       margin: 0;
+      padding: 16px;
     }
 
     h1, h3 {
@@ -56,7 +56,7 @@
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.55);
+      background: rgba(0,0,0,0.6);
       display: none;
       align-items: center;
       justify-content: center;
@@ -68,7 +68,7 @@
     .modal-content {
       background: #fff;
       width: 100%;
-      max-width: 380px;
+      max-width: 360px;
       border-radius: 12px;
       padding: 20px;
     }
@@ -106,30 +106,26 @@
 
 <div id="modal" class="modal">
   <div class="modal-content">
-    <h2 id="modalTitle"></h2>
+    <h3 id="modalTitle"></h3>
 
     <input id="nameField" placeholder="Il tuo nome" />
 
-    <button class="btn stripe" onclick="payWithStripe()">💳 Paga con carta</button>
+    <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
     <button id="resetBtn" class="btn reset" style="display:none" onclick="resetNumber()">Reset numero</button>
     <button class="btn cancel" onclick="closeModal()">Annulla</button>
   </div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
+const params = new URLSearchParams(window.location.search);
+const LOTTERY_ID = params.get("id");
 
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-/* ========================================== */
-
-const params = new URLSearchParams(window.location.search);
-const LOTTERY_ID = params.get("id");
-
 if (!LOTTERY_ID) {
-  document.body.innerHTML = "<h2>Errore: ID lotteria mancante</h2>";
-  throw new Error("Missing lottery id");
+  document.body.innerHTML = "<h2>ID lotteria mancante</h2>";
+  throw new Error("ID mancante");
 }
 
 const grid = document.getElementById("grid");
@@ -140,132 +136,41 @@ const resetBtn = document.getElementById("resetBtn");
 
 let currentRow = null;
 
-/* ===== LOAD LOTTERY ===== */
-
 async function loadLottery() {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-
   const data = await res.json();
-  if (data.length === 0) return;
-
   document.getElementById("lottery-title").textContent = data[0].title;
-  document.getElementById("lottery-price").textContent =
-    `Prezzo biglietto: € ${data[0].ticket_price}`;
+  document.getElementById("lottery-price").textContent = `€ ${data[0].ticket_price}`;
 }
-
-/* ===== LOAD NUMBERS ===== */
 
 async function loadNumbers() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&select=id,number,status,buyer_name&order=number.asc`,
+    `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-
   const data = await res.json();
   grid.innerHTML = "";
-
-  data.forEach(row => {
+  data.forEach(n => {
     const d = document.createElement("div");
-    d.className = `number ${row.status}`;
-    d.innerHTML = `
-      <div>${row.number}</div>
-      ${row.status === "sold" ? `<div class="buyer">${row.buyer_name}</div>` : ""}
-    `;
-    d.onclick = () => openModal(row);
+    d.className = `number ${n.status}`;
+    d.innerHTML = `<div>${n.number}</div>${n.status==="sold" ? `<div class="buyer">${n.buyer_name||""}</div>` : ""}`;
+    d.onclick = () => openModal(n);
     grid.appendChild(d);
   });
 }
 
-/* ===== MODAL ===== */
-
 function openModal(row) {
   currentRow = row;
   nameField.value = "";
-
-  if (row.status === "available") {
-    modalTitle.textContent = `Acquista numero ${row.number}`;
-    nameField.style.display = "block";
-    resetBtn.style.display = "none";
-  } else {
-    modalTitle.textContent = `Reset numero ${row.number}`;
-    nameField.style.display = "none";
-    resetBtn.style.display = "block";
-  }
-
+  resetBtn.style.display = row.status === "sold" ? "block" : "none";
+  modalTitle.textContent = row.status === "sold" ? "Reset numero" : "Acquista numero";
   modal.classList.add("show");
 }
 
-function closeModal() {
-  modal.classList.remove("show");
-}
-
-/* ===== STRIPE ===== */
-
-async function payWithStripe() {
-  const name = nameField.value.trim();
-  if (!name) return alert("Inserisci il tuo nome");
-
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/create-checkout-session`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        lottery_id: LOTTERY_ID,
-        number_id: currentRow.id,
-        buyer_name: name,
-      }),
-    }
-  );
-
-  if (!res.ok) {
-    const err = await res.text();
-    alert("Errore pagamento:\n" + err);
-    return;
-  }
-
-  const data = await res.json();
-  if (!data.url) {
-    alert("Stripe URL non ricevuto");
-    return;
-  }
-
-  window.location.href = data.url;
-}
-
-/* ===== RESET ===== */
-
-async function resetNumber() {
-  const pwd = prompt("Password admin");
-  if (!pwd) return;
-
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/reset-number-admin`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        lottery_id: LOTTERY_ID,
-        number_id: currentRow.id,
-        admin_password: pwd,
-      }),
-    }
-  );
-
-  if (!res.ok) return alert("Password errata");
-
-  closeModal();
-  loadNumbers();
-}
+function closeModal() { modal.classList.remove("show"); }
 
 loadLottery();
 loadNumbers();
