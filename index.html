@@ -24,7 +24,7 @@
       gap: 10px;
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 900px) {
       .grid { grid-template-columns: repeat(6, 1fr); }
     }
 
@@ -43,7 +43,6 @@
       flex-direction: column;
       justify-content: center;
       min-height: 58px;
-      user-select: none;
     }
 
     .available { background: #1e7e34; }
@@ -52,8 +51,6 @@
     .buyer {
       font-size: 11px;
       margin-top: 4px;
-      opacity: 0.9;
-      word-break: break-word;
     }
 
     .modal {
@@ -76,24 +73,12 @@
       padding: 20px;
     }
 
-    .modal h2 {
-      text-align: center;
-      margin-top: 0;
-    }
-
     .modal input {
       width: 100%;
       padding: 10px;
       margin-bottom: 12px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 14px;
-    }
-
-    .pay-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
     }
 
     .btn {
@@ -103,14 +88,10 @@
       border: none;
       font-size: 15px;
       cursor: pointer;
+      margin-bottom: 8px;
     }
 
     .stripe { background: #6772e5; color: #fff; }
-    .stripe:hover { background: #5469d4; }
-
-    .paypal { background: #003087; color: #fff; opacity: 0.6; }
-    .revolut { background: #000; color: #fff; opacity: 0.6; }
-
     .reset { background: #dc3545; color: #fff; }
     .cancel { background: #ddd; }
   </style>
@@ -129,76 +110,58 @@
 
     <input id="nameField" placeholder="Il tuo nome" />
 
-    <div id="paymentSection" class="pay-buttons">
-      <button class="btn stripe" onclick="payWithStripe()">💳 Carta (Stripe)</button>
-      <button class="btn paypal" onclick="comingSoon()">🟦 PayPal (presto)</button>
-      <button class="btn revolut" onclick="comingSoon()">💚 Revolut (presto)</button>
-    </div>
-
+    <button class="btn stripe" onclick="payWithStripe()">💳 Paga con carta</button>
     <button id="resetBtn" class="btn reset" style="display:none" onclick="resetNumber()">Reset numero</button>
     <button class="btn cancel" onclick="closeModal()">Annulla</button>
   </div>
 </div>
 
 <script>
-/* ================== CONFIG ================== */
+/* ================= CONFIG ================= */
 
-// ✅ URL DEL TUO PROGETTO SUPABASE
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-
-// ✅ **SOLO QUESTA KEY** → ANON PUBLIC KEY (quella che inizia con eyJ...)
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-// ID LOTTERIA PRESO DALLA URL
+/* ========================================== */
+
 const params = new URLSearchParams(window.location.search);
 const LOTTERY_ID = params.get("id");
 
 if (!LOTTERY_ID) {
-  document.body.innerHTML = "<h2>ID lotteria mancante nella URL</h2>";
-  throw new Error("LOTTERY_ID mancante");
+  document.body.innerHTML = "<h2>Errore: ID lotteria mancante</h2>";
+  throw new Error("Missing lottery id");
 }
-
-/* ================== ELEMENTI ================== */
 
 const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const nameField = document.getElementById("nameField");
-const paymentSection = document.getElementById("paymentSection");
 const resetBtn = document.getElementById("resetBtn");
 
 let currentRow = null;
 
-/* ================== LOAD DATI ================== */
+/* ===== LOAD LOTTERY ===== */
 
-async function loadLotteryDetails() {
+async function loadLottery() {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY
-      }
-    }
+    { headers: { apikey: SUPABASE_ANON_KEY } }
   );
 
   const data = await res.json();
-  if (!data.length) return;
+  if (data.length === 0) return;
 
   document.getElementById("lottery-title").textContent = data[0].title;
   document.getElementById("lottery-price").textContent =
     `Prezzo biglietto: € ${data[0].ticket_price}`;
 }
 
+/* ===== LOAD NUMBERS ===== */
+
 async function loadNumbers() {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&select=id,number,status,buyer_name&order=number.asc`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY
-      }
-    }
+    { headers: { apikey: SUPABASE_ANON_KEY } }
   );
 
   const data = await res.json();
@@ -209,14 +172,14 @@ async function loadNumbers() {
     d.className = `number ${row.status}`;
     d.innerHTML = `
       <div>${row.number}</div>
-      ${row.status === "sold" ? `<div class="buyer">${row.buyer_name ?? ""}</div>` : ""}
+      ${row.status === "sold" ? `<div class="buyer">${row.buyer_name}</div>` : ""}
     `;
     d.onclick = () => openModal(row);
     grid.appendChild(d);
   });
 }
 
-/* ================== MODAL ================== */
+/* ===== MODAL ===== */
 
 function openModal(row) {
   currentRow = row;
@@ -225,12 +188,10 @@ function openModal(row) {
   if (row.status === "available") {
     modalTitle.textContent = `Acquista numero ${row.number}`;
     nameField.style.display = "block";
-    paymentSection.style.display = "flex";
     resetBtn.style.display = "none";
   } else {
     modalTitle.textContent = `Reset numero ${row.number}`;
     nameField.style.display = "none";
-    paymentSection.style.display = "none";
     resetBtn.style.display = "block";
   }
 
@@ -241,18 +202,11 @@ function closeModal() {
   modal.classList.remove("show");
 }
 
-function comingSoon() {
-  alert("Metodo di pagamento in arrivo");
-}
-
-/* ================== STRIPE ================== */
+/* ===== STRIPE ===== */
 
 async function payWithStripe() {
   const name = nameField.value.trim();
-  if (!name) {
-    alert("Inserisci il tuo nome");
-    return;
-  }
+  if (!name) return alert("Inserisci il tuo nome");
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/create-checkout-session`,
@@ -261,29 +215,34 @@ async function payWithStripe() {
       headers: {
         "Content-Type": "application/json",
         apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY
       },
       body: JSON.stringify({
         lottery_id: LOTTERY_ID,
         number_id: currentRow.id,
-        buyer_name: name
-      })
+        buyer_name: name,
+      }),
     }
   );
 
+  if (!res.ok) {
+    const err = await res.text();
+    alert("Errore pagamento:\n" + err);
+    return;
+  }
+
   const data = await res.json();
   if (!data.url) {
-    alert("Errore avvio pagamento");
+    alert("Stripe URL non ricevuto");
     return;
   }
 
   window.location.href = data.url;
 }
 
-/* ================== RESET ================== */
+/* ===== RESET ===== */
 
 async function resetNumber() {
-  const pwd = prompt("Password admin:");
+  const pwd = prompt("Password admin");
   if (!pwd) return;
 
   const res = await fetch(
@@ -293,28 +252,22 @@ async function resetNumber() {
       headers: {
         "Content-Type": "application/json",
         apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY
       },
       body: JSON.stringify({
         lottery_id: LOTTERY_ID,
         number_id: currentRow.id,
-        admin_password: pwd
-      })
+        admin_password: pwd,
+      }),
     }
   );
 
-  if (!res.ok) {
-    alert("Password errata");
-    return;
-  }
+  if (!res.ok) return alert("Password errata");
 
   closeModal();
   loadNumbers();
 }
 
-/* ================== AVVIO ================== */
-
-loadLotteryDetails();
+loadLottery();
 loadNumbers();
 </script>
 
