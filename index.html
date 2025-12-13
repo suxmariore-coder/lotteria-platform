@@ -186,9 +186,10 @@ async function payWithStripe() {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_ANON_KEY
-    },
+  "Content-Type": "application/json",
+  "apikey": SUPABASE_ANON_KEY,
+  "Authorization": "Bearer " + SUPABASE_ANON_KEY
+},
     body: JSON.stringify({
       lottery_id: LOTTERY_ID,
       number_id: currentRow.id,
