@@ -207,11 +207,12 @@ async function resetNumber() {
   const pwd = prompt("Password admin");
   if (!pwd) return;
 
-  await fetch(`${SUPABASE_URL}/functions/v1/reset-number-admin`, {
+  fetch(`${SUPABASE_URL}/functions/v1/reset-number-admin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      apikey: SUPABASE_ANON_KEY
+      apikey: SUPABASE_ANON_KEY,
+    Authorization: "Bearer " + SUPABASE_ANON_KEY,
     },
     body: JSON.stringify({
       lottery_id: LOTTERY_ID,
