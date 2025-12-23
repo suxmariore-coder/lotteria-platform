@@ -92,15 +92,19 @@
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* ✅ crea client SUPABASE (nome diverso!) */
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 const container = document.getElementById("lotteries");
 
 /* 1️⃣ CHECK AUTH */
 async function checkAuth() {
-  const { data } = await supabase.auth.getUser();
+  const { data, error } = await supabaseClient.auth.getUser();
 
-  if (!data.user) {
+  if (!data?.user) {
     window.location.href = "login.html";
     return;
   }
@@ -110,7 +114,7 @@ async function checkAuth() {
 
 /* 2️⃣ LOAD LOTTERIE OWNER */
 async function loadLotteries(userId) {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("lotteries")
     .select("id, title, ticket_price")
     .eq("owner_id", userId)
@@ -121,7 +125,7 @@ async function loadLotteries(userId) {
     return;
   }
 
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     container.innerHTML = "<p>Nessuna lotteria creata.</p>";
     return;
   }
