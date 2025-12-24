@@ -5,6 +5,7 @@
   <title>Dashboard Owner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
@@ -88,11 +89,11 @@
 <div id="lotteries"></div>
 
 <script>
-/* 🔴 INSERISCI I TUOI DATI */
+/* 🔴 CONFIG SUPABASE */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-/* ✅ crea client SUPABASE (nome diverso!) */
+/* ✅ NOME CORRETTO */
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
@@ -100,11 +101,11 @@ const supabaseClient = supabase.createClient(
 
 const container = document.getElementById("lotteries");
 
-/* 1️⃣ CHECK AUTH */
+/* 1️⃣ AUTH CHECK */
 async function checkAuth() {
-  const { data, error } = await supabaseClient.auth.getUser();
+  const { data } = await supabaseClient.auth.getUser();
 
-  if (!data?.user) {
+  if (!data.user) {
     window.location.href = "login.html";
     return;
   }
@@ -112,7 +113,7 @@ async function checkAuth() {
   loadLotteries(data.user.id);
 }
 
-/* 2️⃣ LOAD LOTTERIE OWNER */
+/* 2️⃣ LOAD LOTTERIE */
 async function loadLotteries(userId) {
   const { data, error } = await supabaseClient
     .from("lotteries")
@@ -148,18 +149,20 @@ async function loadLotteries(userId) {
   });
 }
 
-function openLottery(id) {
+/* 🔗 AZIONI */
+window.openLottery = function(id) {
   window.open(`index.html?id=${id}`, "_blank");
-}
+};
 
-function manageLottery(id) {
+window.manageLottery = function(id) {
   alert("Gestione avanzata – prossimo step 😉");
-}
+};
 
-function goToCreate() {
+window.goToCreate = function() {
   window.location.href = "crea-lotteria.html";
-}
+};
 
+/* START */
 checkAuth();
 </script>
 
