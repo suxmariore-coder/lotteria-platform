@@ -89,80 +89,66 @@
 <div id="lotteries"></div>
 
 <script>
-/* 🔴 CONFIG SUPABASE */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-/* ✅ NOME CORRETTO */
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const container = document.getElementById("lotteries");
 
-/* 1️⃣ AUTH CHECK */
 async function checkAuth() {
-  const { data } = await supabaseClient.auth.getUser();
-
+  const { data } = await sb.auth.getUser();
   if (!data.user) {
     window.location.href = "login.html";
     return;
   }
-
   loadLotteries(data.user.id);
 }
 
-/* 2️⃣ LOAD LOTTERIE */
 async function loadLotteries(userId) {
-  const { data, error } = await supabaseClient
+  const { data, error } = await sb
     .from("lotteries")
     .select("id, title, ticket_price")
     .eq("owner_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) {
-    container.innerHTML = "Errore caricamento lotterie";
+    container.innerHTML = "Errore caricamento";
     return;
   }
 
-  if (!data || data.length === 0) {
+  if (!data.length) {
     container.innerHTML = "<p>Nessuna lotteria creata.</p>";
     return;
   }
 
   container.innerHTML = "";
-
   data.forEach(l => {
     const div = document.createElement("div");
     div.className = "lottery";
     div.innerHTML = `
       <h3>${l.title}</h3>
       <p>Prezzo biglietto: € ${l.ticket_price}</p>
-
       <div class="actions">
-        <button class="open" onclick="openLottery('${l.id}')">Apri</button>
-        <button class="manage" onclick="manageLottery('${l.id}')">Gestisci</button>
+        <button onclick="openLottery('${l.id}')">Apri</button>
+        <button onclick="manageLottery('${l.id}')">Gestisci</button>
       </div>
     `;
     container.appendChild(div);
   });
 }
 
-/* 🔗 AZIONI */
-window.openLottery = function(id) {
+function openLottery(id) {
   window.open(`index.html?id=${id}`, "_blank");
-};
+}
 
-window.manageLottery = function(id) {
-  alert("Gestione avanzata – prossimo step 😉");
-};
+function manageLottery(id) {
+  alert("Gestione avanzata – prossimo step");
+}
 
-window.goToCreate = function() {
+function goToCreate() {
   window.location.href = "crea-lotteria.html";
-};
+}
 
-/* START */
 checkAuth();
 </script>
 
