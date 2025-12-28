@@ -5,15 +5,96 @@
   <title>Dashboard Owner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Supabase SDK -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 16px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .top-actions {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .top-actions button {
+      padding: 10px 16px;
+      font-size: 15px;
+      background: #2d7bf4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .lottery {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .lottery h3 {
+      margin: 0 0 8px 0;
+    }
+
+    .lottery p {
+      margin: 4px 0;
+      color: #555;
+    }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .actions button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .open {
+      background: #1e7e34;
+      color: white;
+    }
+
+    .manage {
+      background: #6c757d;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>📊 Dashboard – Le tue lotterie</h1>
+
+<div class="top-actions">
+  <button onclick="goToCreate()">➕ Crea nuova lotteria</button>
+</div>
+
+<div id="lotteries"></div>
 
 <script>
-/* 🔴 INSERISCI I TUOI DATI */
+/* 🔴 CONFIGURAZIONE */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-/* ✅ client Supabase (nome corretto) */
+/* ✅ client Supabase (NOME CORRETTO) */
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
@@ -21,19 +102,68 @@ const supabaseClient = supabase.createClient(
 
 const container = document.getElementById("lotteries");
 
-/* 🔐 STEP 1.1 – CHECK AUTH */
+/* 1️⃣ CHECK LOGIN */
 async function checkAuth() {
   const { data, error } = await supabaseClient.auth.getUser();
 
-  if (!data.user) {
+  if (error || !data.user) {
     window.location.href = "login.html";
     return;
   }
 
-  // Per ora stampiamo solo l’ID (debug)
-  console.log("User loggato:", data.user.id);
+  loadLotteries(data.user.id);
 }
 
+/* 2️⃣ CARICA LOTTERIE OWNER */
+async function loadLotteries(userId) {
+  const { data, error } = await supabaseClient
+    .from("lotteries")
+    .select("id, title, ticket_price")
+    .eq("owner_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = "❌ Errore caricamento lotterie";
+    return;
+  }
+
+  if (data.length === 0) {
+    container.innerHTML = "<p>Nessuna lotteria creata.</p>";
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(l => {
+    const div = document.createElement("div");
+    div.className = "lottery";
+    div.innerHTML = `
+      <h3>${l.title}</h3>
+      <p>Prezzo biglietto: € ${l.ticket_price}</p>
+
+      <div class="actions">
+        <button class="open" onclick="openLottery('${l.id}')">Apri</button>
+        <button class="manage" onclick="manageLottery('${l.id}')">Gestisci</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* AZIONI */
+function openLottery(id) {
+  window.open(`index.html?id=${id}`, "_blank");
+}
+
+function manageLottery(id) {
+  alert("Gestione avanzata – prossimo step 😉");
+}
+
+function goToCreate() {
+  window.location.href = "crea-lotteria.html";
+}
+
+/* AVVIO */
 checkAuth();
 </script>
 
