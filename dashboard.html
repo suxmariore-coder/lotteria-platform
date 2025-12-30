@@ -1,171 +1,306 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Dashboard Owner</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Supabase JS -->
+  <!-- Supabase JS v2 -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
+    body{
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 16px;
+      background:#f4f4f4;
+      margin:0;
+      padding:16px;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
+    header{
+      max-width:900px;
+      margin:0 auto 16px auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
-    .top-actions {
-      text-align: center;
-      margin-bottom: 20px;
+    h1{
+      margin:0;
+      font-size:20px;
     }
 
-    .top-actions button {
-      padding: 10px 16px;
-      font-size: 15px;
-      background: #2d7bf4;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+    .btn{
+      padding:10px 14px;
+      font-size:14px;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+    }
+    .primary{ background:#2d7bf4; color:#fff; }
+    .secondary{ background:#6c757d; color:#fff; }
+    .danger{ background:#dc3545; color:#fff; }
+
+    .wrap{
+      max-width:900px;
+      margin:0 auto;
     }
 
-    .lottery {
-      background: white;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 12px;
+    .notice{
+      background:#fff3cd;
+      border:1px solid #ffeeba;
+      color:#856404;
+      padding:10px;
+      border-radius:10px;
+      margin-bottom:12px;
+      display:none;
     }
 
-    .lottery h3 {
-      margin: 0 0 8px 0;
+    .card{
+      background:#fff;
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);
     }
 
-    .lottery p {
-      margin: 4px 0;
-      color: #555;
+    .row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
-    .actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
+    .title{
+      margin:0;
+      font-size:18px;
     }
 
-    .actions button {
-      flex: 1;
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
+    .meta{
+      margin:6px 0 0 0;
+      color:#555;
+      font-size:14px;
     }
 
-    .open {
-      background: #1e7e34;
-      color: white;
+    .desc{
+      margin:10px 0 0 0;
+      color:#333;
+      line-height:1.35;
+      font-size:14px;
+      white-space:pre-wrap;
     }
 
-    .manage {
-      background: #6c757d;
-      color: white;
+    .thumbs{
+      display:flex;
+      gap:8px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+
+    .thumb{
+      width:64px;
+      height:64px;
+      border-radius:10px;
+      object-fit:cover;
+      border:1px solid #eee;
+      background:#fafafa;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+
+    .link{
+      font-size:13px;
+      color:#2d7bf4;
+      word-break:break-all;
+      margin-top:8px;
+    }
+
+    .small{
+      font-size:12px;
+      color:#666;
+    }
+
+    .loader{
+      text-align:center;
+      color:#666;
+      padding:20px;
     }
   </style>
 </head>
 
 <body>
+  <header class="wrap">
+    <h1>📊 Dashboard – Le tue lotterie</h1>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn primary" id="btnCreate">➕ Crea nuova lotteria</button>
+      <button class="btn secondary" id="btnRefresh">🔄 Aggiorna</button>
+      <button class="btn danger" id="btnLogout">Esci</button>
+    </div>
+  </header>
 
-<h1>📊 Dashboard – Le tue lotterie</h1>
-
-<div class="top-actions">
-  <button onclick="goToCreate()">➕ Crea nuova lotteria</button>
-</div>
-
-<div id="lotteries"></div>
+  <div class="wrap">
+    <div id="notice" class="notice"></div>
+    <div id="list">
+      <div class="loader">Caricamento…</div>
+    </div>
+  </div>
 
 <script>
-/* 🔴 CONFIGURAZIONE */
-const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+  // ✅ INSERISCI I TUOI DATI
+  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-/* ✅ client Supabase (NOME CORRETTO) */
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+  // crea client (IMPORTANTE: non chiamare la variabile "supabase" se già esiste come globale)
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const container = document.getElementById("lotteries");
+  const listEl = document.getElementById("list");
+  const noticeEl = document.getElementById("notice");
 
-/* 1️⃣ CHECK LOGIN */
-async function checkAuth() {
-  const { data, error } = await supabaseClient.auth.getUser();
+  const btnCreate = document.getElementById("btnCreate");
+  const btnRefresh = document.getElementById("btnRefresh");
+  const btnLogout = document.getElementById("btnLogout");
 
-  if (error || !data.user) {
-    window.location.href = "login.html";
-    return;
+  function showNotice(msg){
+    noticeEl.style.display = "block";
+    noticeEl.innerText = msg;
+  }
+  function hideNotice(){
+    noticeEl.style.display = "none";
+    noticeEl.innerText = "";
   }
 
-  loadLotteries(data.user.id);
-}
-
-/* 2️⃣ CARICA LOTTERIE OWNER */
-async function loadLotteries(userId) {
-  const { data, error } = await supabaseClient
-    .from("lotteries")
-    .select("id, title, ticket_price")
-    .eq("owner_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    container.innerHTML = "❌ Errore caricamento lotterie";
-    return;
+  function esc(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
   }
 
-  if (data.length === 0) {
-    container.innerHTML = "<p>Nessuna lotteria creata.</p>";
-    return;
+  async function requireAuth(){
+    const { data, error } = await sb.auth.getUser();
+    if (error) {
+      showNotice("Errore auth: " + error.message);
+      return null;
+    }
+    if (!data?.user) {
+      window.location.href = "login.html";
+      return null;
+    }
+    return data.user;
   }
 
-  container.innerHTML = "";
+  function buildPublicUrl(lotteryId){
+    return `https://suxmariore-coder.github.io/lotteria-platform/index.html?id=${lotteryId}`;
+  }
 
-  data.forEach(l => {
-    const div = document.createElement("div");
-    div.className = "lottery";
-    div.innerHTML = `
-      <h3>${l.title}</h3>
-      <p>Prezzo biglietto: € ${l.ticket_price}</p>
+  function renderLotteries(rows){
+    if (!rows || rows.length === 0){
+      listEl.innerHTML = `
+        <div class="card">
+          <p style="margin:0;">Nessuna lotteria creata.</p>
+          <p class="small" style="margin-top:8px;">Clicca “Crea nuova lotteria” per iniziare.</p>
+        </div>`;
+      return;
+    }
 
-      <div class="actions">
-        <button class="open" onclick="openLottery('${l.id}')">Apri</button>
-        <button class="manage" onclick="manageLottery('${l.id}')">Gestisci</button>
-      </div>
-    `;
-    container.appendChild(div);
+    listEl.innerHTML = "";
+
+    rows.forEach(l => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const publicUrl = buildPublicUrl(l.id);
+
+      // immagini premio: ci aspettiamo un array in l.prize_images (jsonb) tipo ["path1","path2",...]
+      // Se invece salvi URL completi, funzioneranno lo stesso.
+      const imgs = Array.isArray(l.prize_images) ? l.prize_images.slice(0,5) : [];
+
+      const thumbsHtml = imgs.length
+        ? `<div class="thumbs">${imgs.map(u => `<img class="thumb" src="${esc(u)}" alt="Premio">`).join("")}</div>`
+        : ``;
+
+      card.innerHTML = `
+        <div class="row">
+          <div>
+            <h3 class="title">${esc(l.title)}</h3>
+            <p class="meta">Prezzo biglietto: <b>€ ${esc(l.ticket_price)}</b></p>
+            ${l.description ? `<p class="desc">${esc(l.description)}</p>` : ``}
+            <div class="link"><a href="${publicUrl}" target="_blank" rel="noreferrer">${publicUrl}</a></div>
+          </div>
+        </div>
+
+        ${thumbsHtml}
+
+        <div class="actions">
+          <button class="btn primary" data-open="${esc(l.id)}">Apri lotteria</button>
+          <button class="btn secondary" data-manage="${esc(l.id)}">Gestisci</button>
+        </div>
+      `;
+
+      // bind buttons
+      card.querySelector("[data-open]")?.addEventListener("click", () => {
+        window.open(publicUrl, "_blank");
+      });
+
+      card.querySelector("[data-manage]")?.addEventListener("click", () => {
+        alert("Gestione avanzata: prossimo step (vendite, reset, chiusura, ecc.)");
+      });
+
+      listEl.appendChild(card);
+    });
+  }
+
+  async function loadOwnerLotteries(userId){
+    hideNotice();
+    listEl.innerHTML = `<div class="loader">Caricamento…</div>`;
+
+    // campi attesi in DB:
+    // lotteries: id, title, ticket_price, description, prize_images, owner_id, created_at
+    const { data, error } = await sb
+      .from("lotteries")
+      .select("id,title,ticket_price,description,prize_images,created_at")
+      .eq("owner_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error){
+      showNotice("Errore caricamento lotterie: " + error.message);
+      listEl.innerHTML = "";
+      return;
+    }
+
+    renderLotteries(data);
+  }
+
+  btnCreate.addEventListener("click", () => {
+    window.location.href = "crea-lotteria.html";
   });
-}
 
-/* AZIONI */
-function openLottery(id) {
-  window.open(`index.html?id=${id}`, "_blank");
-}
+  btnRefresh.addEventListener("click", async () => {
+    const user = await requireAuth();
+    if (!user) return;
+    await loadOwnerLotteries(user.id);
+  });
 
-function manageLottery(id) {
-  alert("Gestione avanzata – prossimo step 😉");
-}
+  btnLogout.addEventListener("click", async () => {
+    await sb.auth.signOut();
+    window.location.href = "login.html";
+  });
 
-function goToCreate() {
-  window.location.href = "crea-lotteria.html";
-}
-
-/* AVVIO */
-checkAuth();
+  // INIT
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+    await loadOwnerLotteries(user.id);
+  })();
 </script>
-
 </body>
 </html>
