@@ -1,306 +1,305 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Dashboard Owner</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Supabase JS v2 -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    body{
+    body {
       font-family: Arial, sans-serif;
-      background:#f4f4f4;
-      margin:0;
-      padding:16px;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 16px;
     }
 
-    header{
-      max-width:900px;
-      margin:0 auto 16px auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+    h1 { text-align: center; margin: 10px 0 16px; }
+
+    .top-actions {
+      text-align: center;
+      margin-bottom: 18px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
-    h1{
-      margin:0;
-      font-size:20px;
+    .top-actions button {
+      padding: 10px 16px;
+      font-size: 15px;
+      background: #2d7bf4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .top-actions button.secondary {
+      background: #6c757d;
     }
 
-    .btn{
-      padding:10px 14px;
-      font-size:14px;
-      border:none;
-      border-radius:8px;
-      cursor:pointer;
-    }
-    .primary{ background:#2d7bf4; color:#fff; }
-    .secondary{ background:#6c757d; color:#fff; }
-    .danger{ background:#dc3545; color:#fff; }
-
-    .wrap{
-      max-width:900px;
-      margin:0 auto;
+    #status {
+      text-align: center;
+      margin: 10px 0 16px;
+      color: #444;
     }
 
-    .notice{
-      background:#fff3cd;
-      border:1px solid #ffeeba;
-      color:#856404;
-      padding:10px;
-      border-radius:10px;
-      margin-bottom:12px;
-      display:none;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 1100px;
+      margin: 0 auto;
     }
 
-    .card{
-      background:#fff;
-      border-radius:14px;
-      padding:14px;
-      margin-bottom:12px;
-      box-shadow:0 2px 8px rgba(0,0,0,.06);
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    .row{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+    @media (max-width: 620px) {
+      .grid { grid-template-columns: 1fr; }
     }
 
-    .title{
-      margin:0;
-      font-size:18px;
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .meta{
-      margin:6px 0 0 0;
-      color:#555;
-      font-size:14px;
+    .card-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
     }
 
-    .desc{
-      margin:10px 0 0 0;
-      color:#333;
-      line-height:1.35;
-      font-size:14px;
-      white-space:pre-wrap;
+    .thumb {
+      width: 84px;
+      height: 84px;
+      border-radius: 10px;
+      background: #eee;
+      flex: 0 0 84px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 12px;
+      text-align: center;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
-    .thumbs{
-      display:flex;
-      gap:8px;
-      margin-top:12px;
-      flex-wrap:wrap;
+    .meta {
+      flex: 1;
+      min-width: 0;
     }
 
-    .thumb{
-      width:64px;
-      height:64px;
-      border-radius:10px;
-      object-fit:cover;
-      border:1px solid #eee;
-      background:#fafafa;
+    .title {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
     }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      margin-top:12px;
-      flex-wrap:wrap;
+    .price {
+      margin: 6px 0 0;
+      color: #333;
+      font-weight: bold;
     }
 
-    .link{
-      font-size:13px;
-      color:#2d7bf4;
-      word-break:break-all;
-      margin-top:8px;
+    .desc {
+      margin: 6px 0 0;
+      color: #555;
+      font-size: 13px;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    .small{
-      font-size:12px;
-      color:#666;
+    .images-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      color: #666;
+      font-size: 12px;
     }
 
-    .loader{
-      text-align:center;
-      color:#666;
-      padding:20px;
+    .pill {
+      background: #f0f2f5;
+      border-radius: 999px;
+      padding: 6px 10px;
+      display: inline-block;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .open {
+      background: #1e7e34;
+      color: white;
+    }
+
+    .manage {
+      background: #6c757d;
+      color: white;
+    }
+
+    .danger {
+      background: #dc3545;
+      color: white;
     }
   </style>
 </head>
 
 <body>
-  <header class="wrap">
-    <h1>📊 Dashboard – Le tue lotterie</h1>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <button class="btn primary" id="btnCreate">➕ Crea nuova lotteria</button>
-      <button class="btn secondary" id="btnRefresh">🔄 Aggiorna</button>
-      <button class="btn danger" id="btnLogout">Esci</button>
-    </div>
-  </header>
 
-  <div class="wrap">
-    <div id="notice" class="notice"></div>
-    <div id="list">
-      <div class="loader">Caricamento…</div>
-    </div>
-  </div>
+<h1>📊 Dashboard – Le tue lotterie</h1>
+
+<div class="top-actions">
+  <button id="btnCreate">➕ Crea nuova lotteria</button>
+  <button class="secondary" id="btnLogout">Esci</button>
+</div>
+
+<div id="status"></div>
+
+<div id="lotteries" class="grid"></div>
 
 <script>
-  // ✅ INSERISCI I TUOI DATI
+  // ✅ CONFIG
   const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-  // crea client (IMPORTANTE: non chiamare la variabile "supabase" se già esiste come globale)
+  // Evitiamo il conflitto “supabase già dichiarato”
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const listEl = document.getElementById("list");
-  const noticeEl = document.getElementById("notice");
+  const elGrid = document.getElementById("lotteries");
+  const elStatus = document.getElementById("status");
 
-  const btnCreate = document.getElementById("btnCreate");
-  const btnRefresh = document.getElementById("btnRefresh");
-  const btnLogout = document.getElementById("btnLogout");
+  document.getElementById("btnCreate").addEventListener("click", () => {
+    window.location.href = "crea-lotteria.html";
+  });
 
-  function showNotice(msg){
-    noticeEl.style.display = "block";
-    noticeEl.innerText = msg;
-  }
-  function hideNotice(){
-    noticeEl.style.display = "none";
-    noticeEl.innerText = "";
-  }
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    await sb.auth.signOut();
+    window.location.href = "login.html";
+  });
 
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  async function requireAuth(){
+  async function requireAuth() {
     const { data, error } = await sb.auth.getUser();
-    if (error) {
-      showNotice("Errore auth: " + error.message);
-      return null;
-    }
-    if (!data?.user) {
+    if (error || !data?.user) {
       window.location.href = "login.html";
       return null;
     }
     return data.user;
   }
 
-  function buildPublicUrl(lotteryId){
-    return `https://suxmariore-coder.github.io/lotteria-platform/index.html?id=${lotteryId}`;
+  function safeText(v) {
+    return (v ?? "").toString();
   }
 
-  function renderLotteries(rows){
-    if (!rows || rows.length === 0){
-      listEl.innerHTML = `
-        <div class="card">
-          <p style="margin:0;">Nessuna lotteria creata.</p>
-          <p class="small" style="margin-top:8px;">Clicca “Crea nuova lotteria” per iniziare.</p>
-        </div>`;
+  function truncate(s, n) {
+    s = safeText(s);
+    return s.length > n ? s.slice(0, n - 1) + "…" : s;
+  }
+
+  async function loadLotteries(ownerId) {
+    elStatus.textContent = "Caricamento lotterie…";
+    elGrid.innerHTML = "";
+
+    // ✅ NOTA: qui chiediamo anche description + prize_images
+    const { data, error } = await sb
+      .from("lotteries")
+      .select("id, title, ticket_price, description, prize_images, created_at")
+      .eq("owner_id", ownerId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      elStatus.textContent = `Errore caricamento lotterie: ${error.message}`;
       return;
     }
 
-    listEl.innerHTML = "";
+    if (!data || data.length === 0) {
+      elStatus.textContent = "";
+      elGrid.innerHTML = "<div class='card'><b>Nessuna lotteria creata.</b><div style='color:#555;margin-top:6px;'>Clicca su “Crea nuova lotteria”.</div></div>";
+      return;
+    }
 
-    rows.forEach(l => {
+    elStatus.textContent = "";
+
+    data.forEach(l => {
+      const images = Array.isArray(l.prize_images) ? l.prize_images : [];
+      const firstImg = images.length > 0 ? images[0] : null;
+
       const card = document.createElement("div");
       card.className = "card";
 
-      const publicUrl = buildPublicUrl(l.id);
-
-      // immagini premio: ci aspettiamo un array in l.prize_images (jsonb) tipo ["path1","path2",...]
-      // Se invece salvi URL completi, funzioneranno lo stesso.
-      const imgs = Array.isArray(l.prize_images) ? l.prize_images.slice(0,5) : [];
-
-      const thumbsHtml = imgs.length
-        ? `<div class="thumbs">${imgs.map(u => `<img class="thumb" src="${esc(u)}" alt="Premio">`).join("")}</div>`
-        : ``;
-
       card.innerHTML = `
-        <div class="row">
-          <div>
-            <h3 class="title">${esc(l.title)}</h3>
-            <p class="meta">Prezzo biglietto: <b>€ ${esc(l.ticket_price)}</b></p>
-            ${l.description ? `<p class="desc">${esc(l.description)}</p>` : ``}
-            <div class="link"><a href="${publicUrl}" target="_blank" rel="noreferrer">${publicUrl}</a></div>
+        <div class="card-top">
+          <div class="thumb">
+            ${firstImg ? `<img src="${firstImg}" alt="premio">` : `Nessuna<br>foto`}
+          </div>
+          <div class="meta">
+            <h3 class="title">${safeText(l.title)}</h3>
+            <div class="price">Prezzo biglietto: € ${safeText(l.ticket_price)}</div>
+            <div class="desc">${safeText(l.description) ? truncate(l.description, 160) : "<i style='color:#777'>Nessuna descrizione</i>"}</div>
           </div>
         </div>
 
-        ${thumbsHtml}
+        <div class="images-row">
+          <span class="pill">📷 Foto premio: ${images.length}/5</span>
+          <span class="pill">🔗 ID: ${safeText(l.id).slice(0, 8)}…</span>
+        </div>
 
         <div class="actions">
-          <button class="btn primary" data-open="${esc(l.id)}">Apri lotteria</button>
-          <button class="btn secondary" data-manage="${esc(l.id)}">Gestisci</button>
+          <button class="open" data-open="${l.id}">Apri</button>
+          <button class="manage" data-manage="${l.id}">Gestisci</button>
         </div>
       `;
 
-      // bind buttons
-      card.querySelector("[data-open]")?.addEventListener("click", () => {
-        window.open(publicUrl, "_blank");
+      card.querySelector("[data-open]").addEventListener("click", (e) => {
+        const id = e.currentTarget.getAttribute("data-open");
+        window.open(`index.html?id=${id}`, "_blank");
       });
 
-      card.querySelector("[data-manage]")?.addEventListener("click", () => {
-        alert("Gestione avanzata: prossimo step (vendite, reset, chiusura, ecc.)");
+      card.querySelector("[data-manage]").addEventListener("click", () => {
+        alert("Gestione avanzata: prossimo step (statistiche, vendite, export, ecc.)");
       });
 
-      listEl.appendChild(card);
+      elGrid.appendChild(card);
     });
   }
 
-  async function loadOwnerLotteries(userId){
-    hideNotice();
-    listEl.innerHTML = `<div class="loader">Caricamento…</div>`;
-
-    // campi attesi in DB:
-    // lotteries: id, title, ticket_price, description, prize_images, owner_id, created_at
-    const { data, error } = await sb
-      .from("lotteries")
-      .select("id,title,ticket_price,description,prize_images,created_at")
-      .eq("owner_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error){
-      showNotice("Errore caricamento lotterie: " + error.message);
-      listEl.innerHTML = "";
-      return;
-    }
-
-    renderLotteries(data);
-  }
-
-  btnCreate.addEventListener("click", () => {
-    window.location.href = "crea-lotteria.html";
-  });
-
-  btnRefresh.addEventListener("click", async () => {
-    const user = await requireAuth();
-    if (!user) return;
-    await loadOwnerLotteries(user.id);
-  });
-
-  btnLogout.addEventListener("click", async () => {
-    await sb.auth.signOut();
-    window.location.href = "login.html";
-  });
-
-  // INIT
   (async () => {
     const user = await requireAuth();
     if (!user) return;
-    await loadOwnerLotteries(user.id);
+    await loadLotteries(user.id);
   })();
 </script>
+
 </body>
 </html>
