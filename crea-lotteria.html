@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f5f5f5;
       margin: 0;
       padding: 20px;
     }
@@ -18,20 +18,20 @@
     }
 
     .container {
-      max-width: 460px;
+      max-width: 480px;
       margin: auto;
       background: #fff;
-      padding: 22px;
-      border-radius: 12px;
+      padding: 20px;
+      border-radius: 10px;
     }
 
     label {
-      font-weight: bold;
       display: block;
-      margin-top: 14px;
+      font-weight: bold;
+      margin-top: 15px;
     }
 
-    input, select, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
@@ -40,15 +40,19 @@
       font-size: 14px;
     }
 
+    textarea {
+      resize: vertical;
+    }
+
     button {
       width: 100%;
       margin-top: 20px;
-      padding: 14px;
-      background: #2d7bf4;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
+      padding: 12px;
       font-size: 16px;
+      background: #2d7bf4;
+      color: white;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
     }
 
@@ -57,7 +61,7 @@
     }
 
     .result {
-      margin-top: 18px;
+      margin-top: 20px;
       font-weight: bold;
       text-align: center;
     }
@@ -70,27 +74,28 @@
 
 <div class="container">
 
+  <!-- DATI UTENTE -->
+  <label>Email (per accedere alla dashboard)</label>
+  <input id="email" type="email" placeholder="es. mario@email.it">
+
+  <label>Password</label>
+  <input id="password" type="password" placeholder="Scegli una password">
+
   <!-- DATI LOTTERIA -->
   <label>Titolo lotteria</label>
   <input id="title" placeholder="Es. Lotteria di Natale">
 
+  <label>Descrizione premio</label>
+  <textarea id="description" rows="3" placeholder="Descrivi cosa si vince"></textarea>
+
   <label>Prezzo biglietto (€)</label>
   <input id="ticket_price" type="number" min="1" placeholder="Es. 5">
 
-  <!-- OWNER AUTH -->
-  <label>Email proprietario (per accesso dashboard)</label>
-  <input id="owner_email" type="email" placeholder="es. mario@email.com">
-
-  <label>Password proprietario</label>
-  <input id="owner_password" type="password" placeholder="Password di accesso">
-
-  <!-- ADMIN -->
   <label>Password admin (reset numeri)</label>
-  <input id="admin_password" type="password" placeholder="Password admin">
+  <input id="admin_password" type="password" placeholder="Può essere uguale alla password sopra">
 
-  <!-- PAGAMENTI -->
   <label>Email PayPal (opzionale)</label>
-  <input id="paypal_email" placeholder="es. paypal@email.com">
+  <input id="paypal_email" placeholder="paypal@email.it">
 
   <label>Link Revolut (opzionale)</label>
   <input id="revolut_link" placeholder="https://revolut.me/...">
@@ -112,12 +117,12 @@
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-/* CREA LOTTERIA */
 async function createLottery() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
   const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
   const ticket_price = Number(document.getElementById("ticket_price").value);
-  const owner_email = document.getElementById("owner_email").value.trim();
-  const owner_password = document.getElementById("owner_password").value.trim();
   const admin_password = document.getElementById("admin_password").value.trim();
   const paypal_email = document.getElementById("paypal_email").value.trim();
   const revolut_link = document.getElementById("revolut_link").value.trim();
@@ -126,54 +131,52 @@ async function createLottery() {
     document.getElementById("payment_methods").selectedOptions
   ).map(o => o.value);
 
-  if (!title || !ticket_price || !owner_email || !owner_password || !admin_password) {
+  if (!email || !password || !title || !ticket_price || !admin_password) {
     alert("Compila tutti i campi obbligatori");
     return;
   }
 
   document.getElementById("result").innerText = "⏳ Creazione in corso...";
 
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify({
-        title,
-        ticket_price,
-        owner_email,
-        owner_password,
-        admin_password,
-        paypal_email,
-        revolut_link,
-        payment_methods
-      })
-    });
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: "Bearer " + SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({
+      email,
+      password,
+      title,
+      description,
+      ticket_price,
+      min_number: 1,
+      max_number: 90,
+      admin_password,
+      paypal_email,
+      revolut_link,
+      payment_methods,
+    }),
+  });
 
-    const data = await res.json();
-    console.log("CREATE LOTTERY RESPONSE:", data);
+  const data = await res.json();
 
-    if (!res.ok) {
-      document.getElementById("result").innerText =
-        "❌ Errore creazione lotteria";
-      return;
-    }
-
-    document.getElementById("result").innerHTML = `
-      ✅ Lotteria creata!<br><br>
-      👉 <a href="index.html?id=${data.lottery_id}" target="_blank">
-      Apri la lotteria
-      </a>
-    `;
-
-  } catch (err) {
-    console.error(err);
+  if (!res.ok) {
     document.getElementById("result").innerText =
-      "❌ Errore di connessione";
+      "❌ Errore: " + (data.error || "creazione fallita");
+    return;
   }
+
+  document.getElementById("result").innerHTML = `
+    ✅ Lotteria creata!<br><br>
+    <a href="index.html?id=${data.lottery_id}" target="_blank">
+      Apri la tua lotteria
+    </a><br><br>
+    <a href="dashboard.html" target="_blank">
+      Vai alla dashboard
+    </a>
+  `;
 }
 </script>
 
