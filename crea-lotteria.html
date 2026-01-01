@@ -5,150 +5,178 @@
   <title>Crea nuova lotteria</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body { font-family: Arial, sans-serif; background:#f5f5f5; padding: 20px; margin:0; }
-    h1 { text-align:center; margin: 10px 0 16px; }
-    .container { max-width: 520px; margin:auto; background:#fff; padding:18px; border-radius:12px; }
-    label { font-weight: bold; display:block; margin-top: 14px; }
-    input, select, textarea {
-      width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid #ccc; font-size: 14px;
-      box-sizing: border-box;
-    }
-    small { color:#666; display:block; margin-top:6px; line-height:1.35; }
-    button {
-      width:100%; margin-top:18px; padding:12px; background:#2d7bf4; color:#fff; border:none; border-radius:8px;
-      font-size:16px; cursor:pointer;
-    }
-    button:disabled { opacity:0.6; cursor:not-allowed; }
-    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 520px){ .row{ grid-template-columns: 1fr; } }
+  <!-- Supabase JS -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-    .result { margin-top: 16px; font-weight: bold; }
-    .ok { color: #1e7e34; }
-    .err { color: #c82333; }
-    .muted { color:#666; font-weight: normal; }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 { text-align: center; }
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: #2d7bf4;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background: #1f5fcc; }
+
+    .note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+    }
   </style>
 </head>
 
 <body>
-  <h1>Creazione Lotteria</h1>
 
-  <div class="container">
-    <label>Email (account creatore)</label>
-    <input id="owner_email" type="email" placeholder="es. mario@gmail.com" autocomplete="email">
-    <small>Questa email diventerà l’account per accedere alla dashboard e gestire la lotteria.</small>
+<h1>➕ Crea la tua lotteria</h1>
 
-    <label>Password (account creatore)</label>
-    <input id="owner_password" type="password" placeholder="Scegli una password" autocomplete="new-password">
-    <small>Usa almeno 8 caratteri. Questa password servirà per login e gestione.</small>
+<div class="container">
 
-    <label>Titolo lotteria</label>
-    <input id="title" placeholder="Esempio: Lotteria di Natale">
+  <label>Titolo lotteria</label>
+  <input id="title" placeholder="Es. Lotteria di Natale">
 
-    <label>Prezzo biglietto (€)</label>
-    <input id="ticket_price" type="number" min="1" step="0.5" placeholder="Es. 5">
+  <label>Descrizione premio</label>
+  <textarea id="description" placeholder="Descrivi cosa metti in palio..."></textarea>
 
-    <label>Password Admin (reset numeri)</label>
-    <input id="admin_password" type="text" placeholder="Scegli una password per il reset">
-    <small class="muted">Puoi anche usare la stessa password dell’account, se vuoi.</small>
+  <label>Prezzo biglietto (€)</label>
+  <input id="ticket_price" type="number" min="1" step="0.5" placeholder="Es. 5">
 
-    <label>Email PayPal (opzionale)</label>
-    <input id="paypal_email" type="text" placeholder="Es. paypal@tuodominio.it">
+  <label>Password admin (per reset numeri)</label>
+  <input id="admin_password" type="password" placeholder="Scegli una password">
 
-    <label>Link Revolut (opzionale)</label>
-    <input id="revolut_link" type="text" placeholder="Link pagamento Revolut">
+  <label>Email PayPal (opzionale)</label>
+  <input id="paypal_email" placeholder="es. nome@email.com">
 
-    <label>Metodi di pagamento</label>
-    <select id="payment_methods" multiple>
-      <option value="stripe" selected>Stripe</option>
-      <option value="paypal">PayPal</option>
-      <option value="revolut">Revolut</option>
-    </select>
-    <small>Tieni premuto CTRL (Windows) o CMD (Mac) per selezionare più opzioni.</small>
+  <label>Link Revolut (opzionale)</label>
+  <input id="revolut_link" placeholder="https://revolut.me/...">
 
-    <button id="btnCreate" onclick="createLottery()">Crea lotteria</button>
+  <label>Metodi di pagamento</label>
+  <select id="payment_methods" multiple>
+    <option value="stripe" selected>Stripe</option>
+    <option value="paypal">PayPal</option>
+    <option value="revolut">Revolut</option>
+  </select>
 
-    <div id="result" class="result"></div>
-  </div>
+  <button onclick="createLottery()">Crea lotteria</button>
+
+  <p id="result" class="note"></p>
+
+</div>
 
 <script>
-  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-  // 🔴 INCOLLA QUI LA TUA ANON KEY (quella che inizia con eyJ...)
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+/* 🔴 CONFIG SUPABASE */
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-  async function createLottery() {
-    const btn = document.getElementById("btnCreate");
-    const out = document.getElementById("result");
-    out.textContent = "";
-    out.className = "result";
+const supabase = supabaseJs.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
-    const owner_email = document.getElementById("owner_email").value.trim();
-    const owner_password = document.getElementById("owner_password").value;
-    const title = document.getElementById("title").value.trim();
-    const ticket_price = Number(document.getElementById("ticket_price").value);
-    const admin_password = document.getElementById("admin_password").value.trim();
-    const paypal_email = document.getElementById("paypal_email").value.trim();
-    const revolut_link = document.getElementById("revolut_link").value.trim();
+/* 🔐 CHECK AUTH */
+async function checkAuth() {
+  const { data } = await supabase.auth.getUser();
 
-    const payment_methods = Array.from(document.getElementById("payment_methods").selectedOptions).map(o => o.value);
+  if (!data.user) {
+    window.location.href = "login.html";
+  }
+}
 
-    if (!owner_email || !owner_password || owner_password.length < 8) {
-      alert("Inserisci email e password (minimo 8 caratteri).");
-      return;
-    }
-    if (!title || !ticket_price || !admin_password) {
-      alert("Compila titolo, prezzo e password admin.");
-      return;
-    }
+checkAuth();
 
-    btn.disabled = true;
-    btn.textContent = "Creazione in corso...";
+/* 🚀 CREA LOTTERIA */
+async function createLottery() {
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const ticket_price = Number(document.getElementById("ticket_price").value);
+  const admin_password = document.getElementById("admin_password").value.trim();
+  const paypal_email = document.getElementById("paypal_email").value.trim();
+  const revolut_link = document.getElementById("revolut_link").value.trim();
 
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: "Bearer " + SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
-          owner_email,
-          owner_password,
-          title,
-          ticket_price,
-          min_number: 1,
-          max_number: 90,
-          admin_password,
-          paypal_email: paypal_email || null,
-          revolut_link: revolut_link || null,
-          payment_methods: payment_methods && payment_methods.length ? payment_methods : ["stripe"],
-        }),
-      });
+  const payment_methods = Array.from(
+    document.getElementById("payment_methods").selectedOptions
+  ).map(o => o.value);
 
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        out.className = "result err";
-        out.innerHTML = `❌ Errore creazione lotteria<br><small>${escapeHtml(JSON.stringify(data))}</small>`;
-        return;
-      }
-
-      out.className = "result ok";
-      out.innerHTML = `✅ Lotteria creata!<br>
-        Link pubblico: <a href="index.html?id=${data.lottery_id}" target="_blank">index.html?id=${data.lottery_id}</a>`;
-    } catch (e) {
-      out.className = "result err";
-      out.textContent = "❌ Errore rete o CORS: " + String(e);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Crea lotteria";
-    }
+  if (!title || !ticket_price || !admin_password) {
+    alert("Compila tutti i campi obbligatori");
+    return;
   }
 
-  function escapeHtml(s){
-    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  document.getElementById("result").textContent = "Creazione in corso...";
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: "Bearer " + SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({
+      title,
+      description,
+      ticket_price,
+      min_number: 1,
+      max_number: 90,
+      admin_password,
+      paypal_email,
+      revolut_link,
+      payment_methods,
+    }),
+  });
+
+  const data = await res.json();
+  console.log("CREATE LOTTERY RESPONSE:", data);
+
+  if (!res.ok) {
+    document.getElementById("result").textContent =
+      "❌ Errore creazione lotteria";
+    return;
   }
+
+  document.getElementById("result").innerHTML = `
+    ✅ Lotteria creata!<br>
+    <a href="index.html?id=${data.lottery_id}" target="_blank">
+      Apri lotteria
+    </a>
+  `;
+}
 </script>
+
 </body>
 </html>
