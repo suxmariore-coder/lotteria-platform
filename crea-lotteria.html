@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Crea Lotteria</title>
+  <title>Crea la tua lotteria</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -13,15 +13,16 @@
       background: #f4f4f4;
       padding: 20px;
     }
-    .box {
+    .card {
       max-width: 420px;
       margin: auto;
-      background: white;
+      background: #fff;
       padding: 20px;
       border-radius: 10px;
     }
-    label { font-weight: bold; margin-top: 15px; display: block; }
-    input, textarea {
+    h1 { text-align: center; }
+    label { font-weight: bold; display: block; margin-top: 15px; }
+    input {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
@@ -29,8 +30,8 @@
       border: 1px solid #ccc;
     }
     button {
-      width: 100%;
       margin-top: 20px;
+      width: 100%;
       padding: 12px;
       background: #2d7bf4;
       color: white;
@@ -44,32 +45,42 @@
 
 <body>
 
-<div class="box">
-  <h2>🎟️ Crea la tua lotteria</h2>
+<div class="card">
+  <h1>🎟️ Crea la tua lotteria</h1>
 
   <label>Titolo</label>
-  <input id="title">
+  <input id="title" placeholder="Es. Lotteria di Natale">
 
   <label>Prezzo biglietto (€)</label>
-  <input id="ticket_price" type="number">
+  <input id="ticket_price" type="number" min="1">
 
   <label>Password admin (reset numeri)</label>
   <input id="admin_password" type="password">
 
-  <button onclick="createLottery()">Crea lotteria</button>
+  <button id="createBtn">Crea lotteria</button>
 
-  <p id="result"></p>
+  <p id="result" style="margin-top:15px;font-weight:bold;"></p>
 </div>
 
 <script>
+/* 🔐 SUPABASE CONFIG */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-const supabase = supabaseJs.createClient(
+const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
+/* ✅ CHECK SESSION */
+async function checkAuth() {
+  const { data } = await supabaseClient.auth.getUser();
+  if (!data.user) {
+    window.location.href = "login.html";
+  }
+}
+
+/* 🎯 CREA LOTTERIA */
 async function createLottery() {
   const title = document.getElementById("title").value.trim();
   const ticket_price = Number(document.getElementById("ticket_price").value);
@@ -80,9 +91,9 @@ async function createLottery() {
     return;
   }
 
-  const { data: sessionData } = await supabase.auth.getSession();
-  if (!sessionData.session) {
-    alert("Devi essere loggato");
+  const session = (await supabaseClient.auth.getSession()).data.session;
+  if (!session) {
+    alert("Sessione non valida, rifai login");
     return;
   }
 
@@ -92,8 +103,8 @@ async function createLottery() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionData.session.access_token}`,
-        apikey: SUPABASE_ANON_KEY
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`
       },
       body: JSON.stringify({
         title,
@@ -104,16 +115,25 @@ async function createLottery() {
   );
 
   const data = await res.json();
+  console.log("CREATE LOTTERY RESPONSE:", data);
 
   if (!res.ok) {
-    document.getElementById("result").innerText = "❌ Errore creazione";
-    console.error(data);
+    document.getElementById("result").textContent =
+      "❌ Errore creazione lotteria";
     return;
   }
 
   document.getElementById("result").innerHTML =
-    `✅ Creata! <a href="index.html?id=${data.lottery_id}" target="_blank">Apri lotteria</a>`;
+    `✅ Lotteria creata<br>
+     <a href="index.html?id=${data.lottery_id}" target="_blank">
+       Apri lotteria
+     </a>`;
 }
+
+/* EVENTI */
+document.getElementById("createBtn").onclick = createLottery;
+
+checkAuth();
 </script>
 
 </body>
