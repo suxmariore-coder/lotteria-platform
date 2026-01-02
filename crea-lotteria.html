@@ -5,7 +5,6 @@
   <title>Crea nuova lotteria</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Supabase JS -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
@@ -15,78 +14,75 @@
       padding: 20px;
       margin: 0;
     }
-    h1 { text-align: center; }
+    h1 { text-align: center; margin: 12px 0; }
     .container {
-      max-width: 480px;
+      max-width: 520px;
       margin: auto;
       background: #fff;
-      padding: 20px;
-      border-radius: 10px;
+      padding: 18px;
+      border-radius: 12px;
     }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 15px;
-    }
-    input, textarea, select {
+    label { font-weight: bold; display: block; margin-top: 14px; }
+    input, select, textarea {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 14px;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 80px;
+      box-sizing: border-box;
     }
     button {
       width: 100%;
-      margin-top: 20px;
+      margin-top: 18px;
       padding: 12px;
       background: #2d7bf4;
       color: #fff;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
     }
     button:hover { background: #1f5fcc; }
-
-    .note {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #666;
-      text-align: center;
-    }
+    .hint { font-size: 12px; color:#666; margin-top:6px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+    #result { margin-top: 16px; font-weight: bold; }
   </style>
 </head>
 
 <body>
 
-<h1>➕ Crea la tua lotteria</h1>
+<h1>Creazione Lotteria</h1>
 
 <div class="container">
 
-  <label>Titolo lotteria</label>
-  <input id="title" placeholder="Es. Lotteria di Natale">
+  <div class="hint">✅ Sei in modalità <b>Owner-only</b>: devi essere loggato per creare una lotteria.</div>
 
-  <label>Descrizione premio</label>
-  <textarea id="description" placeholder="Descrivi cosa metti in palio..."></textarea>
+  <label>Titolo lotteria *</label>
+  <input id="title" placeholder="Esempio: Lotteria di Natale">
 
-  <label>Prezzo biglietto (€)</label>
-  <input id="ticket_price" type="number" min="1" step="0.5" placeholder="Es. 5">
+  <label>Descrizione premio (opzionale)</label>
+  <textarea id="description" rows="4" placeholder="Descrivi cosa metti in palio..."></textarea>
 
-  <label>Password admin (per reset numeri)</label>
-  <input id="admin_password" type="password" placeholder="Scegli una password">
+  <div class="row">
+    <div>
+      <label>Prezzo biglietto (€) *</label>
+      <input id="ticket_price" type="number" min="1" step="0.5" placeholder="Es. 5">
+    </div>
+    <div>
+      <label>Password Admin (reset numeri) *</label>
+      <input id="admin_password" type="password" placeholder="Scegli una password">
+    </div>
+  </div>
 
   <label>Email PayPal (opzionale)</label>
-  <input id="paypal_email" placeholder="es. nome@email.com">
+  <input id="paypal_email" type="text" placeholder="Es. mario@gmail.com">
 
   <label>Link Revolut (opzionale)</label>
-  <input id="revolut_link" placeholder="https://revolut.me/...">
+  <input id="revolut_link" type="text" placeholder="Link pagamento Revolut">
 
-  <label>Metodi di pagamento</label>
+  <label>Metodi di pagamento (selezione multipla)</label>
   <select id="payment_methods" multiple>
     <option value="stripe" selected>Stripe</option>
     <option value="paypal">PayPal</option>
@@ -95,87 +91,98 @@
 
   <button onclick="createLottery()">Crea lotteria</button>
 
-  <p id="result" class="note"></p>
+  <p id="result"></p>
 
 </div>
 
 <script>
-/* 🔴 CONFIG SUPABASE */
-const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+  // 🔴 INSERISCI I TUOI DATI
+  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-const supabase = supabaseJs.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+  // Usa un nome diverso per evitare conflitti con la variabile globale "supabase"
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* 🔐 CHECK AUTH */
-async function checkAuth() {
-  const { data } = await supabase.auth.getUser();
+  const resultEl = document.getElementById("result");
 
-  if (!data.user) {
-    window.location.href = "login.html";
-  }
-}
-
-checkAuth();
-
-/* 🚀 CREA LOTTERIA */
-async function createLottery() {
-  const title = document.getElementById("title").value.trim();
-  const description = document.getElementById("description").value.trim();
-  const ticket_price = Number(document.getElementById("ticket_price").value);
-  const admin_password = document.getElementById("admin_password").value.trim();
-  const paypal_email = document.getElementById("paypal_email").value.trim();
-  const revolut_link = document.getElementById("revolut_link").value.trim();
-
-  const payment_methods = Array.from(
-    document.getElementById("payment_methods").selectedOptions
-  ).map(o => o.value);
-
-  if (!title || !ticket_price || !admin_password) {
-    alert("Compila tutti i campi obbligatori");
-    return;
+  async function requireAuth() {
+    const { data, error } = await sb.auth.getUser();
+    if (error || !data?.user) {
+      window.location.href = "login.html";
+      return null;
+    }
+    return data.user;
   }
 
-  document.getElementById("result").textContent = "Creazione in corso...";
+  // 👇 IMPORTANTISSIMO: esponiamo la funzione al global scope per l'onclick HTML
+  window.createLottery = async function createLottery() {
+    resultEl.textContent = "";
+    resultEl.style.color = "#000";
 
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: "Bearer " + SUPABASE_ANON_KEY,
-    },
-    body: JSON.stringify({
-      title,
-      description,
-      ticket_price,
-      min_number: 1,
-      max_number: 90,
-      admin_password,
-      paypal_email,
-      revolut_link,
-      payment_methods,
-    }),
-  });
+    const user = await requireAuth();
+    if (!user) return;
 
-  const data = await res.json();
-  console.log("CREATE LOTTERY RESPONSE:", data);
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const ticket_price = Number(document.getElementById("ticket_price").value);
+    const admin_password = document.getElementById("admin_password").value.trim();
+    const paypal_email = document.getElementById("paypal_email").value.trim();
+    const revolut_link = document.getElementById("revolut_link").value.trim();
 
-  if (!res.ok) {
-    document.getElementById("result").textContent =
-      "❌ Errore creazione lotteria";
-    return;
-  }
+    const payment_methods = Array.from(
+      document.getElementById("payment_methods").selectedOptions
+    ).map(o => o.value);
 
-  document.getElementById("result").innerHTML = `
-    ✅ Lotteria creata!<br>
-    <a href="index.html?id=${data.lottery_id}" target="_blank">
-      Apri lotteria
-    </a>
-  `;
-}
+    if (!title || !ticket_price || !admin_password) {
+      alert("Compila tutti i campi obbligatori (*)");
+      return;
+    }
+
+    resultEl.textContent = "⏳ Creazione in corso...";
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({
+        // owner_id lo ricaviamo dal token lato backend (consigliato), ma lo inviamo anche qui per sicurezza
+        owner_id: user.id,
+        title,
+        description,
+        ticket_price,
+        min_number: 1,
+        max_number: 90,
+        admin_password,
+        paypal_email,
+        revolut_link,
+        payment_methods
+      })
+    });
+
+    let data = null;
+    try { data = await res.json(); } catch(e) {}
+
+    if (!res.ok) {
+      console.error("CREATE LOTTERY ERROR:", data);
+      resultEl.style.color = "crimson";
+      resultEl.textContent = "❌ Errore creazione lotteria";
+      return;
+    }
+
+    resultEl.style.color = "green";
+    resultEl.innerHTML =
+      `✅ Lotteria creata!<br>
+       <a href="index.html?id=${data.lottery_id}" target="_blank">
+         Apri la lotteria
+       </a><br>
+       <small>${data.lottery_id}</small>`;
+  };
+
+  // check auth subito (se non loggato → login)
+  requireAuth();
 </script>
 
 </body>
