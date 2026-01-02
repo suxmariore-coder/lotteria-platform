@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Crea lotteria</title>
+  <title>Crea la tua lotteria</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -16,28 +16,22 @@
     .box {
       max-width: 480px;
       margin: auto;
-      background: #fff;
+      background: white;
       padding: 20px;
       border-radius: 10px;
     }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 15px;
-    }
+    label { display: block; margin-top: 15px; font-weight: bold; }
     input, textarea {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
     }
     button {
-      width: 100%;
       margin-top: 20px;
+      width: 100%;
       padding: 12px;
       background: #2d7bf4;
-      color: #fff;
+      color: white;
       border: none;
       border-radius: 6px;
       font-size: 16px;
@@ -72,64 +66,47 @@
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// 🔐 CHECK SESSION
-(async () => {
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) {
-    window.location.href = "login.html";
-  }
-})();
-
-document.getElementById("createBtn").onclick = createLottery;
+document.getElementById("createBtn").addEventListener("click", createLottery);
 
 async function createLottery() {
-  const title = document.getElementById("title").value.trim();
-  const description = document.getElementById("description").value.trim();
-  const ticket_price = Number(document.getElementById("ticket_price").value);
-  const admin_password = document.getElementById("admin_password").value;
+  const { data: { session } } = await client.auth.getSession();
 
-  if (!title || !ticket_price || !admin_password) {
-    alert("Compila tutti i campi obbligatori");
+  if (!session) {
+    alert("Devi essere loggato");
+    window.location.href = "login.html";
     return;
   }
 
-  const { data: sessionData } = await supabase.auth.getSession();
-  const access_token = sessionData.session.access_token;
+  const body = {
+    title: title.value.trim(),
+    description: description.value.trim(),
+    ticket_price: Number(ticket_price.value),
+    admin_password: admin_password.value.trim()
+  };
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/create-lottery`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${access_token}`
-      },
-      body: JSON.stringify({
-        title,
-        description,
-        ticket_price,
-        admin_password
-      })
-    }
-  );
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`
+    },
+    body: JSON.stringify(body)
+  });
 
   const data = await res.json();
 
   if (!res.ok) {
-    document.getElementById("result").textContent =
-      "❌ Errore: " + data.error;
+    document.getElementById("result").innerText = "❌ " + data.error;
     return;
   }
 
   document.getElementById("result").innerHTML =
-    `✅ Lotteria creata!<br>
-     <a href="index.html?id=${data.lottery_id}" target="_blank">
-     Apri lotteria</a>`;
+    `✅ Lotteria creata<br>
+     <a target="_blank" href="index.html?id=${data.lottery_id}">
+       Apri la lotteria
+     </a>`;
 }
 </script>
 
