@@ -1,65 +1,83 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Login – Lotteria Platform</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Login – Lotteriffa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Supabase JS v2 -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f4f4;
+      margin: 0;
+      padding: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      margin: 0;
     }
 
     .box {
-      background: #fff;
+      background: white;
       padding: 24px;
       border-radius: 10px;
       width: 100%;
       max-width: 360px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    h2 {
+    h1 {
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
     }
 
     input {
       width: 100%;
       padding: 10px;
-      margin-bottom: 12px;
+      margin-top: 6px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 14px;
     }
 
     button {
       width: 100%;
       padding: 12px;
-      background: #2d7bf4;
-      color: white;
+      margin-top: 20px;
       border: none;
       border-radius: 6px;
-      font-size: 15px;
+      font-size: 16px;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #1f5fcc;
+    .login {
+      background: #2d7bf4;
+      color: white;
     }
 
-    .msg {
-      margin-top: 10px;
+    .register {
+      background: #6c757d;
+      color: white;
+    }
+
+    .error {
+      color: red;
+      margin-top: 12px;
       text-align: center;
-      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+      margin-top: 12px;
+      text-align: center;
     }
   </style>
 </head>
@@ -67,47 +85,84 @@
 <body>
 
 <div class="box">
-  <h2>🔐 Login</h2>
+  <h1>🔐 Area Owner</h1>
 
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+  <label>Email</label>
+  <input id="email" type="email" placeholder="email@example.com" />
 
-  <button onclick="login()">Accedi</button>
+  <label>Password</label>
+  <input id="password" type="password" placeholder="Password" />
 
-  <p id="msg" class="msg"></p>
+  <button class="login" onclick="login()">Accedi</button>
+  <button class="register" onclick="register()">Registrati</button>
+
+  <div id="msg"></div>
 </div>
 
 <script>
-const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+  /* 🔴 CONFIG */
+  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+  const supabase = supabaseJs.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
 
-async function login() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("msg");
 
-  if (!email || !password) {
-    document.getElementById("msg").textContent = "Compila tutti i campi";
-    return;
+  async function login() {
+    msg.innerHTML = "";
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+      msg.innerHTML = `<div class="error">Inserisci email e password</div>`;
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      msg.innerHTML = `<div class="error">${error.message}</div>`;
+      return;
+    }
+
+    msg.innerHTML = `<div class="success">Login effettuato!</div>`;
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 600);
   }
 
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password,
-  });
+  async function register() {
+    msg.innerHTML = "";
 
-  if (error) {
-    document.getElementById("msg").textContent = "Credenziali errate";
-    return;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+      msg.innerHTML = `<div class="error">Inserisci email e password</div>`;
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password
+    });
+
+    if (error) {
+      msg.innerHTML = `<div class="error">${error.message}</div>`;
+      return;
+    }
+
+    msg.innerHTML = `<div class="success">
+      Registrazione completata! Ora puoi accedere.
+    </div>`;
   }
-
-  // Login ok → dashboard
-  window.location.href = "dashboard.html";
-}
 </script>
 
 </body>
