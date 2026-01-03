@@ -2,174 +2,82 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Crea nuova lotteria</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crea Lotteria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; margin: 0; }
-    h1 { text-align: center; }
-    .container { max-width: 520px; margin: auto; background: #fff; padding: 18px; border-radius: 12px; }
-    label { font-weight: bold; display: block; margin-top: 14px; }
-    input, select, textarea {
-      width: 100%; padding: 10px; margin-top: 6px;
-      border-radius: 8px; border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    button {
-      width: 100%; margin-top: 18px; padding: 12px;
-      background: #2d7bf4; color: #fff; border: none; border-radius: 8px;
-      font-size: 16px; cursor: pointer;
-    }
-    button:hover { background: #1f5fcc; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    @media (max-width: 520px){ .row { grid-template-columns: 1fr; } }
-    #result { margin-top: 14px; font-weight: bold; }
+    body { font-family: Arial; background:#f5f5f5; padding:20px }
+    .box { max-width:420px; margin:auto; background:#fff; padding:20px; border-radius:10px }
+    input, button { width:100%; padding:10px; margin-top:10px }
+    button { background:#2d7bf4; color:#fff; border:none; border-radius:6px }
+    .error { color:red; margin-top:10px }
   </style>
 </head>
 
 <body>
 
-<h1>🧾 Crea la tua lotteria</h1>
+<div class="box">
+  <h2>Crea la tua lotteria</h2>
 
-<div class="container">
-  <label>Titolo lotteria *</label>
-  <input id="title" placeholder="Es. Lotteria di Natale">
+  <input id="title" placeholder="Titolo lotteria">
+  <input id="ticket_price" type="number" placeholder="Prezzo biglietto (€)">
+  <input id="admin_password" type="password" placeholder="Password admin">
 
-  <div class="row">
-    <div>
-      <label>Prezzo biglietto (€) *</label>
-      <input id="ticket_price" type="number" min="1" step="0.01" placeholder="Es. 5">
-    </div>
-    <div>
-      <label>Password Admin (reset numeri) *</label>
-      <input id="admin_password" type="password" placeholder="Scegli una password">
-    </div>
-  </div>
+  <button onclick="createLottery()">Crea lotteria</button>
 
-  <label>Descrizione premio (opzionale)</label>
-  <textarea id="prize_description" rows="4" placeholder="Descrivi cosa metti in palio..."></textarea>
-
-  <label>Email PayPal (opzionale)</label>
-  <input id="paypal_email" type="text" placeholder="Es. mario@gmail.com">
-
-  <label>Link Revolut (opzionale)</label>
-  <input id="revolut_link" type="text" placeholder="https://revolut.me/...">
-
-  <label>Metodi di pagamento</label>
-  <select id="payment_methods" multiple>
-    <option value="stripe" selected>Stripe</option>
-    <option value="paypal">PayPal</option>
-    <option value="revolut">Revolut</option>
-  </select>
-
-  <button id="btnCreate" type="button">Crea lotteria</button>
-  <div id="result"></div>
+  <div id="result" class="error"></div>
 </div>
 
 <script>
-  // ✅ CONFIG
-  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-  // ✅ crea client (non usare "const supabase = supabase.createClient")
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const resultEl = document.getElementById("result");
-  const btnCreate = document.getElementById("btnCreate");
+async function createLottery() {
+  const { data: { user } } = await sb.auth.getUser();
 
-  async function requireLogin() {
-    const { data } = await sb.auth.getSession();
-    if (!data.session) {
-      window.location.href = "login.html";
-      return null;
-    }
-    return data.session;
+  if (!user) {
+    alert("Devi essere loggato");
+    window.location.href = "login.html";
+    return;
   }
 
-  async function createLottery() {
-    resultEl.textContent = "";
-    btnCreate.disabled = true;
-    btnCreate.textContent = "Creazione in corso...";
+  const title = document.getElementById("title").value.trim();
+  const ticket_price = Number(document.getElementById("ticket_price").value);
+  const admin_password = document.getElementById("admin_password").value.trim();
 
-    const session = await requireLogin();
-    if (!session) return;
-
-    const title = document.getElementById("title").value.trim();
-    const ticket_price = Number(document.getElementById("ticket_price").value);
-    const admin_password = document.getElementById("admin_password").value.trim();
-
-    const paypal_email = document.getElementById("paypal_email").value.trim() || null;
-    const revolut_link = document.getElementById("revolut_link").value.trim() || null;
-    const prize_description = document.getElementById("prize_description").value.trim() || null;
-
-    const payment_methods = Array.from(
-      document.getElementById("payment_methods").selectedOptions
-    ).map(o => o.value);
-
-    if (!title || !ticket_price || !admin_password) {
-      alert("Compila i campi obbligatori: titolo, prezzo, password admin");
-      btnCreate.disabled = false;
-      btnCreate.textContent = "Crea lotteria";
-      return;
-    }
-
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: SUPABASE_ANON_KEY,                 // richiesto dal gateway
-          Authorization: `Bearer ${session.access_token}`, // ✅ JWT utente
-        },
-        body: JSON.stringify({
-          title,
-          ticket_price,
-          min_number: 1,
-          max_number: 90,
-          admin_password,
-          paypal_email,
-          revolut_link,
-          payment_methods,
-          prize_description
-        }),
-      });
-
-      const data = await res.json();
-      console.log("RESPONSE CREATE LOTTERY:", data);
-
-      if (!res.ok) {
-        resultEl.style.color = "crimson";
-        resultEl.textContent = data?.error ? `Errore: ${data.error}` : "Errore creazione lotteria";
-        btnCreate.disabled = false;
-        btnCreate.textContent = "Crea lotteria";
-        return;
-      }
-
-      resultEl.style.color = "green";
-      resultEl.innerHTML = `
-        ✅ Lotteria creata!<br>
-        Link pubblico:<br>
-        <a href="${data.url}" target="_blank">${data.url}</a>
-      `;
-
-      btnCreate.disabled = false;
-      btnCreate.textContent = "Crea lotteria";
-    } catch (e) {
-      console.error(e);
-      resultEl.style.color = "crimson";
-      resultEl.textContent = "Errore di rete / CORS";
-      btnCreate.disabled = false;
-      btnCreate.textContent = "Crea lotteria";
-    }
+  if (!title || !ticket_price || !admin_password) {
+    document.getElementById("result").innerText = "Compila tutti i campi";
+    return;
   }
 
-  // ✅ collega il bottone senza inline onclick (più solido)
-  btnCreate.addEventListener("click", createLottery);
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: "Bearer " + SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify({
+      title,
+      ticket_price,
+      admin_password
+    })
+  });
 
-  // ✅ richiede login appena apri pagina
-  requireLogin();
+  const data = await res.json();
+
+  if (!res.ok) {
+    document.getElementById("result").innerText =
+      data.error || "Errore creazione lotteria";
+    return;
+  }
+
+  window.location.href = `index.html?id=${data.lottery_id}`;
+}
 </script>
 
 </body>
