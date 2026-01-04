@@ -103,8 +103,18 @@
 
 <h1 id="lottery-title">Lotteria</h1>
 <h3 id="lottery-price"></h3>
-
 <p id="lottery-meta" style="text-align:center; color:#555;"></p>
+
+<div id="lottery-description" style="
+  background:#fff;
+  padding:12px;
+  border-radius:8px;
+  margin:12px auto 16px;
+  max-width:600px;
+  text-align:center;
+  color:#333;
+  font-size:15px;
+"></div>
 
 <div id="grid" class="grid"></div>
 
@@ -140,7 +150,7 @@ let currentRow = null;
 
 async function loadLottery() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,draw_date,wheel,status`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -158,6 +168,11 @@ async function loadLottery() {
   document.getElementById("lottery-price").textContent =
     `Prezzo biglietto: € ${lot.ticket_price}`;
 
+  // 📄 descrizione premio
+  document.getElementById("lottery-description").textContent =
+    lot.description || "";
+
+  // 📅 meta info
   let meta = [];
 
   if (lot.draw_date) {
