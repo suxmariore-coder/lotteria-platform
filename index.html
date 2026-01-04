@@ -104,8 +104,6 @@
 <h1 id="lottery-title">Lotteria</h1>
 <h3 id="lottery-price"></h3>
 
-<p id="lottery-meta" style="text-align:center; color:#555;"></p>
-
 <div id="grid" class="grid"></div>
 
 <div id="modal" class="modal">
@@ -138,37 +136,15 @@ const resetBtn = document.getElementById("resetBtn");
 
 let currentRow = null;
 
-async function loadLotteryDetails() {
+async function loadLottery() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,draw_date,wheel,status`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY
-      }
-    }
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price`,
+    { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-
   const data = await res.json();
-  if (!data || data.length === 0) return;
-
-  const lot = data[0];
-
-  document.getElementById("lottery-title").textContent = lot.title;
+  document.getElementById("lottery-title").textContent = data[0].title;
   document.getElementById("lottery-price").textContent =
-    `Prezzo biglietto: € ${lot.ticket_price}`;
-
-  let meta = [];
-
-  if (lot.draw_date) {
-    meta.push(`📅 Estrazione: ${lot.draw_date}`);
-  }
-
-  if (lot.wheel) {
-    meta.push(`🎡 Ruota: ${lot.wheel}`);
-  }
-
-  document.getElementById("lottery-meta").textContent = meta.join(" • ");
+    `Prezzo biglietto: € ${data[0].ticket_price}`;
 }
 
 async function loadNumbers() {
