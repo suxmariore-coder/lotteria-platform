@@ -114,84 +114,82 @@ const supabaseClient = supabase.createClient(
 
 async function createLottery() {
   const { data: { session } } = await supabaseClient.auth.getSession();
+
   if (!session) {
     window.location.href = "login.html";
     return;
   }
 
-  const imagesInput = document.getElementById("prize_images");
+  const images = document.getElementById("prize_images").files;
 
-  if (imagesInput.files.length > 5) {
+  if (images.length > 5) {
     alert("Puoi caricare massimo 5 immagini");
     return;
   }
 
-  // 1️⃣ CREA LOTTERIA (senza immagini)
-  const body = {
-    title: document.getElementById("title").value.trim(),
-    description: document.getElementById("description").value.trim(),
-    ticket_price: Number(document.getElementById("ticket_price").value),
-    admin_password: document.getElementById("admin_password").value,
-    draw_date: document.getElementById("draw_date").value,
-    wheel: document.getElementById("wheel").value,
-    paypal_email: document.getElementById("paypal_email").value,
-    revolut_link: document.getElementById("revolut_link").value,
-    payment_methods: Array.from(
-      document.getElementById("payment_methods").selectedOptions
-    ).map(o => o.value)
-  };
-
+  /* 1️⃣ CREA LOTTERIA */
   const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      title: document.getElementById("title").value.trim(),
+      description: document.getElementById("description").value.trim(),
+      ticket_price: Number(document.getElementById("ticket_price").value),
+      admin_password: document.getElementById("admin_password").value,
+      draw_date: document.getElementById("draw_date").value,
+      wheel: document.getElementById("wheel").value,
+      paypal_email: document.getElementById("paypal_email").value,
+      revolut_link: document.getElementById("revolut_link").value
+    })
   });
 
   const data = await res.json();
+
   if (!res.ok) {
-    document.getElementById("result").innerText = data.error || "Errore creazione";
+    document.getElementById("result").innerText =
+      data.error || "Errore creazione lotteria";
     return;
   }
 
   const lotteryId = data.lottery_id;
 
-  // 2️⃣ UPLOAD IMMAGINI
-  const uploadedUrls = [];
+  /* 2️⃣ UPLOAD IMMAGINI */
+  const imageUrls = [];
 
-  for (const file of imagesInput.files) {
-    const filePath = `${lotteryId}/${crypto.randomUUID()}-${file.name}`;
+  for (const file of images) {
+    const filePath = `${lotteryId}/${Date.now()}-${file.name}`;
 
     const { error } = await supabaseClient
       .storage
-      .from("lottery-images")
-      .upload(filePath, file, { upsert: false });
+      .from("lottery_image")
+      .upload(filePath, file);
 
     if (error) {
-      console.error("Upload error:", error);
+      console.error("UPLOAD ERROR:", error);
       continue;
     }
 
-    const { data: publicData } = supabaseClient
+    const { data: urlData } = supabaseClient
       .storage
-      .from("lottery-images")
+      .from("lottery_image")
       .getPublicUrl(filePath);
 
-    uploadedUrls.push(publicData.publicUrl);
+    imageUrls.push(urlData.publicUrl);
   }
 
-  // 3️⃣ SALVA URL NEL DB
-  if (uploadedUrls.length > 0) {
+  /* 3️⃣ SALVA URL IMMAGINI */
+  if (imageUrls.length > 0) {
     await supabaseClient
       .from("lotteries")
-      .update({ prize_images: uploadedUrls })
+      .update({ prize_images: imageUrls })
       .eq("id", lotteryId);
   }
 
-  // 4️⃣ REDIRECT
-  window.location.href = `index.html?id=${lotteryId}`;
+  /* 4️⃣ REDIRECT */
+  window.location.href = data.url;
 }
 </script>
 
