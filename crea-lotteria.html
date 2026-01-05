@@ -162,59 +162,17 @@ async function createLottery() {
   );
 
   const data = await res.json();
-const data = await res.json();
-console.log("CREATE LOTTERY RESPONSE:", data);
+  console.log("CREATE LOTTERY RESPONSE:", data);
 
-if (!res.ok) {
-  document.getElementById("result").innerText =
-    data.error || "Errore creazione lotteria";
-  return;
-}
-
-const lotteryId = data.lottery_id;
-
-// 🔹 UPLOAD IMMAGINI PREMIO
-const files = document.getElementById("prize_images").files;
-let imageUrls = [];
-
-if (files.length > 0) {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session) {
-    alert("Sessione scaduta");
+  if (!res.ok) {
+    document.getElementById("result").innerText =
+      data.error || "Errore creazione lotteria";
     return;
   }
 
-  for (let i = 0; i < files.length && i < 5; i++) {
-    const file = files[i];
-    const filePath = `${lotteryId}/${Date.now()}_${file.name}`;
-
-    const { error: uploadError } = await supabaseClient.storage
-      .from("lottery_image")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Upload error:", uploadError);
-      continue;
-    }
-
-    const { data: publicUrlData } = supabaseClient.storage
-      .from("lottery_image")
-      .getPublicUrl(filePath);
-
-    imageUrls.push(publicUrlData.publicUrl);
-  }
-
-  // 🔹 salva URLs nel DB
-  if (imageUrls.length > 0) {
-    await supabaseClient
-      .from("lotteries")
-      .update({ prize_images: imageUrls })
-      .eq("id", lotteryId);
-  }
+  window.location.href = data.url;
 }
+</script>
 
-// 🔹 redirect finale
-window.location.href = data.url;
+</body>
+</html>
