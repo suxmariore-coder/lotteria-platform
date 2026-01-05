@@ -114,7 +114,10 @@
   text-align:center;
   color:#333;
   font-size:15px;
-"></div>
+">
+  <strong>🎁 Premio in palio</strong><br><br>
+  <span id="lottery-description-text"></span>
+</div>
 
 <div id="grid" class="grid"></div>
 
@@ -169,7 +172,7 @@ async function loadLottery() {
     `Prezzo biglietto: € ${lot.ticket_price}`;
 
   // 📄 descrizione premio
-  document.getElementById("lottery-description").textContent =
+  document.getElementById("lottery-description-text").textContent =
     lot.description || "";
 
   // 📅 meta info
