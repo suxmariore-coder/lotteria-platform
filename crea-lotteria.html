@@ -76,27 +76,14 @@
   <label>Ruota di riferimento</label>
   <select id="wheel">
     <option value="">Seleziona ruota</option>
-    <option>Bari</option>
-    <option>Cagliari</option>
-    <option>Firenze</option>
-    <option>Genova</option>
+    <option>Nazionale</option>
+    <option>Roma</option>
     <option>Milano</option>
     <option>Napoli</option>
-    <option>Palermo</option>
-    <option>Roma</option>
-    <option>Torino</option>
-    <option>Venezia</option>
-    <option>Nazionale</option>
   </select>
 
   <label>Immagini premio (max 5)</label>
   <input id="prize_images" type="file" accept="image/*" multiple>
-
-  <label>Email PayPal (opzionale)</label>
-  <input id="paypal_email">
-
-  <label>Link Revolut (opzionale)</label>
-  <input id="revolut_link">
 
   <button onclick="createLottery()">Crea lotteria</button>
 
@@ -120,78 +107,63 @@ async function createLottery() {
   }
 
   const imagesInput = document.getElementById("prize_images");
-
   if (imagesInput.files.length > 5) {
-    alert("Puoi caricare massimo 5 immagini");
+    alert("Massimo 5 immagini");
     return;
   }
 
-  // 1️⃣ CREA LOTTERIA (senza immagini)
-  const body = {
-    title: document.getElementById("title").value.trim(),
-    description: document.getElementById("description").value.trim(),
-    ticket_price: Number(document.getElementById("ticket_price").value),
-    admin_password: document.getElementById("admin_password").value,
-    draw_date: document.getElementById("draw_date").value,
-    wheel: document.getElementById("wheel").value,
-    paypal_email: document.getElementById("paypal_email").value,
-    revolut_link: document.getElementById("revolut_link").value,
-    payment_methods: document.getElementById("payment_methods")
-  ? Array.from(document.getElementById("payment_methods").selectedOptions).map(o => o.value)
-  : ["stripe"]
-  };
-
+  /* 1️⃣ CREA LOTTERIA */
   const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      title: title.value,
+      description: description.value,
+      ticket_price: Number(ticket_price.value),
+      admin_password: admin_password.value,
+      draw_date: draw_date.value,
+      wheel: wheel.value
+    })
   });
 
   const data = await res.json();
   if (!res.ok) {
-    document.getElementById("result").innerText = data.error || "Errore creazione";
+    result.innerText = data.error || "Errore creazione";
     return;
   }
 
   const lotteryId = data.lottery_id;
+  const imageUrls = [];
 
-  // 2️⃣ UPLOAD IMMAGINI
-  const uploadedUrls = [];
-
+  /* 2️⃣ UPLOAD IMMAGINI */
   for (const file of imagesInput.files) {
-    const filePath = `${lotteryId}/${crypto.randomUUID()}-${file.name}`;
+    const filePath = `${lotteryId}/${Date.now()}-${file.name}`;
 
     const { error } = await supabaseClient
       .storage
       .from("lottery-images")
-      .upload(filePath, file, { upsert: false });
+      .upload(filePath, file);
 
-    if (error) {
-      console.error("Upload error:", error);
-      continue;
+    if (!error) {
+      const { data } = supabaseClient
+        .storage
+        .from("lottery-images")
+        .getPublicUrl(filePath);
+
+      imageUrls.push(data.publicUrl);
     }
-
-    const { data: publicData } = supabaseClient
-      .storage
-      .from("lottery-images")
-      .getPublicUrl(filePath);
-
-    uploadedUrls.push(publicData.publicUrl);
   }
 
-  // 3️⃣ SALVA URL NEL DB
-  if (uploadedUrls.length > 0) {
-    await supabaseClient
-      .from("lotteries")
-      .update({ prize_images: uploadedUrls })
-      .eq("id", lotteryId);
-  }
+  /* 3️⃣ SALVA URL NEL DB */
+  await supabaseClient
+    .from("lotteries")
+    .update({ prize_images: imageUrls })
+    .eq("id", lotteryId);
 
-  // 4️⃣ REDIRECT
-  window.location.href = `index.html?id=${lotteryId}`;
+  window.location.href = data.url;
 }
 </script>
 
