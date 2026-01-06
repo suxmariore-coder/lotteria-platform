@@ -189,6 +189,7 @@ const nameField = document.getElementById("nameField");
 const resetBtn = document.getElementById("resetBtn");
 
 let currentRow = null;
+let LOTTERY_STATUS = "active";
 
 /* LOAD LOTTERY */
 async function loadLottery() {
@@ -206,6 +207,7 @@ async function loadLottery() {
   if (!data || data.length === 0) return;
 
   const lot = data[0];
+  LOTTERY_STATUS = lot.status || "active";
 
   document.getElementById("lottery-title").textContent = lot.title;
   document.getElementById("lottery-price").textContent =
@@ -286,7 +288,13 @@ async function loadNumbers() {
 
 /* MODAL */
 function openModal(row) {
+  if (LOTTERY_STATUS !== "active") {
+    alert("La lotteria è chiusa. Non sono più possibili operazioni.");
+    return;
+  }
+
   currentRow = row;
+
   modalTitle.textContent =
     row.status === "available"
       ? `Acquista numero ${row.number}`
@@ -295,10 +303,6 @@ function openModal(row) {
   nameField.style.display = row.status === "available" ? "block" : "none";
   resetBtn.style.display = row.status === "sold" ? "block" : "none";
   modal.classList.add("show");
-}
-
-function closeModal() {
-  modal.classList.remove("show");
 }
 
 /* STRIPE */
