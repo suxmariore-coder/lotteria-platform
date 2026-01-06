@@ -18,6 +18,47 @@
       margin: 6px 0;
     }
 
+    #lottery-meta {
+      text-align: center;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    /* GALLERY */
+    .gallery {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      margin: 0 auto 16px;
+      max-width: 600px;
+    }
+
+    .gallery img {
+      height: 220px;
+      border-radius: 10px;
+      object-fit: cover;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+      .gallery img { height: 180px; }
+    }
+
+    /* DESCRIZIONE */
+    #lottery-description {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px auto 16px;
+      max-width: 600px;
+      text-align: center;
+      color: #333;
+      font-size: 15px;
+    }
+
+    /* GRID */
     .grid {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
@@ -39,11 +80,11 @@
       font-weight: bold;
       color: #fff;
       cursor: pointer;
+      min-height: 58px;
+      user-select: none;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 58px;
-      user-select: none;
     }
 
     .available { background: #1e7e34; }
@@ -55,6 +96,7 @@
       opacity: 0.9;
     }
 
+    /* MODAL */
     .modal {
       position: fixed;
       inset: 0;
@@ -103,24 +145,18 @@
 
 <h1 id="lottery-title">Lotteria</h1>
 <h3 id="lottery-price"></h3>
-<p id="lottery-meta" style="text-align:center; color:#555;"></p>
+<p id="lottery-meta"></p>
 
-<div id="lottery-description" style="
-  background:#fff;
-  padding:12px;
-  border-radius:8px;
-  margin:12px auto 16px;
-  max-width:600px;
-  text-align:center;
-  color:#333;
-  font-size:15px;
-">
+<div id="prize-gallery" class="gallery"></div>
+
+<div id="lottery-description">
   <strong>🎁 Premio in palio</strong><br><br>
   <span id="lottery-description-text"></span>
 </div>
 
 <div id="grid" class="grid"></div>
 
+<!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3 id="modalTitle"></h3>
@@ -132,9 +168,11 @@
 </div>
 
 <script>
+/* 🔴 CONFIG */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
+/* LOTTERY ID */
 const params = new URLSearchParams(window.location.search);
 const LOTTERY_ID = params.get("id");
 
@@ -143,6 +181,7 @@ if (!LOTTERY_ID) {
   throw new Error("Missing lottery id");
 }
 
+/* DOM */
 const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
@@ -151,9 +190,10 @@ const resetBtn = document.getElementById("resetBtn");
 
 let currentRow = null;
 
+/* LOAD LOTTERY */
 async function loadLottery() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -171,46 +211,63 @@ async function loadLottery() {
   document.getElementById("lottery-price").textContent =
     `Prezzo biglietto: € ${lot.ticket_price}`;
 
-  // 📄 descrizione premio
   document.getElementById("lottery-description-text").textContent =
     lot.description || "";
 
-  // 📅 meta info
   let meta = [];
-
-  if (lot.draw_date) {
-    meta.push(`📅 Estrazione: ${lot.draw_date}`);
-  }
-
-  if (lot.wheel) {
-    meta.push(`🎡 Ruota: ${lot.wheel}`);
-  }
-
+  if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
+  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
   document.getElementById("lottery-meta").textContent = meta.join(" • ");
+
+  renderGallery(lot.prize_images);
 }
 
+/* GALLERY */
+function renderGallery(images) {
+  const gallery = document.getElementById("prize-gallery");
+  if (!images || images.length === 0) {
+    gallery.style.display = "none";
+    return;
+  }
+
+  gallery.innerHTML = "";
+  images.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.onclick = () => window.open(url, "_blank");
+    gallery.appendChild(img);
+  });
+}
+
+/* LOAD NUMBERS */
 async function loadNumbers() {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
+
   const data = await res.json();
   grid.innerHTML = "";
 
   data.forEach(row => {
     const d = document.createElement("div");
     d.className = `number ${row.status}`;
-    d.innerHTML = `<div>${row.number}</div>${row.status === "sold" ? `<div class="buyer">${row.buyer_name || ""}</div>` : ""}`;
+    d.innerHTML = `
+      <div>${row.number}</div>
+      ${row.status === "sold" ? `<div class="buyer">${row.buyer_name || ""}</div>` : ""}
+    `;
     d.onclick = () => openModal(row);
     grid.appendChild(d);
   });
 }
 
+/* MODAL */
 function openModal(row) {
   currentRow = row;
-  modalTitle.textContent = row.status === "available"
-    ? `Acquista numero ${row.number}`
-    : `Reset numero ${row.number}`;
+  modalTitle.textContent =
+    row.status === "available"
+      ? `Acquista numero ${row.number}`
+      : `Reset numero ${row.number}`;
 
   nameField.style.display = row.status === "available" ? "block" : "none";
   resetBtn.style.display = row.status === "sold" ? "block" : "none";
@@ -221,6 +278,7 @@ function closeModal() {
   modal.classList.remove("show");
 }
 
+/* STRIPE */
 async function payWithStripe() {
   const name = nameField.value.trim();
   if (!name) return alert("Inserisci il nome");
@@ -228,10 +286,10 @@ async function payWithStripe() {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
     method: "POST",
     headers: {
-  "Content-Type": "application/json",
-  "apikey": SUPABASE_ANON_KEY,
-  "Authorization": "Bearer " + SUPABASE_ANON_KEY
-},
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: "Bearer " + SUPABASE_ANON_KEY
+    },
     body: JSON.stringify({
       lottery_id: LOTTERY_ID,
       number_id: currentRow.id,
@@ -240,41 +298,37 @@ async function payWithStripe() {
   });
 
   const data = await res.json();
-  if (!data.url) return alert("Errore Stripe");
+  if (!data.url) return alert("Errore pagamento");
 
   window.location.href = data.url;
 }
 
+/* RESET */
 async function resetNumber() {
   const pwd = prompt("Password admin");
   if (!pwd) return;
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/reset-number-admin`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify({
-        lottery_id: LOTTERY_ID,
-        number_id: currentRow.id,
-        admin_password: pwd
-      })
-    }
-  );
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/reset-number-admin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: "Bearer " + SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      admin_password: pwd
+    })
+  });
 
-  if (!res.ok) {
-    alert("Password errata o errore");
-    return;
-  }
+  if (!res.ok) return alert("Password errata");
 
   closeModal();
   loadNumbers();
 }
 
+/* INIT */
 loadLottery();
 loadNumbers();
 </script>
