@@ -225,13 +225,36 @@ async function loadLottery() {
 /* GALLERY */
 function renderGallery(images) {
   const gallery = document.getElementById("prize-gallery");
-  if (!images || images.length === 0) {
+
+  if (!images) {
+    gallery.style.display = "none";
+    return;
+  }
+
+  // 🛡️ normalizziamo SEMPRE in array
+  let imageArray = [];
+
+  if (Array.isArray(images)) {
+    imageArray = images;
+  } else if (typeof images === "string") {
+    try {
+      imageArray = JSON.parse(images);
+    } catch (e) {
+      imageArray = [];
+    }
+  }
+
+  if (imageArray.length === 0) {
     gallery.style.display = "none";
     return;
   }
 
   gallery.innerHTML = "";
-  images.forEach(url => {
+  gallery.style.display = "flex";
+
+  imageArray.forEach(url => {
+    if (!url) return;
+
     const img = document.createElement("img");
     img.src = url;
     img.onclick = () => window.open(url, "_blank");
