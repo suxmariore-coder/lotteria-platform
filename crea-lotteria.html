@@ -128,12 +128,14 @@ async function createLottery() {
   }
 
   const imagesInput = document.getElementById("prize_images");
+  const files = imagesInput.files;
 
-  if (imagesInput.files.length > 5) {
+  if (files.length > 5) {
     alert("Puoi caricare massimo 5 immagini");
     return;
   }
 
+  // 1️⃣ CREA LOTTERIA (senza immagini)
   const body = {
     title: document.getElementById("title").value.trim(),
     description: document.getElementById("description").value.trim(),
@@ -146,7 +148,6 @@ async function createLottery() {
     payment_methods: Array.from(
       document.getElementById("payment_methods").selectedOptions
     ).map(o => o.value)
-    // ⚠️ immagini gestite nel prossimo step (upload storage)
   };
 
   const res = await fetch(
@@ -170,6 +171,48 @@ async function createLottery() {
     return;
   }
 
+  const lotteryId = data.lottery_id;
+
+  // 2️⃣ UPLOAD IMMAGINI SU STORAGE
+  const uploadedUrls = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const ext = file.name.split(".").pop();
+    const filePath = `lotteries/${lotteryId}/${Date.now()}_${i}.${ext}`;
+
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from("lottery-images")
+      .upload(filePath, file, { upsert: false });
+
+    if (uploadError) {
+      console.error(uploadError);
+      alert("Errore upload immagine");
+      return;
+    }
+
+    const { data: publicData } = supabaseClient
+      .storage
+      .from("lottery-images")
+      .getPublicUrl(filePath);
+
+    uploadedUrls.push(publicData.publicUrl);
+  }
+
+  // 3️⃣ SALVA URL IMMAGINI NEL DB
+  const { error: updateError } = await supabaseClient
+    .from("lotteries")
+    .update({ prize_images: uploadedUrls })
+    .eq("id", lotteryId);
+
+  if (updateError) {
+    console.error(updateError);
+    alert("Errore salvataggio immagini");
+    return;
+  }
+
+  // 4️⃣ REDIRECT
   window.location.href = data.url;
 }
 </script>
