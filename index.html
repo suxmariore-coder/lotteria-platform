@@ -194,7 +194,7 @@ let LOTTERY_STATUS = "active";
 /* LOAD LOTTERY */
 async function loadLottery() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images`,status
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -207,6 +207,22 @@ async function loadLottery() {
   if (!data || data.length === 0) return;
 
   const lot = data[0];
+if (lot.status !== "active") {
+  document.getElementById("grid").style.pointerEvents = "none";
+  document.getElementById("grid").style.opacity = "0.5";
+
+  const info = document.createElement("div");
+  info.style.textAlign = "center";
+  info.style.margin = "16px 0";
+  info.style.fontWeight = "bold";
+  info.textContent =
+    lot.status === "closed"
+      ? "⛔ Lotteria chiusa – vendite terminate"
+      : "🏁 Lotteria conclusa";
+
+  document.body.insertBefore(info, document.getElementById("grid"));
+}
+
   LOTTERY_STATUS = lot.status || "active";
 
   document.getElementById("lottery-title").textContent = lot.title;
@@ -306,6 +322,10 @@ function openModal(row) {
 }
 
 /* STRIPE */
+if (currentLotteryStatus !== "active") {
+  alert("Lotteria chiusa");
+  return;
+}
 async function payWithStripe() {
   const name = nameField.value.trim();
   if (!name) return alert("Inserisci il nome");
