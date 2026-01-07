@@ -1,89 +1,68 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Gestione Lotteria</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 16px;
-      margin: 0;
+      background: #f4f4f4;
+      padding: 20px;
     }
 
     .container {
-      max-width: 700px;
-      margin: auto;
+      max-width: 500px;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
+      margin: auto;
     }
 
-    h1 {
+    h2 {
       text-align: center;
       margin-bottom: 10px;
     }
 
-    .meta {
-      text-align: center;
-      color: #555;
-      margin-bottom: 20px;
+    .info {
+      margin: 10px 0;
+      color: #333;
     }
 
-    .section {
-      border-top: 1px solid #ddd;
-      padding-top: 15px;
-      margin-top: 15px;
+    .status {
+      font-weight: bold;
+      margin-top: 10px;
     }
 
-    .section h3 {
-      margin-top: 0;
-    }
+    .status.active { color: green; }
+    .status.closed { color: red; }
 
     button {
-      padding: 10px 14px;
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 16px;
       border-radius: 6px;
       border: none;
       cursor: pointer;
-      font-size: 14px;
     }
 
-    .danger {
+    .close-btn {
       background: #dc3545;
-      color: white;
+      color: #fff;
     }
 
-    .secondary {
+    .close-btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    .back {
       background: #6c757d;
-      color: white;
-    }
-
-    .success {
-      background: #28a745;
-      color: white;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .stat {
-      background: #f1f1f1;
-      padding: 12px;
-      border-radius: 6px;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .error {
-      color: red;
-      text-align: center;
+      color: #fff;
       margin-top: 10px;
     }
   </style>
@@ -92,32 +71,21 @@
 <body>
 
 <div class="container">
-  <h1 id="title">Gestione lotteria</h1>
-  <div class="meta" id="meta"></div>
+  <h2>⚙️ Gestione Lotteria</h2>
 
-  <!-- STATISTICHE -->
-  <div class="section">
-    <h3>📊 Statistiche</h3>
-    <div class="stats">
-      <div class="stat" id="stat-sold">Numeri venduti: –</div>
-      <div class="stat" id="stat-available">Numeri disponibili: –</div>
-    </div>
-  </div>
+  <div class="info"><strong>Titolo:</strong> <span id="title"></span></div>
+  <div class="info"><strong>Data estrazione:</strong> <span id="draw_date"></span></div>
+  <div class="info status" id="status"></div>
 
-  <!-- AZIONI -->
-  <div class="section">
-    <h3>⚙️ Azioni</h3>
+  <button id="closeBtn" class="close-btn" onclick="closeLottery()">
+    🔒 Chiudi definitivamente la lotteria
+  </button>
 
-    <button class="secondary" onclick="openPublic()">Apri pagina pubblica</button>
-    <br><br>
-    <button class="danger" onclick="closeLottery()">Chiudi lotteria</button>
-  </div>
-
-  <div id="error" class="error"></div>
+  <button class="back" onclick="goBack()">⬅️ Torna alla dashboard</button>
 </div>
 
 <script>
-/* 🔴 CONFIG */
+/* CONFIG */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
@@ -126,83 +94,86 @@ const supabaseClient = supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
-/* 🔍 PRENDO ID LOTTERIA */
+/* LOTTERY ID */
 const params = new URLSearchParams(window.location.search);
 const LOTTERY_ID = params.get("id");
 
 if (!LOTTERY_ID) {
-  document.body.innerHTML = "<h2>ID LOTTERIA MANCANTE</h2>";
+  document.body.innerHTML = "<h2>ID lotteria mancante</h2>";
   throw new Error("Missing lottery id");
 }
 
-/* 🚦 CHECK AUTH + OWNER */
-async function init() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
+let LOTTERY_STATUS = "active";
 
+/* AUTH CHECK */
+async function checkAuth() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
     window.location.href = "login.html";
     return;
   }
-
-  await loadLottery(session.user.id);
-  await loadStats();
+  loadLottery();
 }
 
-/* 📦 LOAD LOTTERIA */
-async function loadLottery(userId) {
+/* LOAD LOTTERY */
+async function loadLottery() {
   const { data, error } = await supabaseClient
     .from("lotteries")
-    .select("id, title, draw_date, wheel, owner_id, status")
+    .select("title, draw_date, status")
     .eq("id", LOTTERY_ID)
     .single();
 
   if (error || !data) {
-    document.getElementById("error").innerText = "Lotteria non trovata";
+    alert("Errore caricamento lotteria");
     return;
   }
 
-  if (data.owner_id !== userId) {
-    document.getElementById("error").innerText = "Accesso non autorizzato";
+  document.getElementById("title").textContent = data.title;
+  document.getElementById("draw_date").textContent = data.draw_date || "—";
+
+  LOTTERY_STATUS = data.status || "active";
+
+  const statusEl = document.getElementById("status");
+  statusEl.textContent =
+    LOTTERY_STATUS === "active"
+      ? "🟢 Lotteria attiva"
+      : "🔴 Lotteria chiusa";
+
+  statusEl.className = "info status " + LOTTERY_STATUS;
+
+  if (LOTTERY_STATUS !== "active") {
+    document.getElementById("closeBtn").disabled = true;
+  }
+}
+
+/* CLOSE LOTTERY */
+async function closeLottery() {
+  const ok = confirm(
+    "Sei sicuro? Questa operazione è DEFINITIVA.\nNon potrai più vendere o resettare numeri."
+  );
+  if (!ok) return;
+
+  const { error } = await supabaseClient
+    .from("lotteries")
+    .update({ status: "closed" })
+    .eq("id", LOTTERY_ID);
+
+  if (error) {
+    alert("Errore chiusura lotteria");
     return;
   }
 
-  document.getElementById("title").innerText = data.title;
-
-  let meta = [];
-  if (data.draw_date) meta.push(`📅 Estrazione: ${data.draw_date}`);
-  if (data.wheel) meta.push(`🎡 Ruota: ${data.wheel}`);
-  if (data.status) meta.push(`📌 Stato: ${data.status}`);
-
-  document.getElementById("meta").innerText = meta.join(" • ");
+  alert("Lotteria chiusa con successo");
+  loadLottery();
 }
 
-/* 📊 STATISTICHE */
-async function loadStats() {
-  const { data, error } = await supabaseClient
-    .from("lottery_numbers")
-    .select("status", { count: "exact" })
-    .eq("lottery_id", LOTTERY_ID);
-
-  if (error) return;
-
-  const sold = data.filter(n => n.status === "sold").length;
-  const available = data.filter(n => n.status === "available").length;
-
-  document.getElementById("stat-sold").innerText = `Numeri venduti: ${sold}`;
-  document.getElementById("stat-available").innerText = `Numeri disponibili: ${available}`;
+/* BACK */
+function goBack() {
+  window.location.href = "dashboard.html";
 }
 
-/* 🔗 APRI PAGINA PUBBLICA */
-function openPublic() {
-  window.open(`index.html?id=${LOTTERY_ID}`, "_blank");
-}
-
-/* ⛔ CHIUDI LOTTERIA (placeholder) */
-function closeLottery() {
-  alert("Chiudi lotteria – prossimo step");
-}
-
-init();
+/* INIT */
+checkAuth();
 </script>
 
 </body>
