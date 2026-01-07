@@ -325,6 +325,16 @@ function openModal(row) {
   }
 
   modal.classList.add("show");
+
+function closeModal() {
+  const modal = document.getElementById("modal");
+  modal.classList.remove("show");
+
+  // reset campi
+  const nameField = document.getElementById("nameField");
+  if (nameField) nameField.value = "";
+}
+
 }
 
 /* STRIPE */
