@@ -187,6 +187,7 @@ const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const nameField = document.getElementById("nameField");
 const resetBtn = document.getElementById("resetBtn");
+const stripeBtn = document.querySelector(".btn.stripe");
 
 let currentRow = null;
 let LOTTERY_STATUS = "active";
@@ -311,18 +312,19 @@ function openModal(row) {
 
   currentRow = row;
 
-  modalTitle.textContent =
-    row.status === "available"
-      ? `Acquista numero ${row.number}`
-      : `Reset numero ${row.number}`;
+  if (row.status === "available") {
+    modalTitle.textContent = `Acquista numero ${row.number}`;
+    nameField.style.display = "block";
+    stripeBtn.style.display = "block";
+    resetBtn.style.display = "none";
+  } else {
+    modalTitle.textContent = `Reset numero ${row.number}`;
+    nameField.style.display = "none";
+    stripeBtn.style.display = "none";
+    resetBtn.style.display = "block";
+  }
 
-  nameField.style.display = row.status === "available" ? "block" : "none";
-  resetBtn.style.display = row.status === "sold" ? "block" : "none";
   modal.classList.add("show");
-}
-
-function closeModal() {
-  modal.classList.remove("show");
 }
 
 /* STRIPE */
