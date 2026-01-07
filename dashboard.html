@@ -286,8 +286,10 @@
         window.open(`index.html?id=${id}`, "_blank");
       });
 
-      card.querySelector("[data-manage]").addEventListener("click", () => {
-        alert("Gestione avanzata: prossimo step (statistiche, vendite, export, ecc.)");
+
+      card.querySelector("[data-manage]").addEventListener("click", (e) => {
+      const id = e.currentTarget.getAttribute("data-manage");
+      window.location.href = `manage-lottery.html?id=${id}`;
       });
 
       elGrid.appendChild(card);
