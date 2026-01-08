@@ -161,14 +161,14 @@
   <div class="modal-content">
     <h3 id="modalTitle"></h3>
     <input id="nameField" placeholder="Il tuo nome" />
-    <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
+    <button id="stripeBtn" class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
     <button id="resetBtn" class="btn reset" style="display:none" onclick="resetNumber()">Reset</button>
     <button class="btn cancel" onclick="closeModal()">Annulla</button>
   </div>
 </div>
 
 <script>
-/* 🔴 CONFIG */
+/* CONFIG */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
@@ -187,53 +187,52 @@ const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const nameField = document.getElementById("nameField");
 const resetBtn = document.getElementById("resetBtn");
-const stripeBtn = document.querySelector(".btn.stripe");
+const stripeBtn = document.getElementById("stripeBtn");
 
 let currentRow = null;
 let LOTTERY_STATUS = "active";
 
 /* LOAD LOTTERY */
 async function loadLottery() {
-const res = await fetch(
-  `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
-  {
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: "Bearer " + SUPABASE_ANON_KEY
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY
+      }
     }
-  }
-);
+  );
 
   const data = await res.json();
   if (!data || data.length === 0) return;
 
   const lot = data[0];
-if (lot.status !== "active") {
-  document.getElementById("grid").style.pointerEvents = "none";
-  document.getElementById("grid").style.opacity = "0.5";
-
-  const info = document.createElement("div");
-  info.style.textAlign = "center";
-  info.style.margin = "16px 0";
-  info.style.fontWeight = "bold";
-  info.textContent =
-    lot.status === "closed"
-      ? "⛔ Lotteria chiusa – vendite terminate"
-      : "🏁 Lotteria conclusa";
-
-  document.body.insertBefore(info, document.getElementById("grid"));
-}
-
   LOTTERY_STATUS = lot.status || "active";
+
+  if (LOTTERY_STATUS !== "active") {
+    grid.style.pointerEvents = "none";
+    grid.style.opacity = "0.5";
+
+    const info = document.createElement("div");
+    info.style.textAlign = "center";
+    info.style.margin = "16px 0";
+    info.style.fontWeight = "bold";
+    info.textContent =
+      LOTTERY_STATUS === "closed"
+        ? "⛔ Lotteria chiusa – vendite terminate"
+        : "🏁 Lotteria conclusa";
+
+    document.body.insertBefore(info, grid);
+  }
 
   document.getElementById("lottery-title").textContent = lot.title;
   document.getElementById("lottery-price").textContent =
     `Prezzo biglietto: € ${lot.ticket_price}`;
-
   document.getElementById("lottery-description-text").textContent =
     lot.description || "";
 
-  let meta = [];
+  const meta = [];
   if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
   if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
   document.getElementById("lottery-meta").textContent = meta.join(" • ");
@@ -245,25 +244,13 @@ if (lot.status !== "active") {
 function renderGallery(images) {
   const gallery = document.getElementById("prize-gallery");
 
-  if (!images) {
-    gallery.style.display = "none";
-    return;
+  let arr = [];
+  if (Array.isArray(images)) arr = images;
+  else if (typeof images === "string") {
+    try { arr = JSON.parse(images); } catch {}
   }
 
-  // 🛡️ normalizziamo SEMPRE in array
-  let imageArray = [];
-
-  if (Array.isArray(images)) {
-    imageArray = images;
-  } else if (typeof images === "string") {
-    try {
-      imageArray = JSON.parse(images);
-    } catch (e) {
-      imageArray = [];
-    }
-  }
-
-  if (imageArray.length === 0) {
+  if (arr.length === 0) {
     gallery.style.display = "none";
     return;
   }
@@ -271,9 +258,7 @@ function renderGallery(images) {
   gallery.innerHTML = "";
   gallery.style.display = "flex";
 
-  imageArray.forEach(url => {
-    if (!url) return;
-
+  arr.forEach(url => {
     const img = document.createElement("img");
     img.src = url;
     img.onclick = () => window.open(url, "_blank");
@@ -306,7 +291,7 @@ async function loadNumbers() {
 /* MODAL */
 function openModal(row) {
   if (LOTTERY_STATUS !== "active") {
-    alert("La lotteria è chiusa. Non sono più possibili operazioni.");
+    alert("La lotteria è chiusa.");
     return;
   }
 
@@ -325,24 +310,17 @@ function openModal(row) {
   }
 
   modal.classList.add("show");
-
-function closeModal() {
-  const modal = document.getElementById("modal");
-  modal.classList.remove("show");
-
-  // reset campi
-  const nameField = document.getElementById("nameField");
-  if (nameField) nameField.value = "";
 }
 
+/* CLOSE MODAL */
+function closeModal() {
+  modal.classList.remove("show");
+  nameField.value = "";
 }
 
 /* STRIPE */
 async function payWithStripe() {
-  if (LOTTERY_STATUS !== "active") {
-    alert("La lotteria è chiusa. Non è possibile acquistare numeri.");
-    return;
-  }
+  if (!currentRow) return;
 
   const name = nameField.value.trim();
   if (!name) return alert("Inserisci il nome");
