@@ -189,9 +189,60 @@ async function loadLottery() {
   const [lot] = await res.json();
   if (!lot) return;
 
+  LOTTERY_STATUS = lot.status || "active";
+
+  banner.style.display = "block";
+  banner.className = "status-banner";
+
+  if (LOTTERY_STATUS === "active") {
+    banner.classList.add("status-active");
+    banner.textContent = "✅ Lotteria attiva – puoi acquistare i numeri";
+  } else if (LOTTERY_STATUS === "closed") {
+    banner.classList.add("status-closed");
+    banner.textContent = "⛔ Vendite chiuse – estrazione imminente";
+  } else {
+    banner.classList.add("status-finished");
+    banner.textContent = "🏁 Lotteria conclusa";
+  }
+
+  if (LOTTERY_STATUS !== "active") {
+    grid.style.pointerEvents = "none";
+    grid.style.opacity = "0.45";
+  }
+
   document.getElementById("lottery-title").textContent = lot.title;
   document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
   document.getElementById("lottery-description-text").textContent = lot.description || "";
+
+  const meta = [];
+  if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
+  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
+  document.getElementById("lottery-meta").textContent = meta.join(" • ");
+
+  renderGallery(lot.prize_images);
+}
+
+function renderGallery(images) {
+  const gallery = document.getElementById("prize-gallery");
+  let arr = [];
+
+  if (Array.isArray(images)) arr = images;
+  else if (typeof images === "string") {
+    try { arr = JSON.parse(images); } catch {}
+  }
+
+  if (!arr.length) return gallery.style.display = "none";
+
+  gallery.innerHTML = "";
+  gallery.style.display = "flex";
+
+  arr.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.onclick = () => window.open(url, "_blank");
+    gallery.appendChild(img);
+  });
+
 }
 
 /* LOAD NUMBERS */
