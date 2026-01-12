@@ -216,11 +216,24 @@ async function loadPendingNumbers() {
 async function confirmManual(id) {
   if (!confirm("Confermi pagamento ricevuto?")) return;
 
+  // 1️⃣ recuperiamo il nome in pending
+  const { data, error } = await sb
+    .from("lottery_numbers")
+    .select("pending_buyer_name")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    alert("Errore recupero dati");
+    return;
+  }
+
+  // 2️⃣ spostiamo il nome da pending → buyer_name
   await sb
     .from("lottery_numbers")
     .update({
       status: "sold",
-      buyer_name: null,
+      buyer_name: data.pending_buyer_name,
       payment_status: "paid",
       pending_buyer_name: null
     })
