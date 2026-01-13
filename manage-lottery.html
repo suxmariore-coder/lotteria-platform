@@ -108,22 +108,19 @@
     🔒 Chiudi definitivamente la lotteria
   </button>
 
-<hr style="margin:20px 0">
+  <hr style="margin:20px 0">
 
-<h3>📊 Vendite</h3>
+  <h3>📊 Vendite</h3>
+  <div class="info"><strong>Numeri venduti:</strong> <span id="soldCount">0</span></div>
+  <div class="info"><strong>Numeri in attesa:</strong> <span id="pendingCount">0</span></div>
+  <div class="info"><strong>Numeri disponibili:</strong> <span id="availableCount">0</span></div>
 
-<div class="info"><strong>Numeri venduti:</strong> <span id="soldCount">0</span></div>
-<div class="info"><strong>Numeri in attesa:</strong> <span id="pendingCount">0</span></div>
-<div class="info"><strong>Numeri disponibili:</strong> <span id="availableCount">0</span></div>
+  <hr style="margin:20px 0">
 
-<hr style="margin:20px 0">
-
-<h3>💰 Incassi</h3>
-
-<div class="info"><strong>Incasso confermato:</strong> € <span id="revenuePaid">0</span></div>
-<div class="info"><strong>Incasso potenziale:</strong> € <span id="revenuePending">0</span></div>
-<div class="info"><strong>Totale:</strong> € <span id="revenueTotal">0</span></div>
-
+  <h3>💰 Incassi</h3>
+  <div class="info"><strong>Incasso confermato:</strong> € <span id="revenuePaid">0</span></div>
+  <div class="info"><strong>Incasso potenziale:</strong> € <span id="revenuePending">0</span></div>
+  <div class="info"><strong>Totale:</strong> € <span id="revenueTotal">0</span></div>
 
   <hr style="margin:20px 0">
 
@@ -158,8 +155,9 @@ async function checkAuth() {
     window.location.href = "login.html";
     return;
   }
-  loadLottery();
-  loadPendingNumbers();
+  await loadLottery();
+  await loadSalesStats();
+  await loadPendingNumbers();
 }
 
 /* LOAD LOTTERY */
@@ -175,8 +173,26 @@ async function loadLottery() {
     return;
   }
 
+  document.getElementById("title").textContent = data.title;
+  document.getElementById("draw_date").textContent = data.draw_date || "—";
+
+  LOTTERY_STATUS = data.status || "active";
+
+  const statusEl = document.getElementById("status");
+  statusEl.textContent =
+    LOTTERY_STATUS === "active"
+      ? "🟢 Lotteria attiva"
+      : "🔴 Lotteria chiusa";
+
+  statusEl.className = "info status " + LOTTERY_STATUS;
+
+  if (LOTTERY_STATUS !== "active") {
+    document.getElementById("closeBtn").disabled = true;
+  }
+}
+
+/* SALES STATS */
 async function loadSalesStats() {
-  // prezzo biglietto
   const { data: lottery } = await sb
     .from("lotteries")
     .select("ticket_price")
@@ -184,16 +200,12 @@ async function loadSalesStats() {
     .single();
 
   if (!lottery) return;
-
   const price = Number(lottery.ticket_price);
 
-  // numeri
-  const { data: numbers, error } = await sb
+  const { data: numbers } = await sb
     .from("lottery_numbers")
     .select("status, payment_status")
     .eq("lottery_id", LOTTERY_ID);
-
-  if (error || !numbers) return;
 
   let sold = 0;
   let pending = 0;
@@ -213,26 +225,6 @@ async function loadSalesStats() {
   document.getElementById("revenuePending").textContent = (pending * price).toFixed(2);
   document.getElementById("revenueTotal").textContent =
     ((sold + pending) * price).toFixed(2);
-}
-
-  document.getElementById("title").textContent = data.title;
-  document.getElementById("draw_date").textContent = data.draw_date || "—";
-
-loadSalesStats();
-
-  LOTTERY_STATUS = data.status || "active";
-
-  const statusEl = document.getElementById("status");
-  statusEl.textContent =
-    LOTTERY_STATUS === "active"
-      ? "🟢 Lotteria attiva"
-      : "🔴 Lotteria chiusa";
-
-  statusEl.className = "info status " + LOTTERY_STATUS;
-
-  if (LOTTERY_STATUS !== "active") {
-    document.getElementById("closeBtn").disabled = true;
-  }
 }
 
 /* PENDING NUMBERS */
@@ -255,18 +247,15 @@ async function loadPendingNumbers() {
   data.forEach(n => {
     const div = document.createElement("div");
     div.className = "pending-box";
-
     div.innerHTML = `
       <b>Numero ${n.number}</b><br>
       👤 ${n.pending_buyer_name}<br>
       💳 ${n.payment_method}
-
       <div class="row">
         <button class="confirm" onclick="confirmManual('${n.id}')">✅ Conferma</button>
         <button class="cancel" onclick="cancelManual('${n.id}')">❌ Annulla</button>
       </div>
     `;
-
     box.appendChild(div);
   });
 }
@@ -275,19 +264,12 @@ async function loadPendingNumbers() {
 async function confirmManual(id) {
   if (!confirm("Confermi pagamento ricevuto?")) return;
 
-  // 1️⃣ recuperiamo il nome in pending
-  const { data, error } = await sb
+  const { data } = await sb
     .from("lottery_numbers")
     .select("pending_buyer_name")
     .eq("id", id)
     .single();
 
-  if (error || !data) {
-    alert("Errore recupero dati");
-    return;
-  }
-
-  // 2️⃣ spostiamo il nome da pending → buyer_name
   await sb
     .from("lottery_numbers")
     .update({
@@ -298,7 +280,8 @@ async function confirmManual(id) {
     })
     .eq("id", id);
 
-  loadPendingNumbers();
+  await loadSalesStats();
+  await loadPendingNumbers();
 }
 
 /* CANCEL */
@@ -314,15 +297,13 @@ async function cancelManual(id) {
     })
     .eq("id", id);
 
-  loadPendingNumbers();
+  await loadSalesStats();
+  await loadPendingNumbers();
 }
 
 /* CLOSE LOTTERY */
 async function closeLottery() {
-  const ok = confirm(
-    "Sei sicuro? Questa operazione è DEFINITIVA."
-  );
-  if (!ok) return;
+  if (!confirm("Sei sicuro? Questa operazione è DEFINITIVA.")) return;
 
   await sb
     .from("lotteries")
@@ -330,7 +311,7 @@ async function closeLottery() {
     .eq("id", LOTTERY_ID);
 
   alert("Lotteria chiusa");
-  loadLottery();
+  await loadLottery();
 }
 
 /* BACK */
