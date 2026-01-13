@@ -175,8 +175,50 @@ async function loadLottery() {
     return;
   }
 
+async function loadSalesStats() {
+  // prezzo biglietto
+  const { data: lottery } = await sb
+    .from("lotteries")
+    .select("ticket_price")
+    .eq("id", LOTTERY_ID)
+    .single();
+
+  if (!lottery) return;
+
+  const price = Number(lottery.ticket_price);
+
+  // numeri
+  const { data: numbers, error } = await sb
+    .from("lottery_numbers")
+    .select("status, payment_status")
+    .eq("lottery_id", LOTTERY_ID);
+
+  if (error || !numbers) return;
+
+  let sold = 0;
+  let pending = 0;
+  let available = 0;
+
+  numbers.forEach(n => {
+    if (n.status === "sold") sold++;
+    else if (n.payment_status === "pending") pending++;
+    else available++;
+  });
+
+  document.getElementById("soldCount").textContent = sold;
+  document.getElementById("pendingCount").textContent = pending;
+  document.getElementById("availableCount").textContent = available;
+
+  document.getElementById("revenuePaid").textContent = (sold * price).toFixed(2);
+  document.getElementById("revenuePending").textContent = (pending * price).toFixed(2);
+  document.getElementById("revenueTotal").textContent =
+    ((sold + pending) * price).toFixed(2);
+}
+
   document.getElementById("title").textContent = data.title;
   document.getElementById("draw_date").textContent = data.draw_date || "—";
+
+loadSalesStats();
 
   LOTTERY_STATUS = data.status || "active";
 
