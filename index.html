@@ -24,7 +24,6 @@
       margin-bottom: 10px;
     }
 
-    /* STATUS BANNER */
     .status-banner {
       max-width: 600px;
       margin: 12px auto 16px;
@@ -37,7 +36,6 @@
     .status-closed { background: #fff3cd; color: #856404; }
     .status-finished { background: #f8d7da; color: #842029; }
 
-    /* GALLERY */
     .gallery {
       display: flex;
       gap: 10px;
@@ -51,10 +49,8 @@
       border-radius: 10px;
       object-fit: cover;
       cursor: pointer;
-      flex-shrink: 0;
     }
 
-    /* DESCRIZIONE */
     #lottery-description {
       background: #fff;
       padding: 12px;
@@ -62,16 +58,14 @@
       margin: 12px auto 16px;
       max-width: 600px;
       text-align: center;
-      color: #333;
-      font-size: 15px;
     }
 
-    /* GRID */
     .grid {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
       gap: 10px;
     }
+
     .number {
       border-radius: 8px;
       padding: 10px 4px;
@@ -84,6 +78,7 @@
       flex-direction: column;
       justify-content: center;
     }
+
     .available { background: #1e7e34; }
     .sold { background: #c82333; }
     .pending { background: #ffc107; color:#333; }
@@ -91,10 +86,8 @@
     .buyer {
       font-size: 11px;
       margin-top: 4px;
-      opacity: 0.9;
     }
 
-    /* MODAL */
     .modal {
       position: fixed;
       inset: 0;
@@ -102,32 +95,33 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 999;
     }
     .modal.show { display: flex; }
+
     .modal-content {
       background: #fff;
-      width: 100%;
       max-width: 380px;
-      border-radius: 12px;
       padding: 20px;
+      border-radius: 12px;
+      width: 100%;
     }
+
     .modal input {
       width: 100%;
       padding: 10px;
       margin-bottom: 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
     }
+
     .btn {
       width: 100%;
       padding: 12px;
       margin-top: 8px;
-      border-radius: 6px;
       border: none;
+      border-radius: 6px;
       font-size: 15px;
       cursor: pointer;
     }
+
     .stripe { background: #6772e5; color: #fff; }
     .paypal { background: #003087; color: #fff; }
     .revolut { background: #111; color: #fff; }
@@ -137,7 +131,7 @@
 
 <body>
 
-<h1 id="lottery-title">Lotteria</h1>
+<h1 id="lottery-title"></h1>
 <h3 id="lottery-price"></h3>
 <p id="lottery-meta"></p>
 
@@ -152,16 +146,14 @@
 
 <div id="grid" class="grid"></div>
 
-<!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <h3 id="modalTitle"></h3>
     <input id="nameField" placeholder="Il tuo nome" />
 
-    <button id="stripeBtn" class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
-    <button id="paypalBtn" class="btn paypal" onclick="payManual('paypal')">Paga con PayPal</button>
-    <button id="revolutBtn" class="btn revolut" onclick="payManual('revolut')">Paga con Revolut</button>
-
+    <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
+    <button class="btn paypal" onclick="payManual('paypal')">Paga con PayPal</button>
+    <button class="btn revolut" onclick="payManual('revolut')">Paga con Revolut</button>
     <button class="btn cancel" onclick="closeModal()">Annulla</button>
   </div>
 </div>
@@ -170,9 +162,7 @@
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-const params = new URLSearchParams(window.location.search);
-const LOTTERY_ID = params.get("id");
-
+const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
@@ -183,109 +173,65 @@ let currentRow = null;
 /* LOAD LOTTERY */
 async function loadLottery() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=*`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-
   const [lot] = await res.json();
   if (!lot) return;
 
-  // 🧠 STATO
-  const status = lot.status || "active";
-
-  const banner = document.getElementById("lottery-status-banner");
-  banner.style.display = "block";
-  banner.className = "status-banner";
-
-  if (status === "active") {
-    banner.classList.add("status-active");
-    banner.textContent = "✅ Lotteria attiva – puoi acquistare i numeri";
-  } else if (status === "closed") {
-    banner.classList.add("status-closed");
-    banner.textContent = "⛔ Vendite chiuse – estrazione imminente";
-    grid.style.pointerEvents = "none";
-    grid.style.opacity = "0.45";
-  } else {
-    banner.classList.add("status-finished");
-    banner.textContent = "🏁 Lotteria conclusa";
-    grid.style.pointerEvents = "none";
-    grid.style.opacity = "0.45";
-  }
-
-  // 🏷️ TESTI
   document.getElementById("lottery-title").textContent = lot.title;
-  document.getElementById("lottery-price").textContent =
-    `Prezzo biglietto: € ${lot.ticket_price}`;
-  document.getElementById("lottery-description-text").textContent =
-    lot.description || "";
+  document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
+  document.getElementById("lottery-description-text").textContent = lot.description || "";
 
-  // 📅 META
   const meta = [];
   if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
   if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
   document.getElementById("lottery-meta").textContent = meta.join(" • ");
 
-  // 🖼️ GALLERY
   renderGallery(lot.prize_images);
 }
 
+/* GALLERY */
 function renderGallery(images) {
-  const gallery = document.getElementById("prize-gallery");
-
-  let arr = [];
-  if (Array.isArray(images)) arr = images;
-  else if (typeof images === "string") {
-    try { arr = JSON.parse(images); } catch {}
-  }
-
-  if (!arr.length) {
-    gallery.style.display = "none";
-    return;
-  }
-
-  gallery.innerHTML = "";
-  gallery.style.display = "flex";
-
-  arr.forEach(url => {
-    if (!url) return;
-    const img = document.createElement("img");
-    img.src = url;
-    img.onclick = () => window.open(url, "_blank");
-    gallery.appendChild(img);
+  const g = document.getElementById("prize-gallery");
+  let arr = Array.isArray(images) ? images : [];
+  g.innerHTML = "";
+  arr.forEach(u => {
+    const i = document.createElement("img");
+    i.src = u;
+    i.onclick = () => window.open(u, "_blank");
+    g.appendChild(i);
   });
 }
 
 /* LOAD NUMBERS */
 async function loadNumbers() {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
+    `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
   const data = await res.json();
   grid.innerHTML = "";
 
-  data.forEach(row => {
+  data.forEach(n => {
     const d = document.createElement("div");
-    const cls = row.payment_status === "pending" ? "pending" : row.status;
+    const cls = n.payment_status === "pending" ? "pending" : n.status;
     d.className = `number ${cls}`;
-    d.innerHTML = `<div>${row.number}</div>${
-      row.payment_status === "pending"
-        ? `<div class="buyer">⏳ ${row.pending_buyer_name || ""}</div>`
-        : row.status === "sold"
-        ? `<div class="buyer">${row.buyer_name || ""}</div>`
-        : ""
+    d.innerHTML = `<div>${n.number}</div>${
+      n.payment_status === "pending" ? `<div class="buyer">⏳ ${n.pending_buyer_name}</div>` :
+      n.status === "sold" ? `<div class="buyer">${n.buyer_name}</div>` : ""
     }`;
-    d.onclick = () => openModal(row);
+    d.onclick = () => openModal(n);
     grid.appendChild(d);
   });
 }
 
 function openModal(row) {
-  currentRow = row;
   if (row.payment_status === "pending") {
-    alert("Numero già prenotato in attesa di conferma.");
+    alert("Numero già prenotato.");
     return;
   }
+  currentRow = row;
   modalTitle.textContent = `Acquista numero ${row.number}`;
   modal.classList.add("show");
 }
@@ -307,7 +253,6 @@ async function payWithStripe() {
   });
 
   const data = await res.json();
-  if (!data.url) return alert("Errore Stripe");
   window.location.href = data.url;
 }
 
@@ -328,12 +273,15 @@ async function payManual(method) {
   });
 
   const data = await res.json();
-  if (!res.ok) return alert(data.error || "Errore");
+  if (!res.ok) return alert(data.error);
 
-  alert(
-    `✅ Numero prenotato!\n\nInvia il pagamento.\n${data.instructions.note}`
-  );
+  if (method === "paypal" && data.payment.paypal_url)
+    window.open(data.payment.paypal_url, "_blank");
 
+  if (method === "revolut" && data.payment.revolut_url)
+    window.open(data.payment.revolut_url, "_blank");
+
+  alert(`Completa il pagamento.\nCausale:\n${data.payment.note}`);
   closeModal();
   loadNumbers();
 }
