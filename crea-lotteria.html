@@ -93,7 +93,7 @@
   <input id="prize_images" type="file" accept="image/*" multiple>
 
   <label>Email PayPal (opzionale)</label>
-  <input id="paypal_email">
+  <input id="paypal_user">
 
   <label>Link Revolut (opzionale)</label>
   <input id="revolut_link">
@@ -143,7 +143,7 @@ async function createLottery() {
     admin_password: document.getElementById("admin_password").value,
     draw_date: document.getElementById("draw_date").value,
     wheel: document.getElementById("wheel").value,
-    paypal_email: document.getElementById("paypal_email").value,
+    paypal_user: document.getElementById("paypal_user").value,
     revolut_link: document.getElementById("revolut_link").value,
     payment_methods: Array.from(
       document.getElementById("payment_methods").selectedOptions
