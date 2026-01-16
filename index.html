@@ -307,23 +307,37 @@ async function payManual(method) {
   const name = nameField.value.trim();
   if (!name) return alert("Inserisci il nome");
 
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-    body: JSON.stringify({
-      lottery_id: LOTTERY_ID,
-      number_id: currentRow.id,
-      buyer_name: name,
-      payment_method: method
-    })
-  });
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({
+        lottery_id: LOTTERY_ID,
+        number_id: currentRow.id,
+        buyer_name: name,
+        payment_method: method,
+      }),
+    }
+  );
 
   const data = await res.json();
   if (!res.ok) return alert(data.error || "Errore");
 
-  alert(
-    `✅ Numero prenotato\n\nMetodo: ${method.toUpperCase()}\nImporto: € ${data.instructions.amount}\n\nCausale:\n${data.instructions.note}\n\n⏳ Valido 30 minuti`
-  );
+  if (method === "paypal" && data.instructions.paypal_url) {
+    window.open(data.instructions.paypal_url, "_blank");
+  } 
+  else if (method === "revolut" && data.instructions.revolut_url) {
+    window.open(data.instructions.revolut_url, "_blank");
+  } 
+  else {
+    alert(
+      `Numero prenotato.\n\nCausale:\n${data.instructions.note}`
+    );
+  }
 
   closeModal();
   loadNumbers();
