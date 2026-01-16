@@ -191,16 +191,33 @@ async function loadLottery() {
   renderGallery(lot.prize_images);
 }
 
-/* GALLERY */
+  // 🖼️ GALLERY
+  renderGallery(lot.prize_images);
+}
+
 function renderGallery(images) {
-  const g = document.getElementById("prize-gallery");
-  let arr = Array.isArray(images) ? images : [];
-  g.innerHTML = "";
-  arr.forEach(u => {
-    const i = document.createElement("img");
-    i.src = u;
-    i.onclick = () => window.open(u, "_blank");
-    g.appendChild(i);
+  const gallery = document.getElementById("prize-gallery");
+
+  let arr = [];
+  if (Array.isArray(images)) arr = images;
+  else if (typeof images === "string") {
+    try { arr = JSON.parse(images); } catch {}
+  }
+
+  if (!arr.length) {
+    gallery.style.display = "none";
+    return;
+  }
+
+  gallery.innerHTML = "";
+  gallery.style.display = "flex";
+
+  arr.forEach(url => {
+    if (!url) return;
+    const img = document.createElement("img");
+    img.src = url;
+    img.onclick = () => window.open(url, "_blank");
+    gallery.appendChild(img);
   });
 }
 
