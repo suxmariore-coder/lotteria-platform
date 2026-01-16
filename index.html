@@ -300,17 +300,21 @@ async function payManual(method) {
   });
 
   const data = await res.json();
-  if (!res.ok) return alert(data.error);
+if (!res.ok) return alert(data.error || "Errore");
 
+if (method === "paypal" && data.instructions.paypal_url) {
+  window.open(data.instructions.paypal_url, "_blank");
+} 
+else if (method === "revolut" && data.instructions.revolut_url) {
+  window.open(data.instructions.revolut_url, "_blank");
+} 
+else {
   alert(
-    `✅ Numero prenotato\n\nMetodo: ${method.toUpperCase()}\nImporto: € ${data.instructions.amount}\n\nCausale:\n${data.instructions.note}\n\n⏳ Valido 30 minuti`
+    `Numero prenotato.\n\nCausale:\n${data.instructions.note}`
   );
-
-  closeModal();
-  loadNumbers();
 }
 
-loadLottery();
+closeModal();
 loadNumbers();
 </script>
 </body>
