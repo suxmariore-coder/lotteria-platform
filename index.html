@@ -168,6 +168,7 @@ const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
+
 const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
@@ -200,6 +201,7 @@ async function loadLottery() {
     lot.status === "active" ? "status-active" :
     lot.status === "closed" ? "status-closed" : "status-finished"
   );
+
   banner.textContent =
     lot.status === "active" ? "✅ Lotteria attiva" :
     lot.status === "closed" ? "⛔ Vendite chiuse" :
@@ -218,13 +220,15 @@ function renderGallery(images) {
     try { arr = JSON.parse(images); } catch {}
   }
 
-  if (!arr.length) return gallery.style.display = "none";
+  if (!arr.length) {
+    gallery.style.display = "none";
+    return;
+  }
 
   gallery.innerHTML = "";
   gallery.style.display = "flex";
 
   arr.forEach(url => {
-    if (!url) return;
     const img = document.createElement("img");
     img.src = url;
     img.onclick = () => window.open(url, "_blank");
@@ -245,13 +249,19 @@ async function loadNumbers() {
   data.forEach(row => {
     const d = document.createElement("div");
     const cls = row.payment_status === "pending" ? "pending" : row.status;
+
     d.className = `number ${cls}`;
-    d.innerHTML = `<div>${row.number}</div>${
-      row.payment_status === "pending"
-        ? `<div class="buyer">⏳ ${row.pending_buyer_name}</div>`
-        : row.status === "sold"
-        ? `<div class="buyer">${row.buyer_name}</div>` : ""
-    }`;
+    d.innerHTML = `
+      <div>${row.number}</div>
+      ${
+        row.payment_status === "pending"
+          ? `<div class="buyer">⏳ ${row.pending_buyer_name || ""}</div>`
+          : row.status === "sold"
+          ? `<div class="buyer">${row.buyer_name || ""}</div>`
+          : ""
+      }
+    `;
+
     d.onclick = () => openModal(row);
     grid.appendChild(d);
   });
@@ -280,7 +290,11 @@ async function payWithStripe() {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
     method: "POST",
     headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-    body: JSON.stringify({ lottery_id: LOTTERY_ID, number_id: currentRow.id, buyer_name: name })
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name
+    })
   });
 
   const data = await res.json();
@@ -289,46 +303,35 @@ async function payWithStripe() {
 }
 
 /* PAYPAL / REVOLUT */
-</script>
 async function payManual(method) {
   const name = nameField.value.trim();
   if (!name) return alert("Inserisci il nome");
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        lottery_id: LOTTERY_ID,
-        number_id: currentRow.id,
-        buyer_name: name,
-        payment_method: method,
-      }),
-    }
-  );
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name,
+      payment_method: method
+    })
+  });
 
   const data = await res.json();
   if (!res.ok) return alert(data.error || "Errore");
 
-  if (method === "paypal" && data.instructions.paypal_url) {
-    window.open(data.instructions.paypal_url, "_blank");
-  } 
-  else if (method === "revolut" && data.instructions.revolut_url) {
-    window.open(data.instructions.revolut_url, "_blank");
-  } 
-  else {
-    alert(
-      `Numero prenotato.\n\nCausale:\n${data.instructions.note}`
-    );
-  }
+  alert(
+    `✅ Numero prenotato\n\nMetodo: ${method.toUpperCase()}\nImporto: € ${data.instructions.amount}\n\nCausale:\n${data.instructions.note}\n\n⏳ Valido 30 minuti`
+  );
 
   closeModal();
   loadNumbers();
 }
+
+loadLottery();
+loadNumbers();
 </script>
+
 </body>
 </html>
