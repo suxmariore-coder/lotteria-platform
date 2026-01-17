@@ -37,6 +37,32 @@
     .status-closed { background: #fff3cd; color: #856404; }
     .status-finished { background: #f8d7da; color: #842029; }
 
+    .share-box {
+      max-width: 600px;
+      margin: 10px auto 16px;
+      text-align: center;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .whatsapp {
+      background: #25D366;
+      color: #fff;
+    }
+
+    .stripe { background: #6772e5; color: #fff; }
+    .paypal { background: #003087; color: #fff; }
+    .revolut { background: #111; color: #fff; }
+    .cancel { background: #ddd; }
+
     .gallery {
       display: flex;
       gap: 10px;
@@ -118,21 +144,6 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 6px;
-      border: none;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .stripe { background: #6772e5; color: #fff; }
-    .paypal { background: #003087; color: #fff; }
-    .revolut { background: #111; color: #fff; }
-    .cancel { background: #ddd; }
   </style>
 </head>
 
@@ -141,6 +152,12 @@
 <h1 id="lottery-title"></h1>
 <h3 id="lottery-price"></h3>
 <p id="lottery-meta"></p>
+
+<div class="share-box">
+  <button class="btn whatsapp" onclick="shareWhatsapp()">
+    📲 Condividi la lotteria su WhatsApp
+  </button>
+</div>
 
 <div id="lottery-status-banner" style="display:none"></div>
 <div id="prize-gallery" class="gallery"></div>
@@ -176,6 +193,15 @@ const nameField = document.getElementById("nameField");
 
 let currentRow = null;
 
+/* CONDIVISIONE WHATSAPP */
+function shareWhatsapp() {
+  const url = window.location.href;
+  const text = encodeURIComponent(
+    "🎟️ Partecipa a questa lotteria!\nProva a vincere un premio 🎁\n\n" + url
+  );
+  window.open(`https://wa.me/?text=${text}`, "_blank");
+}
+
 /* LOAD LOTTERY */
 async function loadLottery() {
   const res = await fetch(
@@ -201,7 +227,6 @@ async function loadLottery() {
     lot.status === "active" ? "status-active" :
     lot.status === "closed" ? "status-closed" : "status-finished"
   );
-
   banner.textContent =
     lot.status === "active" ? "✅ Lotteria attiva" :
     lot.status === "closed" ? "⛔ Vendite chiuse" :
@@ -327,17 +352,9 @@ async function payManual(method) {
   const data = await res.json();
   if (!res.ok) return alert(data.error || "Errore");
 
-  if (method === "paypal" && data.instructions.paypal_url) {
-    window.open(data.instructions.paypal_url, "_blank");
-  } 
-  else if (method === "revolut" && data.instructions.revolut_url) {
-    window.open(data.instructions.revolut_url, "_blank");
-  } 
-  else {
-    alert(
-      `✅ Numero prenotato\n\nMetodo: ${method.toUpperCase()}\nImporto: € ${data.instructions.amount}\n\nCausale:\n${data.instructions.note}\n\n⏳ Valido 30 minuti`
-    );
-  }
+  alert(
+    `✅ Numero prenotato\n\nMetodo: ${method.toUpperCase()}\nImporto: € ${data.instructions.amount}\n\nCausale:\n${data.instructions.note}\n\n⏳ Valido 30 minuti`
+  );
 
   closeModal();
   loadNumbers();
