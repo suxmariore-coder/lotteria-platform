@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lotteria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      background: #f5f5f5;
+      margin: 0;
+    }
+
+    h1, h3 {
+      text-align: center;
+      margin: 6px 0;
+    }
+
+    #lottery-meta {
+      text-align: center;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .status-banner {
+      max-width: 600px;
+      margin: 12px auto;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .status-active { background: #e6f4ea; color: #1e7e34; }
+    .status-closed { background: #fff3cd; color: #856404; }
+    .status-finished { background: #f8d7da; color: #842029; }
+
+    .gallery {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      margin: 0 auto 16px;
+      max-width: 600px;
+    }
+
+    .gallery img {
+      height: 220px;
+      border-radius: 10px;
+      object-fit: cover;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    #lottery-description {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px auto;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 10px;
+    }
+
+    .number {
+      border-radius: 8px;
+      padding: 10px 4px;
+      text-align: center;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      min-height: 58px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .available { background: #1e7e34; }
+    .sold { background: #c82333; }
+    .pending { background: #ffc107; color: #333; }
+
+    .buyer {
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal.show { display: flex; }
+
+    .modal-content {
+      background: #fff;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .stripe { background: #6772e5; color: #fff; }
+    .paypal { background: #003087; color: #fff; }
+    .revolut { background: #111; color: #fff; }
+    .cancel { background: #ddd; }
+  </style>
+</head>
+
+<body>
+
+<h1 id="lottery-title"></h1>
+<h3 id="lottery-price"></h3>
+<p id="lottery-meta"></p>
+
+<div id="lottery-status-banner" style="display:none"></div>
+<div id="prize-gallery" class="gallery"></div>
+
+<div id="lottery-description">
+  <strong>🎁 Premio in palio</strong><br><br>
+  <span id="lottery-description-text"></span>
+</div>
+
+<div id="grid" class="grid"></div>
+
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <h3 id="modalTitle"></h3>
+    <input id="nameField" placeholder="Il tuo nome" />
+    <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
+    <button class="btn paypal" onclick="payManual('paypal')">Paga con PayPal</button>
+    <button class="btn revolut" onclick="payManual('revolut')">Paga con Revolut</button>
+    <button class="btn cancel" onclick="closeModal()">Annulla</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+
+const LOTTERY_ID = new URLSearchParams(location.search).get("id");
+const grid = document.getElementById("grid");
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modalTitle");
+const nameField = document.getElementById("nameField");
+
+let currentRow = null;
+
+/* LOAD LOTTERY */
+async function loadLottery() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
+    { headers: { apikey: SUPABASE_ANON_KEY } }
+  );
+
+  const [lot] = await res.json();
+  if (!lot) return;
+
+  document.getElementById("lottery-title").textContent = lot.title;
+  document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
+  document.getElementById("lottery-description-text").textContent = lot.description || "";
+
+  const meta = [];
+  if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
+  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
+  document.getElementById("lottery-meta").textContent = meta.join(" • ");
+
+  const banner = document.getElementById("lottery-status-banner");
+  banner.style.display = "block";
+  banner.className = "status-banner " + (
+    lot.status === "active" ? "status-active" :
+    lot.status === "closed" ? "status-closed" : "status-finished"
+  );
+  banner.textContent =
+    lot.status === "active" ? "✅ Lotteria attiva" :
+    lot.status === "closed" ? "⛔ Vendite chiuse" :
+    "🏁 Lotteria conclusa";
+
+  renderGallery(lot.prize_images);
+}
+
+/* GALLERY */
+function renderGallery(images) {
+  const gallery = document.getElementById("prize-gallery");
+  let arr = [];
+
+  if (Array.isArray(images)) arr = images;
+  else if (typeof images === "string") {
+    try { arr = JSON.parse(images); } catch {}
+  }
+
+  if (!arr.length) return gallery.style.display = "none";
+
+  gallery.innerHTML = "";
+  gallery.style.display = "flex";
+
+  arr.forEach(url => {
+    if (!url) return;
+    const img = document.createElement("img");
+    img.src = url;
+    img.onclick = () => window.open(url, "_blank");
+    gallery.appendChild(img);
+  });
+}
+
+/* LOAD NUMBERS */
+async function loadNumbers() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
+    { headers: { apikey: SUPABASE_ANON_KEY } }
+  );
+
+  const data = await res.json();
+  grid.innerHTML = "";
+
+  data.forEach(row => {
+    const d = document.createElement("div");
+    const cls = row.payment_status === "pending" ? "pending" : row.status;
+    d.className = `number ${cls}`;
+    d.innerHTML = `<div>${row.number}</div>${
+      row.payment_status === "pending"
+        ? `<div class="buyer">⏳ ${row.pending_buyer_name}</div>`
+        : row.status === "sold"
+        ? `<div class="buyer">${row.buyer_name}</div>` : ""
+    }`;
+    d.onclick = () => openModal(row);
+    grid.appendChild(d);
+  });
+}
+
+function openModal(row) {
+  if (row.payment_status === "pending") {
+    alert("Numero già prenotato.");
+    return;
+  }
+  currentRow = row;
+  modalTitle.textContent = `Acquista numero ${row.number}`;
+  modal.classList.add("show");
+}
+
+function closeModal() {
+  modal.classList.remove("show");
+  nameField.value = "";
+}
+
+/* STRIPE */
+async function payWithStripe() {
+  const name = nameField.value.trim();
+  if (!name) return alert("Inserisci il nome");
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({ lottery_id: LOTTERY_ID, number_id: currentRow.id, buyer_name: name })
+  });
+
+  const data = await res.json();
+  if (!data.url) return alert("Errore Stripe");
+  location.href = data.url;
+}
+
+/* PAYPAL / REVOLUT */
+async function payManual(method) {
+  const name = nameField.value.trim();
+  if (!name) return alert("Inserisci il nome");
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({ lottery_id: LOTTERY_ID, number_id: currentRow.id, buyer_name: name, payment_method: method })
+  });
+
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+
+  alert(
+    `✅ Numero prenotato\n\nMetodo: ${method.toUpperCase()}\nImporto: € ${data.instructions.amount}\n\nCausale:\n${data.instructions.note}\n\n⏳ Valido 30 minuti`
+  );
+
+  closeModal();
+  loadNumbers();
+}
+
+loadLottery();
+loadNumbers();
+</script>
+</body>
+</html>
