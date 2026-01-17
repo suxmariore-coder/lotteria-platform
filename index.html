@@ -327,6 +327,50 @@ function closeModal() {
   nameField.value = "";
 }
 
+/* STRIPE */
+async function payWithStripe() {
+  const name = nameField.value.trim();
+  if (!name) return alert("Inserisci il nome");
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name
+    })
+  });
+
+  const data = await res.json();
+  if (data.url) location.href = data.url;
+  else alert("Errore Stripe");
+}
+
+/* PAYPAL / REVOLUT */
+async function payManual(method) {
+  const name = nameField.value.trim();
+  if (!name) return alert("Inserisci il nome");
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name,
+      payment_method: method
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) return alert(data.error || "Errore");
+
+  alert(`Numero prenotato.\nCompleta il pagamento e attendi conferma.`);
+  closeModal();
+  loadNumbers();
+}
+
 loadLottery();
 loadNumbers();
 </script>
