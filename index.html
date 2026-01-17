@@ -14,9 +14,7 @@
       font-family: Arial, sans-serif;
     }
 
-    body {
-      padding: 16px;
-    }
+    body { padding: 16px; }
 
     h1, h3 {
       text-align: center;
@@ -41,6 +39,30 @@
     .status-active { background: #e6f4ea; color: #1e7e34; }
     .status-closed { background: #fff3cd; color: #856404; }
     .status-finished { background: #f8d7da; color: #842029; }
+
+    .share-box {
+      max-width: 600px;
+      margin: 10px auto 16px;
+      text-align: center;
+    }
+
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #25D366;
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .share-btn img {
+      width: 20px;
+      height: 20px;
+    }
 
     .gallery {
       display: flex;
@@ -138,11 +160,6 @@
     .paypal { background: #003087; color: #fff; }
     .revolut { background: #111; color: #fff; }
     .cancel { background: #ddd; }
-
-    .instructions {
-      font-size: 14px;
-      line-height: 1.5;
-    }
   </style>
 </head>
 
@@ -153,6 +170,14 @@
 <p id="lottery-meta"></p>
 
 <div id="lottery-status-banner" style="display:none"></div>
+
+<!-- WHATSAPP SHARE -->
+<div class="share-box">
+  <button class="share-btn" onclick="shareWhatsApp()">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
+    Condividi su WhatsApp
+  </button>
+</div>
 
 <div id="prize-gallery" class="gallery"></div>
 
@@ -175,33 +200,27 @@
   </div>
 </div>
 
-<!-- MODAL ISTRUZIONI -->
-<div id="paymentModal" class="modal">
-  <div class="modal-content">
-    <h3>📄 Istruzioni di pagamento</h3>
-    <div id="paymentDetails" class="instructions"></div>
-    <button id="goPayBtn" class="btn paypal" style="display:none">
-      Vai al pagamento
-    </button>
-    <button class="btn cancel" onclick="closePaymentModal()">Chiudi</button>
-  </div>
-</div>
-
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
-
 const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
-const paymentModal = document.getElementById("paymentModal");
 const modalTitle = document.getElementById("modalTitle");
 const nameField = document.getElementById("nameField");
-const paymentDetails = document.getElementById("paymentDetails");
 
 let currentRow = null;
-let redirectUrl = null;
+let lotteryTitle = "";
+
+/* WHATSAPP SHARE */
+function shareWhatsApp() {
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent(
+    `🎟️ Partecipa alla lotteria "${lotteryTitle}"!\n\n👉 ${window.location.href}`
+  );
+  window.open(`https://wa.me/?text=${text}`, "_blank");
+}
 
 /* LOAD LOTTERY */
 async function loadLottery() {
@@ -211,6 +230,8 @@ async function loadLottery() {
   );
   const [lot] = await res.json();
   if (!lot) return;
+
+  lotteryTitle = lot.title;
 
   document.getElementById("lottery-title").textContent = lot.title;
   document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
@@ -223,7 +244,8 @@ async function loadLottery() {
 
   const banner = document.getElementById("lottery-status-banner");
   banner.style.display = "block";
-  banner.className = "status-banner " +
+  banner.className =
+    "status-banner " +
     (lot.status === "active" ? "status-active" :
      lot.status === "closed" ? "status-closed" : "status-finished");
 
@@ -303,64 +325,6 @@ function openModal(row) {
 function closeModal() {
   modal.classList.remove("show");
   nameField.value = "";
-}
-
-function closePaymentModal() {
-  paymentModal.classList.remove("show");
-}
-
-/* STRIPE */
-async function payWithStripe() {
-  const name = nameField.value.trim();
-  if (!name) return alert("Inserisci il nome");
-
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-    body: JSON.stringify({ lottery_id: LOTTERY_ID, number_id: currentRow.id, buyer_name: name })
-  });
-
-  const data = await res.json();
-  if (!data.url) return alert("Errore Stripe");
-  location.href = data.url;
-}
-
-/* PAYPAL / REVOLUT */
-async function payManual(method) {
-  const name = nameField.value.trim();
-  if (!name) return alert("Inserisci il nome");
-
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-    body: JSON.stringify({
-      lottery_id: LOTTERY_ID,
-      number_id: currentRow.id,
-      buyer_name: name,
-      payment_method: method
-    })
-  });
-
-  const data = await res.json();
-  if (!res.ok) return alert(data.error || "Errore");
-
-  paymentDetails.innerHTML = `
-    <b>Metodo:</b> ${method.toUpperCase()}<br>
-    <b>Importo:</b> € ${data.instructions.amount}<br>
-    <b>Destinatario:</b> ${method === "paypal" ? data.instructions.paypal : data.instructions.revolut}<br>
-    <b>Causale:</b><br>${data.instructions.note}<br><br>
-    ⏳ Valido 30 minuti
-  `;
-
-  redirectUrl = data.instructions[method + "_url"] || null;
-
-  const btn = document.getElementById("goPayBtn");
-  btn.style.display = redirectUrl ? "block" : "none";
-  btn.onclick = () => window.open(redirectUrl, "_blank");
-
-  modal.classList.remove("show");
-  paymentModal.classList.add("show");
-  loadNumbers();
 }
 
 loadLottery();
