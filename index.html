@@ -328,9 +328,13 @@ async function payWithStripe() {
 }
 
 /* PAYPAL / REVOLUT */
+<script>
 async function payManual(method) {
   const name = nameField.value.trim();
-  if (!name) return alert("Inserisci il nome");
+  if (!name) {
+    alert("Inserisci il nome");
+    return;
+  }
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
@@ -350,15 +354,41 @@ async function payManual(method) {
   );
 
   const data = await res.json();
-  if (!res.ok) return alert(data.error || "Errore");
+  if (!res.ok) {
+    alert(data.error || "Errore prenotazione");
+    return;
+  }
 
-  alert(
-    `✅ Numero prenotato\n\nMetodo: ${method.toUpperCase()}\nImporto: € ${data.instructions.amount}\n\nCausale:\n${data.instructions.note}\n\n⏳ Valido 30 minuti`
+  const amount = data.instructions.amount;
+  const note = data.instructions.note;
+
+  let paymentUrl = null;
+
+  if (method === "paypal" && data.instructions.paypal_user) {
+    paymentUrl = `https://www.paypal.me/${data.instructions.paypal_user}/${amount}`;
+  }
+
+  if (method === "revolut" && data.instructions.revolut_link) {
+    paymentUrl = data.instructions.revolut_link;
+  }
+
+  const goPay = confirm(
+    `✅ Numero prenotato!\n\n` +
+    `Metodo: ${method.toUpperCase()}\n` +
+    `Importo: € ${amount}\n\n` +
+    `Causale:\n${note}\n\n` +
+    `⏳ Prenotazione valida 30 minuti.\n\n` +
+    `Premi OK per andare al pagamento.`
   );
+
+  if (goPay && paymentUrl) {
+    window.open(paymentUrl, "_blank");
+  }
 
   closeModal();
   loadNumbers();
 }
+</script>
 
 loadLottery();
 loadNumbers();
