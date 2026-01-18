@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Login – Lotteriffa</title>
+  <title>Accedi o crea la tua Lotteriffa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Supabase JS v2 -->
@@ -17,7 +17,7 @@
     }
 
     .container {
-      max-width: 400px;
+      max-width: 420px;
       margin: auto;
       background: #fff;
       padding: 20px;
@@ -26,6 +26,30 @@
 
     h1 {
       text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .intro {
+      font-size: 14px;
+      color: #333;
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .intro strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin: 8px 0;
+    }
+
+    li {
+      margin-bottom: 6px;
     }
 
     input {
@@ -57,7 +81,14 @@
       color: white;
     }
 
-    p {
+    .note {
+      font-size: 13px;
+      color: #555;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    #result {
       text-align: center;
       margin-top: 15px;
       font-weight: bold;
@@ -68,13 +99,31 @@
 <body>
 
 <div class="container">
-  <h1>🔐 Accesso</h1>
+
+  <h1>🎟️ Lotteriffa</h1>
+
+  <div class="intro">
+    <strong>Crea la tua lotteria online in pochi minuti</strong>
+    <ul>
+      <li>🎁 Imposta il premio e i numeri</li>
+      <li>💳 Vendi biglietti con Stripe, PayPal o Revolut</li>
+      <li>⚙️ Gestisci pagamenti e prenotazioni</li>
+    </ul>
+    <p>
+      👉 Paghi <strong>solo una fee di creazione</strong>.<br>
+      👉 <strong>Non serve</strong> avere account Stripe / PayPal.
+    </p>
+  </div>
 
   <input id="email" type="email" placeholder="Email" />
   <input id="password" type="password" placeholder="Password" />
 
   <button class="login" onclick="login()">Accedi</button>
-  <button class="register" onclick="register()">Registrati</button>
+  <button class="register" onclick="register()">Crea la tua Lotteriffa</button>
+
+  <div class="note">
+    Dopo l’accesso potrai creare la tua prima lotteria
+  </div>
 
   <p id="result"></p>
 </div>
