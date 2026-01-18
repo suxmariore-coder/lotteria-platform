@@ -160,7 +160,7 @@
       alt="WhatsApp"
       style="width:20px; height:20px;"
     />
-    Condividi Lotteria
+    Condividi LotteRiffa
   </button>
 
   <button
@@ -213,6 +213,11 @@ function shareWhatsapp() {
     "🎟️ Partecipa a questa lotteria!\nProva a vincere un premio 🎁\n\n" + url
   );
   window.open(`https://wa.me/?text=${text}`, "_blank");
+}
+
+/* CREA LA TUA LOTTERIFFA */
+function goToCreateLottery() {
+  window.location.href = "login.html";
 }
 
 /* LOAD LOTTERY */
