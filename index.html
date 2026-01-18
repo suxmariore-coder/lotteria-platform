@@ -386,7 +386,6 @@ async function payManual(method) {
   }
 
   if (method === "revolut" && data.instructions.revolut_link) {
-  const username = data.instructions.revolut_link.replace("@", "").trim();
   paymentUrl = `https://revolut.me/${username}?amount=${amount}&currency=EUR`;
 }
 
