@@ -153,9 +153,22 @@
 <h3 id="lottery-price"></h3>
 <p id="lottery-meta"></p>
 
-<div class="share-box">
-  <button class="btn whatsapp" onclick="shareWhatsapp()">
-    📲 Condividi la lotteria su WhatsApp
+<div class="share-box" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+  <button class="btn whatsapp" onclick="shareWhatsapp()" style="display:flex; align-items:center; gap:8px; width:auto;">
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+      alt="WhatsApp"
+      style="width:20px; height:20px;"
+    />
+    Condividi
+  </button>
+
+  <button
+    class="btn"
+    style="background:#000; color:#fff; width:auto;"
+    onclick="goToCreateLottery()"
+  >
+    ✨ Crea la tua Lotteriffa
   </button>
 </div>
 
