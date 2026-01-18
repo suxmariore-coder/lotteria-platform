@@ -53,11 +53,7 @@
       cursor: pointer;
     }
 
-    .whatsapp {
-      background: #25D366;
-      color: #fff;
-    }
-
+    .whatsapp { background: #25D366; color: #fff; }
     .stripe { background: #6772e5; color: #fff; }
     .paypal { background: #003087; color: #fff; }
     .revolut { background: #111; color: #fff; }
@@ -153,22 +149,9 @@
 <h3 id="lottery-price"></h3>
 <p id="lottery-meta"></p>
 
-<div class="share-box" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-  <button class="btn whatsapp" onclick="shareWhatsapp()" style="display:flex; align-items:center; gap:8px; width:auto;">
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-      alt="WhatsApp"
-      style="width:20px; height:20px;"
-    />
-    Condividi LotteRiffa
-  </button>
-
-  <button
-    class="btn"
-    style="background:#000; color:#fff; width:auto;"
-    onclick="goToCreateLottery()"
-  >
-    ✨ Crea la tua Lotteriffa
+<div class="share-box">
+  <button class="btn whatsapp" onclick="shareWhatsapp()">
+    📲 Condividi la lotteria su WhatsApp
   </button>
 </div>
 
@@ -195,8 +178,7 @@
 
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-
+const SUPABASE_ANON_KEY = "INCOLLA QUI LA TUA ANON KEY";
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 
 const grid = document.getElementById("grid");
@@ -206,18 +188,12 @@ const nameField = document.getElementById("nameField");
 
 let currentRow = null;
 
-/* CONDIVISIONE WHATSAPP */
+/* WHATSAPP */
 function shareWhatsapp() {
-  const url = window.location.href;
   const text = encodeURIComponent(
-    "🎟️ Partecipa a questa lotteria!\nProva a vincere un premio 🎁\n\n" + url
+    "🎟️ Partecipa a questa lotteria!\n\n" + window.location.href
   );
   window.open(`https://wa.me/?text=${text}`, "_blank");
-}
-
-/* CREA LA TUA LOTTERIFFA */
-function goToCreateLottery() {
-  window.location.href = "login.html";
 }
 
 /* LOAD LOTTERY */
@@ -226,7 +202,6 @@ async function loadLottery() {
     `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-
   const [lot] = await res.json();
   if (!lot) return;
 
@@ -285,7 +260,6 @@ async function loadNumbers() {
     `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-
   const data = await res.json();
   grid.innerHTML = "";
 
@@ -304,7 +278,6 @@ async function loadNumbers() {
           : ""
       }
     `;
-
     d.onclick = () => openModal(row);
     grid.appendChild(d);
   });
@@ -348,58 +321,31 @@ async function payWithStripe() {
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
   const name = nameField.value.trim();
-  if (!name) {
-    alert("Inserisci il nome");
-    return;
-  }
+  if (!name) return alert("Inserisci il nome");
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        lottery_id: LOTTERY_ID,
-        number_id: currentRow.id,
-        buyer_name: name,
-        payment_method: method,
-      }),
-    }
-  );
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name,
+      payment_method: method
+    })
+  });
 
   const data = await res.json();
-  if (!res.ok) {
-    alert(data.error || "Errore prenotazione");
-    return;
-  }
+  if (!res.ok) return alert(data.error || "Errore");
 
   const amount = data.instructions.amount;
   const note = data.instructions.note;
 
-  let paymentUrl = null;
+  let url = null;
+  if (method === "paypal") url = `https://www.paypal.me/${data.instructions.paypal_user}/${amount}`;
+  if (method === "revolut") url = data.instructions.revolut_link;
 
-  if (method === "paypal" && data.instructions.paypal_user) {
-    paymentUrl = `https://www.paypal.me/${data.instructions.paypal_user}/${amount}`;
-  }
-
-  if (method === "revolut" && data.instructions.revolut_link) {
-    paymentUrl = data.instructions.revolut_link;
-  }
-
-  const goPay = confirm(
-    `✅ Numero prenotato!\n\n` +
-    `Metodo: ${method.toUpperCase()}\n` +
-    `Importo: € ${amount}\n\n` +
-    `Causale:\n${note}\n\n` +
-    `⏳ Prenotazione valida 30 minuti.\n\n` +
-    `Premi OK per andare al pagamento.`
-  );
-
-  if (goPay && paymentUrl) {
-    window.open(paymentUrl, "_blank");
+  if (confirm(`Numero prenotato.\n\nMetodo: ${method}\nImporto: € ${amount}\n\nVai al pagamento?`)) {
+    window.open(url, "_blank");
   }
 
   closeModal();
