@@ -379,31 +379,39 @@ async function payManual(method) {
   const amount = data.instructions.amount;
   const note = data.instructions.note;
 
-  let paymentUrl = null;
+  let paymentUrl = "";
 
   if (method === "paypal" && data.instructions.paypal_user) {
     paymentUrl = `https://www.paypal.me/${data.instructions.paypal_user}/${amount}`;
   }
 
   if (method === "revolut" && data.instructions.revolut_link) {
-  const username = data.instructions.revolut_link.replace("@", "").trim();
-  paymentUrl = `https://revolut.me/${username}?amount=${amount}&currency=EUR`;
-}
-
-  const goPay = confirm(
-    `✅ Numero prenotato!\n\n` +
-    `Metodo: ${method.toUpperCase()}\n` +
-    `Importo: € ${amount}\n\n` +
-    `Causale:\n${note}\n\n` +
-    `⏳ Prenotazione valida 30 minuti.\n\n` +
-    `Premi OK per andare al pagamento.`
-  );
-
-  if (goPay && paymentUrl) {
-    window.open(paymentUrl, "_blank");
+    const username = data.instructions.revolut_link.replace("@", "").trim();
+    paymentUrl = `https://revolut.me/${username}?amount=${amount}&currency=EUR`;
   }
 
-  closeModal();
+  // ⬇️ MOSTRIAMO UN BLOCCO CON LINK CLICCABILE
+  modalTitle.innerHTML = "💳 Completa il pagamento";
+
+  modal.querySelector(".modal-content").innerHTML = `
+    <h3>💳 Completa il pagamento</h3>
+
+    <p>
+      <b>Metodo:</b> ${method.toUpperCase()}<br>
+      <b>Importo:</b> € ${amount}<br><br>
+      <b>Causale:</b><br>${note}<br><br>
+      ⏳ Prenotazione valida 30 minuti
+    </p>
+
+    <a href="${paymentUrl}" target="_blank">
+      <button class="btn ${method}">
+        👉 Vai al pagamento
+      </button>
+    </a>
+
+    <button class="btn cancel" onclick="closeModal()">Chiudi</button>
+  `;
+
   loadNumbers();
 }
 
