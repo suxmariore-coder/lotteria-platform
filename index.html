@@ -310,7 +310,7 @@ async function loadNumbers() {
   });
 }
 
-function openModal(row) {
+async function openModal(row) {
   if (row.payment_status === "pending") {
     alert("Numero già prenotato.");
     return;
@@ -325,7 +325,7 @@ function openModal(row) {
   modal.classList.add("show");
 }
 
-function closeModal() {
+async function closeModal() {
   modal.classList.remove("show");
   nameField.value = "";
   currentRow = null;
