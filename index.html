@@ -312,7 +312,12 @@ async function loadNumbers() {
 
     // ⛔ BLOCCO TOTALE NUMERI NON DISPONIBILI
     if (row.status === "available") {
-      d.onclick = () => openModal(row);
+      if (row.status === "available" && row.payment_status !== "pending") {
+  d.onclick = () => openModal(row);
+} else {
+  d.style.cursor = "not-allowed";
+  d.style.opacity = "0.6";
+}
       d.style.cursor = "pointer";
     } else {
       d.style.cursor = "not-allowed";
@@ -364,14 +369,10 @@ async function payWithStripe() {
 
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
-  if (!currentRow) {
-    alert("Seleziona prima un numero");
-    return;
-  }
 
-  // 🔒 blocchiamo numeri non disponibili
-  if (currentRow.status !== "available") {
-    alert("Numero non disponibile");
+  if (!currentRow) {
+    alert("Seleziona prima un numero.");
+    closeModal();
     return;
   }
 
