@@ -207,6 +207,7 @@ const modalContent = modal.querySelector(".modal-content");
 const originalModalHTML = modalContent.innerHTML;
 
 let currentRow = null;
+let currentBuyerName = "";
 
 /* CONDIVISIONE WHATSAPP */
 function shareWhatsapp() {
@@ -360,10 +361,13 @@ async function payWithStripe() {
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
   const name = nameField.value.trim();
-  if (!name) {
-    alert("Inserisci il nome");
-    return;
-  }
+if (!name) {
+  alert("Inserisci il nome");
+  return;
+}
+
+// 🔒 salviamo il nome UNA VOLTA SOLA
+currentBuyerName = name;
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
