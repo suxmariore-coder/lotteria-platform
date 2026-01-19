@@ -41,23 +41,21 @@
       max-width: 600px;
       margin: 10px auto 16px;
       text-align: center;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
     }
 
     .btn {
-      width: 100%;
       padding: 12px;
-      margin-top: 8px;
       border-radius: 6px;
       border: none;
       font-size: 15px;
       cursor: pointer;
     }
 
-    .whatsapp {
-      background: #25D366;
-      color: #fff;
-    }
-
+    .whatsapp { background: #25D366; color: #fff; }
     .stripe { background: #6772e5; color: #fff; }
     .paypal { background: #003087; color: #fff; }
     .revolut { background: #111; color: #fff; }
@@ -77,7 +75,6 @@
       border-radius: 10px;
       object-fit: cover;
       cursor: pointer;
-      flex-shrink: 0;
     }
 
     #lottery-description {
@@ -101,16 +98,15 @@
       text-align: center;
       font-weight: bold;
       color: #fff;
-      cursor: pointer;
       min-height: 58px;
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
 
-    .available { background: #1e7e34; }
-    .sold { background: #c82333; }
-    .pending { background: #ffc107; color: #333; }
+    .available { background: #1e7e34; cursor:pointer; }
+    .sold { background: #c82333; cursor:not-allowed; opacity:.8; }
+    .pending { background: #ffc107; color:#333; cursor:not-allowed; }
 
     .buyer {
       font-size: 11px;
@@ -153,21 +149,13 @@
 <h3 id="lottery-price"></h3>
 <p id="lottery-meta"></p>
 
-<div class="share-box" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-  <button class="btn whatsapp" onclick="shareWhatsapp()" style="display:flex; align-items:center; gap:8px; width:auto;">
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-      alt="WhatsApp"
-      style="width:20px; height:20px;"
-    />
-    Condividi LotteRiffa
+<div class="share-box">
+  <button class="btn whatsapp" onclick="shareWhatsapp()">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:18px;vertical-align:middle">
+    Condividi Lotteriffa
   </button>
 
-  <button
-    class="btn"
-    style="background:#000; color:#fff; width:auto;"
-    onclick="goToCreateLottery()"
-  >
+  <button class="btn" style="background:#000;color:#fff" onclick="goToCreateLottery()">
     ✨ Crea la tua Lotteriffa
   </button>
 </div>
@@ -196,7 +184,6 @@
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 
 const grid = document.getElementById("grid");
@@ -206,236 +193,105 @@ const nameField = document.getElementById("nameField");
 
 let currentRow = null;
 
-/* CONDIVISIONE WHATSAPP */
+/* WHATSAPP */
 function shareWhatsapp() {
-  const url = window.location.href;
-  const text = encodeURIComponent(
-    "🎟️ Partecipa a questa lotteria!\nProva a vincere un premio 🎁\n\n" + url
-  );
-  window.open(`https://wa.me/?text=${text}`, "_blank");
+  window.open(`https://wa.me/?text=${encodeURIComponent(location.href)}`, "_blank");
 }
 
-/* CREA LA TUA LOTTERIFFA */
 function goToCreateLottery() {
-  window.location.href = "login.html";
+  location.href = "login.html";
 }
 
 /* LOAD LOTTERY */
 async function loadLottery() {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
-    { headers: { apikey: SUPABASE_ANON_KEY } }
-  );
-
-  const [lot] = await res.json();
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`, { headers:{apikey:SUPABASE_ANON_KEY}});
+  const [lot] = await r.json();
   if (!lot) return;
 
-  document.getElementById("lottery-title").textContent = lot.title;
-  document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
-  document.getElementById("lottery-description-text").textContent = lot.description || "";
-
-  const meta = [];
-  if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
-  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
-  document.getElementById("lottery-meta").textContent = meta.join(" • ");
-
-  const banner = document.getElementById("lottery-status-banner");
-  banner.style.display = "block";
-  banner.className = "status-banner " + (
-    lot.status === "active" ? "status-active" :
-    lot.status === "closed" ? "status-closed" : "status-finished"
-  );
-  banner.textContent =
-    lot.status === "active" ? "✅ Lotteria attiva" :
-    lot.status === "closed" ? "⛔ Vendite chiuse" :
-    "🏁 Lotteria conclusa";
+  lottery_title.textContent = lot.title;
+  lottery_price.textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
+  lottery_description_text.textContent = lot.description || "";
 
   renderGallery(lot.prize_images);
 }
 
-/* GALLERY */
-function renderGallery(images) {
-  const gallery = document.getElementById("prize-gallery");
-  let arr = [];
-
-  if (Array.isArray(images)) arr = images;
-  else if (typeof images === "string") {
-    try { arr = JSON.parse(images); } catch {}
-  }
-
-  if (!arr.length) {
-    gallery.style.display = "none";
-    return;
-  }
-
-  gallery.innerHTML = "";
-  gallery.style.display = "flex";
-
-  arr.forEach(url => {
-    const img = document.createElement("img");
-    img.src = url;
-    img.onclick = () => window.open(url, "_blank");
-    gallery.appendChild(img);
-  });
+function renderGallery(images){
+  const g=document.getElementById("prize-gallery");
+  let arr=[];
+  try{arr=Array.isArray(images)?images:JSON.parse(images)}catch{}
+  if(!arr.length){g.style.display="none";return}
+  g.innerHTML="";
+  arr.forEach(u=>{const i=document.createElement("img");i.src=u;i.onclick=()=>window.open(u);g.appendChild(i)})
 }
 
 /* LOAD NUMBERS */
-async function loadNumbers() {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
-    { headers: { apikey: SUPABASE_ANON_KEY } }
-  );
-
-  const data = await res.json();
-  grid.innerHTML = "";
-
-  data.forEach(row => {
-    const d = document.createElement("div");
-    const cls =
-      row.status === "sold"
-        ? "sold"
-        : row.payment_status === "pending"
-        ? "pending"
-        : "available";
-
-    d.className = `number ${cls}`;
-    d.innerHTML = `
-      <div>${row.number}</div>
-      ${
-        row.payment_status === "pending"
-          ? `<div class="buyer">⏳ ${row.pending_buyer_name || ""}</div>`
-          : row.status === "sold"
-          ? `<div class="buyer">${row.buyer_name || ""}</div>`
-          : ""
-      }
-    `;
-
-    // ⛔ BLOCCO TOTALE NUMERI NON DISPONIBILI
-    if (row.status === "available") {
-      if (row.status === "available" && row.payment_status !== "pending") {
-  d.onclick = () => openModal(row);
-} else {
-  d.style.cursor = "not-allowed";
-  d.style.opacity = "0.6";
-}
-      d.style.cursor = "pointer";
-    } else {
-      d.style.cursor = "not-allowed";
-      d.style.opacity = "0.85";
+async function loadNumbers(){
+  const r=await fetch(`${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,{headers:{apikey:SUPABASE_ANON_KEY}});
+  const data=await r.json();
+  grid.innerHTML="";
+  data.forEach(row=>{
+    const d=document.createElement("div");
+    d.className=`number ${row.status==="sold"?"sold":row.payment_status==="pending"?"pending":"available"}`;
+    d.innerHTML=`<div>${row.number}</div>${row.payment_status==="pending"?`<div class="buyer">⏳ ${row.pending_buyer_name||""}</div>`:row.status==="sold"?`<div class="buyer">${row.buyer_name||""}</div>`:""}`;
+    if(row.status==="available" && row.payment_status!=="pending"){
+      d.onclick=()=>openModal(row);
     }
-
     grid.appendChild(d);
-  });
+  })
 }
 
-function openModal(row) {
-  if (row.status !== "available") {
-    return; // sicurezza extra
-  }
-
-  currentRow = row;
-
-  modalTitle.textContent = `Acquista numero ${row.number}`;
-  nameField.value = "";
-
+function openModal(row){
+  currentRow=row;
+  modalTitle.textContent=`Acquista numero ${row.number}`;
+  nameField.value="";
   modal.classList.add("show");
 }
 
-function closeModal() {
+function closeModal(){
   modal.classList.remove("show");
-  nameField.value = "";
-  currentRow = null;
+  nameField.value="";
+  currentRow=null;
 }
 
 /* STRIPE */
-async function payWithStripe() {
-  const name = nameField.value.trim();
-  if (!name) return alert("Inserisci il nome");
-
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-    body: JSON.stringify({
-      lottery_id: LOTTERY_ID,
-      number_id: currentRow.id,
-      buyer_name: name
-    })
+async function payWithStripe(){
+  if(!currentRow) return;
+  const name=nameField.value.trim();
+  if(!name) return alert("Inserisci il nome");
+  const r=await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json",apikey:SUPABASE_ANON_KEY},
+    body:JSON.stringify({lottery_id:LOTTERY_ID,number_id:currentRow.id,buyer_name:name})
   });
-
-  const data = await res.json();
-  if (!data.url) return alert("Errore Stripe");
-  location.href = data.url;
+  const d=await r.json();
+  if(d.url) location.href=d.url;
 }
 
 /* PAYPAL / REVOLUT */
-async function payManual(method) {
+async function payManual(method){
+  if(!currentRow) return alert("Seleziona un numero");
 
-  if (!currentRow) {
-    alert("Seleziona prima un numero.");
-    closeModal();
-    return;
-  }
+  const name=nameField.value.trim();
+  if(!name) return alert("Inserisci il nome");
 
-  const name = nameField.value.trim();
-  if (!name) {
-    alert("Inserisci il nome");
-    return;
-  }
-
-  // 1️⃣ prenotazione numero (giallo)
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        lottery_id: LOTTERY_ID,
-        number_id: currentRow.id,
-        buyer_name: name,
-        payment_method: method,
-      }),
-    }
-  );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.error || "Errore prenotazione");
-    return;
-  }
-
-  // 2️⃣ chiudiamo SUBITO il modal (stato pulito)
+  const number=currentRow.number; // ✅ SALVATO PRIMA
+  const r=await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json",apikey:SUPABASE_ANON_KEY},
+    body:JSON.stringify({lottery_id:LOTTERY_ID,number_id:currentRow.id,buyer_name:name,payment_method:method})
+  });
+  const d=await r.json();
   closeModal();
 
-  // 3️⃣ messaggio informativo
-  alert(
-    `✅ Numero ${currentRow.number} prenotato!\n\n` +
-    `Metodo: ${method.toUpperCase()}\n\n` +
-    `👉 Ora verrai reindirizzato al pagamento.\n\n` +
-    `Inserisci MANUALMENTE l'importo.\n\n` +
-    `Causale:\n${data.instructions.note}\n\n` +
-    `⏳ Prenotazione valida 30 minuti`
-  );
+  alert(`✅ Numero ${number} prenotato!\n\nOra verrai reindirizzato al pagamento.`);
 
-  // 4️⃣ redirect esterno (come nel tuo vecchio progetto)
-  if (method === "paypal" && data.instructions.paypal_user) {
-    window.open(
-      `https://www.paypal.me/${data.instructions.paypal_user}`,
-      "_blank"
-    );
+  if(method==="paypal" && d.instructions.paypal){
+    window.open(`https://www.paypal.me/${d.instructions.paypal}`,"_blank");
+  }
+  if(method==="revolut" && d.instructions.revolut){
+    window.open(`https://revolut.me/${d.instructions.revolut}`,"_blank");
   }
 
-  if (method === "revolut" && data.instructions.revolut_user) {
-    window.open(
-      `https://revolut.me/${data.instructions.revolut_user}`,
-      "_blank"
-    );
-  }
-
-  // 5️⃣ refresh griglia
   loadNumbers();
 }
 
