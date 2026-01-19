@@ -364,12 +364,24 @@ async function payWithStripe() {
 
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
+  if (!currentRow) {
+    alert("Seleziona prima un numero");
+    return;
+  }
+
+  // 🔒 blocchiamo numeri non disponibili
+  if (currentRow.status !== "available") {
+    alert("Numero non disponibile");
+    return;
+  }
+
   const name = nameField.value.trim();
   if (!name) {
     alert("Inserisci il nome");
     return;
   }
 
+  // 1️⃣ prenotazione numero (giallo)
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
     {
@@ -388,39 +400,41 @@ async function payManual(method) {
   );
 
   const data = await res.json();
+
   if (!res.ok) {
     alert(data.error || "Errore prenotazione");
     return;
   }
 
-  const amount = data.instructions.amount;
-  const note = data.instructions.note;
+  // 2️⃣ chiudiamo SUBITO il modal (stato pulito)
+  closeModal();
 
-  let paymentUrl = null;
-
-  if (method === "paypal" && data.instructions.paypal_user) {
-    paymentUrl = `https://www.paypal.me/${data.instructions.paypal_user}/${amount}`;
-  }
-
-  if (method === "revolut" && data.instructions.revolut_link) {
-  const username = data.instructions.revolut_link.replace("@", "").trim();
-  paymentUrl = `https://revolut.me/${username}?`;
-}
-
-  const goPay = confirm(
-    `✅ Numero prenotato!\n\n` +
-    `Metodo: ${method.toUpperCase()}\n` +
-    `Importo: € ${amount}\n\n` +
-    `Causale:\n${note}\n\n` +
-    `⏳ Prenotazione valida 30 minuti.\n\n` +
-    `Premi OK per andare al pagamento.`
+  // 3️⃣ messaggio informativo
+  alert(
+    `✅ Numero ${currentRow.number} prenotato!\n\n` +
+    `Metodo: ${method.toUpperCase()}\n\n` +
+    `👉 Ora verrai reindirizzato al pagamento.\n\n` +
+    `Inserisci MANUALMENTE l'importo.\n\n` +
+    `Causale:\n${data.instructions.note}\n\n` +
+    `⏳ Prenotazione valida 30 minuti`
   );
 
-  if (goPay && paymentUrl) {
-    window.open(paymentUrl, "_blank");
+  // 4️⃣ redirect esterno (come nel tuo vecchio progetto)
+  if (method === "paypal" && data.instructions.paypal_user) {
+    window.open(
+      `https://www.paypal.me/${data.instructions.paypal_user}`,
+      "_blank"
+    );
   }
 
-  closeModal();
+  if (method === "revolut" && data.instructions.revolut_user) {
+    window.open(
+      `https://revolut.me/${data.instructions.revolut_user}`,
+      "_blank"
+    );
+  }
+
+  // 5️⃣ refresh griglia
   loadNumbers();
 }
 
