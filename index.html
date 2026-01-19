@@ -315,6 +315,11 @@ function openModal(row) {
     alert("Numero già prenotato.");
     return;
   }
+
+  // 🔄 reset modal prima di riaprirlo
+  modalContent.innerHTML = originalModalHTML;
+  nameField.value = "";
+
   currentRow = row;
   modalTitle.textContent = `Acquista numero ${row.number}`;
   modal.classList.add("show");
@@ -323,7 +328,12 @@ function openModal(row) {
 function closeModal() {
   modal.classList.remove("show");
   nameField.value = "";
+  currentRow = null;
+
+  // 🔄 ripristina contenuto originale
+  modalContent.innerHTML = originalModalHTML;
 }
+
 
 /* STRIPE */
 async function payWithStripe() {
