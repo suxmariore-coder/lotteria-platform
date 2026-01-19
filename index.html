@@ -203,11 +203,8 @@ const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const nameField = document.getElementById("nameField");
-const modalContent = modal.querySelector(".modal-content");
-const originalModalHTML = modalContent.innerHTML;
 
 let currentRow = null;
-let currentBuyerName = "";
 
 /* CONDIVISIONE WHATSAPP */
 function shareWhatsapp() {
@@ -313,30 +310,20 @@ async function loadNumbers() {
   });
 }
 
-async function openModal(row) {
+function openModal(row) {
   if (row.payment_status === "pending") {
     alert("Numero già prenotato.");
     return;
   }
-
-  // 🔄 reset modal prima di riaprirlo
-  modalContent.innerHTML = originalModalHTML;
-  nameField.value = "";
-
   currentRow = row;
   modalTitle.textContent = `Acquista numero ${row.number}`;
   modal.classList.add("show");
 }
 
-async function closeModal() {
+function closeModal() {
   modal.classList.remove("show");
   nameField.value = "";
-  currentRow = null;
-
-  // 🔄 ripristina contenuto originale
-  modalContent.innerHTML = originalModalHTML;
 }
-
 
 /* STRIPE */
 async function payWithStripe() {
@@ -361,13 +348,10 @@ async function payWithStripe() {
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
   const name = nameField.value.trim();
-if (!name) {
-  alert("Inserisci il nome");
-  return;
-}
-
-// 🔒 salviamo il nome UNA VOLTA SOLA
-currentBuyerName = name;
+  if (!name) {
+    alert("Inserisci il nome");
+    return;
+  }
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
@@ -395,39 +379,31 @@ currentBuyerName = name;
   const amount = data.instructions.amount;
   const note = data.instructions.note;
 
-  let paymentUrl = "";
+  let paymentUrl = null;
 
   if (method === "paypal" && data.instructions.paypal_user) {
     paymentUrl = `https://www.paypal.me/${data.instructions.paypal_user}/${amount}`;
   }
 
   if (method === "revolut" && data.instructions.revolut_link) {
-    const username = data.instructions.revolut_link.replace("@", "").trim();
-    paymentUrl = `https://revolut.me/${username}?amount=${amount}&currency=EUR`;
+  const username = data.instructions.revolut_link.replace("@", "").trim();
+  paymentUrl = `https://revolut.me/${username}?amount=${amount}&currency=EUR`;
+}
+
+  const goPay = confirm(
+    `✅ Numero prenotato!\n\n` +
+    `Metodo: ${method.toUpperCase()}\n` +
+    `Importo: € ${amount}\n\n` +
+    `Causale:\n${note}\n\n` +
+    `⏳ Prenotazione valida 30 minuti.\n\n` +
+    `Premi OK per andare al pagamento.`
+  );
+
+  if (goPay && paymentUrl) {
+    window.open(paymentUrl, "_blank");
   }
 
-  // ⬇️ MOSTRIAMO UN BLOCCO CON LINK CLICCABILE
-  modalTitle.innerHTML = "💳 Completa il pagamento";
-
-  modal.querySelector(".modal-content").innerHTML = `
-    <h3>💳 Completa il pagamento</h3>
-
-    <p>
-      <b>Metodo:</b> ${method.toUpperCase()}<br>
-      <b>Importo:</b> € ${amount}<br><br>
-      <b>Causale:</b><br>${note}<br><br>
-      ⏳ Prenotazione valida 30 minuti
-    </p>
-
-    <a href="${paymentUrl}" target="_blank">
-      <button class="btn ${method}">
-        👉 Vai al pagamento
-      </button>
-    </a>
-
-    <button class="btn cancel" onclick="closeModal()">Chiudi</button>
-  `;
-
+  closeModal();
   loadNumbers();
 }
 
