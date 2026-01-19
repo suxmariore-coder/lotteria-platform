@@ -325,19 +325,21 @@ async function loadNumbers() {
 
 function openModal(row) {
   if (row.status !== "available") {
-    return; // sicurezza assoluta
+    return; // sicurezza extra
   }
 
   currentRow = row;
-  modalContent.innerHTML = originalModalHTML;
-  document.getElementById("modalTitle").textContent =
-    `Acquista numero ${row.number}`;
+
+  modalTitle.textContent = `Acquista numero ${row.number}`;
+  nameField.value = "";
+
   modal.classList.add("show");
 }
 
 function closeModal() {
   modal.classList.remove("show");
   nameField.value = "";
+  currentRow = null;
 }
 
 /* STRIPE */
