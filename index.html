@@ -291,7 +291,12 @@ async function loadNumbers() {
 
   data.forEach(row => {
     const d = document.createElement("div");
-    const cls = row.payment_status === "pending" ? "pending" : row.status;
+    const cls =
+      row.status === "sold"
+        ? "sold"
+        : row.payment_status === "pending"
+        ? "pending"
+        : "available";
 
     d.className = `number ${cls}`;
     d.innerHTML = `
@@ -305,18 +310,28 @@ async function loadNumbers() {
       }
     `;
 
-    d.onclick = () => openModal(row);
+    // ⛔ BLOCCO TOTALE NUMERI NON DISPONIBILI
+    if (row.status === "available") {
+      d.onclick = () => openModal(row);
+      d.style.cursor = "pointer";
+    } else {
+      d.style.cursor = "not-allowed";
+      d.style.opacity = "0.85";
+    }
+
     grid.appendChild(d);
   });
 }
 
 function openModal(row) {
-  if (row.payment_status === "pending") {
-    alert("Numero già prenotato.");
-    return;
+  if (row.status !== "available") {
+    return; // sicurezza assoluta
   }
+
   currentRow = row;
-  modalTitle.textContent = `Acquista numero ${row.number}`;
+  modalContent.innerHTML = originalModalHTML;
+  document.getElementById("modalTitle").textContent =
+    `Acquista numero ${row.number}`;
   modal.classList.add("show");
 }
 
