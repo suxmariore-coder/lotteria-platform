@@ -126,6 +126,41 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
+
+    /* ⬇️ SOLO STILE MODALE */
+    .field-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e5e5e5;
+      margin: 16px 0;
+    }
+
+    .pay-title {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .pay-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pay-buttons img {
+      width: 18px;
+      height: 18px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
   </style>
 </head>
 
@@ -162,7 +197,7 @@
 
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+const SUPABASE_ANON_KEY = "INCOLLA QUI LA TUA ANON KEY";
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 
 const grid = document.getElementById("grid");
@@ -171,14 +206,37 @@ const modalContent = document.querySelector(".modal-content");
 
 let currentRow = null;
 
+/* TEMPLATE MODALE – SOLO ESTETICA */
 const originalModalHTML = `
   <h3 id="modalTitle"></h3>
-  <input id="nameField" placeholder="Il tuo nome" />
-  <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
-  <button class="btn paypal" onclick="payManual('paypal')">Paga con PayPal</button>
-  <button class="btn revolut" onclick="payManual('revolut')">Paga con Revolut</button>
+
+  <label class="field-label">Il tuo nome</label>
+  <input id="nameField" placeholder="Es. Mario Rossi" />
+
+  <div class="divider"></div>
+
+  <div class="pay-title">Scegli il metodo di pagamento</div>
+
+  <div class="pay-buttons">
+    <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
+
+    <button class="btn paypal" onclick="payManual('paypal')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg">
+      Paga con PayPal
+    </button>
+
+    <button class="btn revolut" onclick="payManual('revolut')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg">
+      Paga con Revolut
+    </button>
+  </div>
+
   <button class="btn cancel" onclick="closeModal()">Annulla</button>
 `;
+</script>
+
+</body>
+</html>
 
 /* WHATSAPP */
 function shareWhatsapp() {
