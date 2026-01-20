@@ -295,6 +295,9 @@ async function payManual(method) {
     return;
   }
 
+  // 🔒 salviamo subito info critiche
+  const numberLabel = currentRow.number;
+
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
     {
