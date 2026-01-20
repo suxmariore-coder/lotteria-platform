@@ -339,8 +339,14 @@ async function payManual(method) {
     paymentUrl = `https://www.paypal.me/${paypalUser}`;
   }
 
-  if (method === "revolut" && data.instructions.revolut_link) {
-    paymentUrl = `https://www.revolut.me/${revolut_link}`;
+  const btnRevolut = document.createElement("button");
+    btnRevolut.classList.add("revolut");
+    btnRevolut.innerText = "Revolut";
+    btnRevolut.onclick = () => {
+        window.open("https://revolut.me/marioreita", "_blank");
+        confirmPurchase(n, nome);
+        document.body.removeChild(popup);
+    };
 }
 
   if (!paymentUrl) {
