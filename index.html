@@ -195,14 +195,12 @@
 
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+const SUPABASE_ANON_KEY = "INCOLLA LA TUA ANON KEY";
 
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 
 const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
-const modalTitle = document.getElementById("modalTitle");
-const nameField = document.getElementById("nameField");
 const modalContent = document.querySelector(".modal-content");
 const originalModalHTML = modalContent.innerHTML;
 
@@ -326,11 +324,14 @@ async function loadNumbers() {
 }
 
 function openModal(row) {
-  if (row.status !== "available") {
-    return; // sicurezza extra
-  }
+  if (row.status !== "available") return;
 
   currentRow = row;
+
+  modalContent.innerHTML = originalModalHTML;
+
+  const modalTitle = modalContent.querySelector("#modalTitle");
+  const nameField = modalContent.querySelector("#nameField");
 
   modalTitle.textContent = `Acquista numero ${row.number}`;
   nameField.value = "";
