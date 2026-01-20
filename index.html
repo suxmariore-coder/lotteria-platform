@@ -292,36 +292,88 @@ async function payWithStripe() {
 
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
-  const name = modalContent.querySelector("#nameField").value.trim();
-  if (!name) return alert("Inserisci il nome");
+  if (!currentRow) return;
 
+  const name = nameField.value.trim();
+  if (!name) {
+    alert("Inserisci il nome");
+    return;
+  }
+
+  // 🔒 salviamo subito info critiche
   const numberLabel = currentRow.number;
 
-  const r = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json", apikey:SUPABASE_ANON_KEY },
-    body:JSON.stringify({ lottery_id:LOTTERY_ID, number_id:currentRow.id, buyer_name:name, payment_method:method })
-  });
-  const d = await r.json();
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({
+        lottery_id: LOTTERY_ID,
+        number_id: currentRow.id,
+        buyer_name: name,
+        payment_method: method,
+      }),
+    }
+  );
 
-  let url = null;
-  if (method === "paypal" && data.instructions.paypal_user) {
-  paymentUrl = `https://www.paypal.me/${data.instructions.paypal_user}`;
-}
-  if (method === "revolut" && data.instructions.revolut_link) {
-  paymentUrl = data.instructions.revolut_link;
-}
+  const responseData = await res.json();
 
+  if (!res.ok) {
+    alert(responseData.error || "Errore prenotazione");
+    return;
+  }
+
+  // 🔑 estraiamo TUTTO qui (mai usare responseData dopo)
+  const amount = responseData.instructions.amount;
+  const note = responseData.instructions.note;
+  const paypalUser = responseData.instructions.paypal_user || null;
+  const revolutLink = responseData.instructions.revolut_link || null;
+
+  let paymentUrl = null;
+
+  if (method === "paypal" && paypalUser) {
+    paymentUrl = `https://www.paypal.me/${paypalUser}`;
+  }
+
+  if (method === "revolut" && revolutLink) {
+    paymentUrl = revolutLink; // link già pronto
+  }
+
+  if (!paymentUrl) {
+    alert("Metodo di pagamento non disponibile");
+    closeModal();
+    return;
+  }
+
+  // 🔁 RIEPILOGO NEL MODAL (senza usare data)
   modalContent.innerHTML = `
     <h3>💳 Completa il pagamento</h3>
-    <p>Numero <b>${numberLabel}</b> prenotato<br><br>
-    Metodo: ${method.toUpperCase()}<br>
-    Importo: € ${d.instructions.amount}<br><br>
-    Causale:<br>${d.instructions.note}</p>
-    <button class="btn ${method}" onclick="window.open('${url}','_blank')">👉 Vai al pagamento</button>
+
+    <p>
+      ✅ Numero <b>${numberLabel}</b> prenotato<br><br>
+      <b>Metodo:</b> ${method.toUpperCase()}<br>
+      <b>Importo:</b> € ${amount}<br><br>
+      <b>Causale:</b><br>${note}<br><br>
+      ⏳ Prenotazione valida 30 minuti
+    </p>
+
+    <button class="btn ${method}" id="goPayBtn">
+      👉 Vai al pagamento
+    </button>
+
     <button class="btn cancel" onclick="closeModal()">Chiudi</button>
   `;
 
+  // ✅ bind JS (NO onclick inline → niente scope bug)
+  document.getElementById("goPayBtn").onclick = () => {
+    window.open(paymentUrl, "_blank");
+  };
+
+  // aggiorna griglia → numero giallo
   loadNumbers();
 }
 
