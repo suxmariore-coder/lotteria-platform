@@ -339,9 +339,9 @@ async function payManual(method) {
     paymentUrl = `https://www.paypal.me/${paypalUser}`;
   }
 
-  if (method === "revolut" && revolutLink) {
-    paymentUrl = revolutLink; // link già pronto
-  }
+  if (method === "revolut" && data.instructions.revolut_link) {
+  window.open(data.instructions.revolut_link, "_blank");
+}
 
   if (!paymentUrl) {
     alert("Metodo di pagamento non disponibile");
