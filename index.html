@@ -338,7 +338,6 @@ async function payManual(method) {
   if (method === "paypal" && paypalUser) {
     paymentUrl = `https://www.paypal.me/${paypalUser}`;
   }
-  }
 
   if (method === "revolut" && data.instructions.revolut_link) {
   window.open(data.instructions.revolut_link, "_blank");
