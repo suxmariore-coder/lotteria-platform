@@ -41,21 +41,23 @@
       max-width: 600px;
       margin: 10px auto 16px;
       text-align: center;
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      flex-wrap:wrap;
     }
 
     .btn {
+      width: 100%;
       padding: 12px;
+      margin-top: 8px;
       border-radius: 6px;
       border: none;
       font-size: 15px;
       cursor: pointer;
     }
 
-    .whatsapp { background: #25D366; color: #fff; }
+    .whatsapp {
+      background: #25D366;
+      color: #fff;
+    }
+
     .stripe { background: #6772e5; color: #fff; }
     .paypal { background: #003087; color: #fff; }
     .revolut { background: #111; color: #fff; }
@@ -75,6 +77,7 @@
       border-radius: 10px;
       object-fit: cover;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     #lottery-description {
@@ -98,15 +101,16 @@
       text-align: center;
       font-weight: bold;
       color: #fff;
+      cursor: pointer;
       min-height: 58px;
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
 
-    .available { background: #1e7e34; cursor:pointer; }
-    .sold { background: #c82333; cursor:not-allowed; opacity:.8; }
-    .pending { background: #ffc107; color:#333; cursor:not-allowed; }
+    .available { background: #1e7e34; }
+    .sold { background: #c82333; }
+    .pending { background: #ffc107; color: #333; }
 
     .buyer {
       font-size: 11px;
@@ -140,14 +144,6 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
-
-    /* bottone “vai al pagamento” usa la stessa classe del metodo scelto */
-    .paylink {
-      width: 100%;
-      display: inline-block;
-      text-decoration: none;
-    }
-    .paylink .btn { width: 100%; }
   </style>
 </head>
 
@@ -157,13 +153,21 @@
 <h3 id="lottery-price"></h3>
 <p id="lottery-meta"></p>
 
-<div class="share-box">
-  <button class="btn whatsapp" onclick="shareWhatsapp()">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:18px;vertical-align:middle">
-    Condividi Lotteriffa
+<div class="share-box" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+  <button class="btn whatsapp" onclick="shareWhatsapp()" style="display:flex; align-items:center; gap:8px; width:auto;">
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+      alt="WhatsApp"
+      style="width:20px; height:20px;"
+    />
+    Condividi LotteRiffa
   </button>
 
-  <button class="btn" style="background:#000;color:#fff" onclick="goToCreateLottery()">
+  <button
+    class="btn"
+    style="background:#000; color:#fff; width:auto;"
+    onclick="goToCreateLottery()"
+  >
     ✨ Crea la tua Lotteriffa
   </button>
 </div>
@@ -179,7 +183,7 @@
 <div id="grid" class="grid"></div>
 
 <div id="modal" class="modal">
-  <div class="modal-content" id="modalContent">
+  <div class="modal-content">
     <h3 id="modalTitle"></h3>
     <input id="nameField" placeholder="Il tuo nome" />
     <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
@@ -192,60 +196,28 @@
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 
 const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const nameField = document.getElementById("nameField");
-const modalContent = document.getElementById("modalContent");
-
-// snapshot HTML del modal “standard” (serve per ripristinare dopo la schermata pagamento)
-const originalModalHTML = modalContent.innerHTML;
 
 let currentRow = null;
 
-/* WHATSAPP */
+/* CONDIVISIONE WHATSAPP */
 function shareWhatsapp() {
-  window.open(`https://wa.me/?text=${encodeURIComponent(location.href)}`, "_blank");
+  const url = window.location.href;
+  const text = encodeURIComponent(
+    "🎟️ Partecipa a questa lotteria!\nProva a vincere un premio 🎁\n\n" + url
+  );
+  window.open(`https://wa.me/?text=${text}`, "_blank");
 }
 
+/* CREA LA TUA LOTTERIFFA */
 function goToCreateLottery() {
-  location.href = "login.html";
-}
-
-/* helper: ripristina UI del modal allo stato iniziale */
-function restoreModalUI() {
-  modalContent.innerHTML = originalModalHTML;
-}
-
-/* helper: normalizza revolut value (può essere link, @user o user) */
-function buildRevolutUrl(val) {
-  if (!val) return null;
-  let v = String(val).trim();
-
-  // se è già un URL revolut.me valido, usa quello
-  if (v.startsWith("http://") || v.startsWith("https://")) return v;
-
-  // se è tipo "@marioreita" -> "marioreita"
-  v = v.replace(/^@/, "").trim();
-  if (!v) return null;
-
-  return `https://revolut.me/${encodeURIComponent(v)}`;
-}
-
-/* helper: normalizza paypal user (paypal.me/<user>) */
-function buildPaypalUrl(val) {
-  if (!val) return null;
-  let v = String(val).trim();
-
-  // se hanno salvato già "paypal.me/xxx" o "https://paypal.me/xxx"
-  v = v.replace(/^https?:\/\/(www\.)?/i, "");
-  v = v.replace(/^paypal\.me\//i, "");
-  v = v.replace(/^\//, "").trim();
-
-  if (!v) return null;
-  return `https://www.paypal.me/${encodeURIComponent(v)}`;
+  window.location.href = "login.html";
 }
 
 /* LOAD LOTTERY */
@@ -309,12 +281,12 @@ function renderGallery(images) {
 
 /* LOAD NUMBERS */
 async function loadNumbers() {
-  const r = await fetch(
+  const res = await fetch(
     `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-  const data = await r.json();
 
+  const data = await res.json();
   grid.innerHTML = "";
 
   data.forEach(row => {
@@ -327,7 +299,6 @@ async function loadNumbers() {
         : "available";
 
     d.className = `number ${cls}`;
-
     d.innerHTML = `
       <div>${row.number}</div>
       ${
@@ -339,9 +310,13 @@ async function loadNumbers() {
       }
     `;
 
-    // cliccabile SOLO se disponibile e non pending
-    if (row.status === "available" && row.payment_status !== "pending") {
+    // ⛔ BLOCCO TOTALE NUMERI NON DISPONIBILI
+    if (row.status === "available") {
       d.onclick = () => openModal(row);
+      d.style.cursor = "pointer";
+    } else {
+      d.style.cursor = "not-allowed";
+      d.style.opacity = "0.85";
     }
 
     grid.appendChild(d);
@@ -349,116 +324,103 @@ async function loadNumbers() {
 }
 
 function openModal(row) {
-  // sicurezza: solo available
-  if (row.status !== "available" || row.payment_status === "pending") return;
+  if (row.status !== "available") {
+    return; // sicurezza extra
+  }
 
-  // ripristina sempre modal “standard”
-  restoreModalUI();
-
-  // ricollega riferimenti dopo restore
-  // (perché innerHTML rimpiazza i nodi)
   currentRow = row;
 
-  // re-get dei nodi dentro al modal ripristinato
-  const newTitle = document.getElementById("modalTitle");
-  const newName = document.getElementById("nameField");
-  newTitle.textContent = `Acquista numero ${row.number}`;
-  newName.value = "";
+  modalTitle.textContent = `Acquista numero ${row.number}`;
+  nameField.value = "";
 
   modal.classList.add("show");
 }
 
 function closeModal() {
   modal.classList.remove("show");
+  nameField.value = "";
   currentRow = null;
-  restoreModalUI();
 }
 
 /* STRIPE */
 async function payWithStripe() {
-  if (!currentRow) return;
-
-  const name = document.getElementById("nameField").value.trim();
+  const name = nameField.value.trim();
   if (!name) return alert("Inserisci il nome");
 
-  const r = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-    body: JSON.stringify({ lottery_id: LOTTERY_ID, number_id: currentRow.id, buyer_name: name })
-  });
-
-  const d = await r.json();
-  if (!r.ok) return alert(d.error || "Errore Stripe");
-  if (d.url) location.href = d.url;
-}
-
-/* PAYPAL / REVOLUT */
-async function payManual(method) {
-  if (!currentRow) return alert("Seleziona un numero");
-
-  const name = document.getElementById("nameField").value.trim();
-  if (!name) return alert("Inserisci il nome");
-
-  const numberLabel = currentRow.number;
-
-  // prenota lato server
-  const r = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
     method: "POST",
     headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
     body: JSON.stringify({
       lottery_id: LOTTERY_ID,
       number_id: currentRow.id,
-      buyer_name: name,
-      payment_method: method
+      buyer_name: name
     })
   });
 
-  const d = await r.json();
-  if (!r.ok) {
-    alert(d.error || "Errore prenotazione");
+  const data = await res.json();
+  if (!data.url) return alert("Errore Stripe");
+  location.href = data.url;
+}
+
+/* PAYPAL / REVOLUT */
+async function payManual(method) {
+  const name = nameField.value.trim();
+  if (!name) {
+    alert("Inserisci il nome");
     return;
   }
 
-  const amount = d?.instructions?.amount ?? "";
-  const note = d?.instructions?.note ?? "";
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({
+        lottery_id: LOTTERY_ID,
+        number_id: currentRow.id,
+        buyer_name: name,
+        payment_method: method,
+      }),
+    }
+  );
 
-  // costruisci url pagamento
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || "Errore prenotazione");
+    return;
+  }
+
+  const amount = data.instructions.amount;
+  const note = data.instructions.note;
+
   let paymentUrl = null;
 
-  if (method === "paypal") {
-    paymentUrl = buildPaypalUrl(d?.instructions?.paypal);
-  } else if (method === "revolut") {
-    paymentUrl = buildRevolutUrl(d?.instructions?.revolut);
+  if (method === "paypal" && data.instructions.paypal_user) {
+    paymentUrl = `https://www.paypal.me/${data.instructions.paypal_user}/${amount}`;
   }
 
-  if (!paymentUrl) {
-    alert("Errore: dati pagamento mancanti (paypal/revolut). Contatta l'organizzatore.");
-    closeModal();
-    loadNumbers();
-    return;
+  if (method === "revolut" && data.instructions.revolut_link) {
+  const username = data.instructions.revolut_link.replace("@", "").trim();
+  paymentUrl = `https://revolut.me/${username}?amount=${amount}&currency=EUR`;
+}
+
+  const goPay = confirm(
+    `✅ Numero prenotato!\n\n` +
+    `Metodo: ${method.toUpperCase()}\n` +
+    `Importo: € ${amount}\n\n` +
+    `Causale:\n${note}\n\n` +
+    `⏳ Prenotazione valida 30 minuti.\n\n` +
+    `Premi OK per andare al pagamento.`
+  );
+
+  if (goPay && paymentUrl) {
+    window.open(paymentUrl, "_blank");
   }
 
-  // mostra schermata “Vai al pagamento” dentro lo stesso modal
-  modalContent.innerHTML = `
-    <h3>💳 Completa il pagamento</h3>
-    <p>
-      ✅ Numero <b>${numberLabel}</b> prenotato!<br><br>
-      <b>Metodo:</b> ${method.toUpperCase()}<br>
-      <b>Importo:</b> € ${amount}<br><br>
-      <b>Causale:</b><br>${note}<br><br>
-      ⏳ Prenotazione valida 30 minuti
-    </p>
-
-    <a class="paylink" href="${paymentUrl}" target="_blank" rel="noopener">
-      <button class="btn ${method}">
-        👉 Vai al pagamento
-      </button>
-    </a>
-
-    <button class="btn cancel" onclick="closeModal()">Chiudi</button>
-  `;
-
-  // aggiorna subito griglia (diventa giallo)
+  closeModal();
   loadNumbers();
 }
 
