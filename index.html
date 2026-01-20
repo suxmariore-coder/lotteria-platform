@@ -289,71 +289,28 @@ async function payWithStripe() {
 
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
-  if (!currentRow) {
-    alert("Seleziona prima un numero");
-    return;
-  }
-
   const name = nameField.value.trim();
-  if (!name) {
-    alert("Inserisci il nome");
-    return;
-  }
+  if (!name) return alert("Inserisci il nome");
 
-  const numberLabel = currentRow.number;
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name,
+      payment_method: method
+    })
+  });
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({
-        lottery_id: LOTTERY_ID,
-        number_id: currentRow.id,
-        buyer_name: name,
-        payment_method: method,
-      }),
-    }
-  );
+  const data = await res.json();
+  if (!res.ok) return alert(data.error || "Errore");
 
-  const data = await res.json(); // ✅ QUI NASCE "data"
-
-  if (!res.ok) {
-    alert(data.error || "Errore prenotazione");
-    return;
-  }
-
-  // 🔒 chiudiamo il primo modal
-  closeModal();
-
-  // 🔔 messaggio informativo
   alert(
-    `✅ Numero ${numberLabel} prenotato!\n\n` +
-    `Metodo: ${method.toUpperCase()}\n\n` +
-    `Inserisci MANUALMENTE l'importo del biglietto.\n\n` +
-    `Causale:\n${data.instructions.note}\n\n` +
-    `⏳ Prenotazione valida 30 minuti`
+    `✅ Numero prenotato\n\nMetodo: ${method.toUpperCase()}\nImporto: € ${data.instructions.amount}\n\nCausale:\n${data.instructions.note}\n\n⏳ Valido 30 minuti`
   );
 
-  // 👉 REDIRECT ESTERNO (COME NEL VECCHIO PROGETTO)
-  if (method === "paypal" && data.instructions.paypal) {
-    window.open(
-      `https://www.paypal.me/${data.instructions.paypal}`,
-      "_blank"
-    );
-  }
-
-  if (method === "revolut" && data.instructions.revolut) {
-    window.open(
-      data.instructions.revolut,
-      "_blank"
-    );
-  }
-
-  // 🔄 aggiorniamo la griglia (numero diventa giallo)
+  closeModal();
   loadNumbers();
 }
 
