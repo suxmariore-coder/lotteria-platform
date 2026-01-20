@@ -289,7 +289,10 @@ async function payWithStripe() {
 
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
-  if (!currentRow) return;
+  if (!currentRow) {
+    alert("Seleziona prima un numero");
+    return;
+  }
 
   const name = nameField.value.trim();
   if (!name) {
@@ -297,7 +300,6 @@ async function payManual(method) {
     return;
   }
 
-  // 🔒 salviamo subito info critiche
   const numberLabel = currentRow.number;
 
   const res = await fetch(
@@ -317,60 +319,41 @@ async function payManual(method) {
     }
   );
 
-  const responseData = await res.json();
+  const data = await res.json(); // ✅ QUI NASCE "data"
 
   if (!res.ok) {
-    alert(responseData.error || "Errore prenotazione");
+    alert(data.error || "Errore prenotazione");
     return;
   }
 
-  // 🔑 estraiamo TUTTO qui (mai usare responseData dopo)
-  const amount = responseData.instructions.amount;
-  const note = responseData.instructions.note;
-  const paypalUser = responseData.instructions.paypal_user || null;
-  const revolutLink = responseData.instructions.revolut_link || null;
+  // 🔒 chiudiamo il primo modal
+  closeModal();
 
-  let paymentUrl = null;
+  // 🔔 messaggio informativo
+  alert(
+    `✅ Numero ${numberLabel} prenotato!\n\n` +
+    `Metodo: ${method.toUpperCase()}\n\n` +
+    `Inserisci MANUALMENTE l'importo del biglietto.\n\n` +
+    `Causale:\n${data.instructions.note}\n\n` +
+    `⏳ Prenotazione valida 30 minuti`
+  );
 
-  if (method === "paypal" && paypalUser) {
-    paymentUrl = `https://www.paypal.me/${paypalUser}`;
+  // 👉 REDIRECT ESTERNO (COME NEL VECCHIO PROGETTO)
+  if (method === "paypal" && data.instructions.paypal) {
+    window.open(
+      `https://www.paypal.me/${data.instructions.paypal}`,
+      "_blank"
+    );
   }
 
-  if (method === "revolut" && data.instructions.revolut_link) {
-  window.open(data.instructions.revolut_link, "_blank");
-}
-
-  if (!paymentUrl) {
-    alert("Metodo di pagamento non disponibile");
-    closeModal();
-    return;
+  if (method === "revolut" && data.instructions.revolut) {
+    window.open(
+      data.instructions.revolut,
+      "_blank"
+    );
   }
 
-  // 🔁 RIEPILOGO NEL MODAL (senza usare data)
-  modalContent.innerHTML = `
-    <h3>💳 Completa il pagamento</h3>
-
-    <p>
-      ✅ Numero <b>${numberLabel}</b> prenotato<br><br>
-      <b>Metodo:</b> ${method.toUpperCase()}<br>
-      <b>Importo:</b> € ${amount}<br><br>
-      <b>Causale:</b><br>${note}<br><br>
-      ⏳ Prenotazione valida 30 minuti
-    </p>
-
-    <button class="btn ${method}" id="goPayBtn">
-      👉 Vai al pagamento
-    </button>
-
-    <button class="btn cancel" onclick="closeModal()">Chiudi</button>
-  `;
-
-  // ✅ bind JS (NO onclick inline → niente scope bug)
-  document.getElementById("goPayBtn").onclick = () => {
-    window.open(paymentUrl, "_blank");
-  };
-
-  // aggiorna griglia → numero giallo
+  // 🔄 aggiorniamo la griglia (numero diventa giallo)
   loadNumbers();
 }
 
