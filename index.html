@@ -201,28 +201,65 @@ function shareWhatsapp() {
 function goToCreateLottery() {
   location.href = "login.html";
 }
-
 /* LOAD LOTTERY */
 async function loadLottery() {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`, { headers:{apikey:SUPABASE_ANON_KEY}});
-  const [lot] = await r.json();
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
+    { headers: { apikey: SUPABASE_ANON_KEY } }
+  );
+
+  const [lot] = await res.json();
   if (!lot) return;
 
-  lottery_title.textContent = lot.title;
-  lottery_price.textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
-  lottery_description_text.textContent = lot.description || "";
+  document.getElementById("lottery-title").textContent = lot.title;
+  document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
+  document.getElementById("lottery-description-text").textContent = lot.description || "";
+
+  const meta = [];
+  if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
+  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
+  document.getElementById("lottery-meta").textContent = meta.join(" • ");
+
+  const banner = document.getElementById("lottery-status-banner");
+  banner.style.display = "block";
+  banner.className = "status-banner " + (
+    lot.status === "active" ? "status-active" :
+    lot.status === "closed" ? "status-closed" : "status-finished"
+  );
+  banner.textContent =
+    lot.status === "active" ? "✅ Lotteria attiva" :
+    lot.status === "closed" ? "⛔ Vendite chiuse" :
+    "🏁 Lotteria conclusa";
 
   renderGallery(lot.prize_images);
 }
 
-function renderGallery(images){
-  const g=document.getElementById("prize-gallery");
-  let arr=[];
-  try{arr=Array.isArray(images)?images:JSON.parse(images)}catch{}
-  if(!arr.length){g.style.display="none";return}
-  g.innerHTML="";
-  arr.forEach(u=>{const i=document.createElement("img");i.src=u;i.onclick=()=>window.open(u);g.appendChild(i)})
+/* GALLERY */
+function renderGallery(images) {
+  const gallery = document.getElementById("prize-gallery");
+  let arr = [];
+
+  if (Array.isArray(images)) arr = images;
+  else if (typeof images === "string") {
+    try { arr = JSON.parse(images); } catch {}
+  }
+
+  if (!arr.length) {
+    gallery.style.display = "none";
+    return;
+  }
+
+  gallery.innerHTML = "";
+  gallery.style.display = "flex";
+
+  arr.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.onclick = () => window.open(url, "_blank");
+    gallery.appendChild(img);
+  });
 }
+
 
 /* LOAD NUMBERS */
 async function loadNumbers(){
