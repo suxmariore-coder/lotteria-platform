@@ -210,6 +210,17 @@ async function loadLottery() {
   if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
   document.getElementById("lottery-meta").textContent = meta.join(" • ");
 
+  const banner = document.getElementById("lottery-status-banner");
+  banner.style.display = "block";
+  banner.className = "status-banner " + (
+    lot.status === "active" ? "status-active" :
+    lot.status === "closed" ? "status-closed" : "status-finished"
+  );
+  banner.textContent =
+    lot.status === "active" ? "✅ Lotteria attiva" :
+    lot.status === "closed" ? "⛔ Vendite chiuse" :
+    "🏁 Lotteria conclusa";
+
   renderGallery(lot.prize_images);
 }
 
@@ -294,8 +305,12 @@ async function payManual(method) {
   const d = await r.json();
 
   let url = null;
-  if (method==="paypal" && d.instructions.paypal_user) url = `https://www.paypal.me/${d.instructions.paypal_user}`;
-  if (method==="revolut" && d.instructions.revolut_link) url = `https://revolut.me/${d.instructions.revolut_link.replace("@","")}`;
+  if (method === "paypal" && data.instructions.paypal_user) {
+  paymentUrl = `https://www.paypal.me/${data.instructions.paypal_user}`;
+}
+  if (method === "revolut" && data.instructions.revolut_link) {
+  paymentUrl = data.instructions.revolut_link;
+}
 
   modalContent.innerHTML = `
     <h3>💳 Completa il pagamento</h3>
