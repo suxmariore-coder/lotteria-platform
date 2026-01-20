@@ -157,8 +157,51 @@
 <div id="grid" class="grid"></div>
 
 <div id="modal" class="modal">
-  <div class="modal-content"></div>
+  <div class="modal-content">
+  <h3 id="modalTitle">Acquista numero</h3>
+
+  <label class="field-label">Il tuo nome</label>
+  <input id="nameField" placeholder="Es. Mario Rossi" />
+
+  <div class="divider"></div>
+
+  <p class="pay-title">Scegli il metodo di pagamento</p>
+
+  <div class="pay-buttons">
+    <button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>
+    <button class="btn paypal" onclick="payManual('paypal')">Paga con PayPal</button>
+    <button class="btn revolut" onclick="payManual('revolut')">Paga con Revolut</button>
+  </div>
+
+  <button class="btn cancel" onclick="closeModal()">Annulla</button>
 </div>
+
+.field-label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.divider {
+  height: 1px;
+  background: #e5e5e5;
+  margin: 16px 0;
+}
+
+.pay-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.pay-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
