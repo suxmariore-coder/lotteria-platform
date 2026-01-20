@@ -340,7 +340,7 @@ async function payManual(method) {
   }
 
   if (method === "revolut" && data.instructions.revolut_link) {
-  window.open(data.instructions.revolut_link, "_blank");
+    paymentUrl = `https://www.revolut.me/${revolut_link}`;
 }
 
   if (!paymentUrl) {
