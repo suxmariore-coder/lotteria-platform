@@ -332,20 +332,37 @@ async function payManual(method) {
   paymentUrl = `https://revolut.me/${username}?amount=${amount}&currency=EUR`;
 }
 
-  const goPay = confirm(
-    `✅ Numero prenotato!\n\n` +
-    `Metodo: ${method.toUpperCase()}\n` +
-    `Importo: € ${amount}\n\n` +
-    `Causale:\n${note}\n\n` +
-    `⏳ Prenotazione valida 30 minuti.\n\n` +
-    `Premi OK per andare al pagamento.`
-  );
-
-  if (goPay && paymentUrl) {
-    window.open(paymentUrl, "_blank");
+  if (!paymentUrl) {
+    alert("Metodo di pagamento non disponibile");
+    closeModal();
+    return;
   }
 
-  closeModal();
+  // 🔁 RIEPILOGO NEL MODAL (senza usare data)
+  modalContent.innerHTML = `
+    <h3>💳 Completa il pagamento</h3>
+
+    <p>
+      ✅ Numero <b>${numberLabel}</b> prenotato<br><br>
+      <b>Metodo:</b> ${method.toUpperCase()}<br>
+      <b>Importo:</b> € ${amount}<br><br>
+      <b>Causale:</b><br>${note}<br><br>
+      ⏳ Prenotazione valida 30 minuti
+    </p>
+
+    <button class="btn ${method}" id="goPayBtn">
+      👉 Vai al pagamento
+    </button>
+
+    <button class="btn cancel" onclick="closeModal()">Chiudi</button>
+  `;
+
+  // ✅ bind JS (NO onclick inline → niente scope bug)
+  document.getElementById("goPayBtn").onclick = () => {
+    window.open(paymentUrl, "_blank");
+  };
+
+  // aggiorna griglia → numero giallo
   loadNumbers();
 }
 
