@@ -203,6 +203,8 @@ const grid = document.getElementById("grid");
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modalTitle");
 const nameField = document.getElementById("nameField");
+const modalContent = document.querySelector(".modal-content");
+const originalModalHTML = modalContent.innerHTML;
 
 let currentRow = null;
 
@@ -338,8 +340,8 @@ function openModal(row) {
 
 function closeModal() {
   modal.classList.remove("show");
-  nameField.value = "";
   currentRow = null;
+  modalContent.innerHTML = originalModalHTML;
 }
 
 /* STRIPE */
@@ -364,11 +366,15 @@ async function payWithStripe() {
 
 /* PAYPAL / REVOLUT */
 async function payManual(method) {
+  if (!currentRow) return;
+
   const name = nameField.value.trim();
   if (!name) {
     alert("Inserisci il nome");
     return;
   }
+
+  const numberLabel = currentRow.number;
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/reserve-number-manual`,
@@ -403,24 +409,36 @@ async function payManual(method) {
   }
 
   if (method === "revolut" && data.instructions.revolut_link) {
-  const username = data.instructions.revolut_link.replace("@", "").trim();
-  paymentUrl = `https://revolut.me/${username}?amount=${amount}&currency=EUR`;
-}
-
-  const goPay = confirm(
-    `✅ Numero prenotato!\n\n` +
-    `Metodo: ${method.toUpperCase()}\n` +
-    `Importo: € ${amount}\n\n` +
-    `Causale:\n${note}\n\n` +
-    `⏳ Prenotazione valida 30 minuti.\n\n` +
-    `Premi OK per andare al pagamento.`
-  );
-
-  if (goPay && paymentUrl) {
-    window.open(paymentUrl, "_blank");
+    const username = data.instructions.revolut_link.replace("@", "").trim();
+    paymentUrl = `https://revolut.me/${username}`;
   }
 
-  closeModal();
+  if (!paymentUrl) {
+    alert("Metodo di pagamento non disponibile");
+    closeModal();
+    return;
+  }
+
+  // 🔁 Mostriamo il riepilogo DENTRO il modal
+  modalContent.innerHTML = `
+    <h3>💳 Completa il pagamento</h3>
+
+    <p>
+      ✅ Numero <b>${numberLabel}</b> prenotato<br><br>
+      <b>Metodo:</b> ${method.toUpperCase()}<br>
+      <b>Importo:</b> € ${amount}<br><br>
+      <b>Causale:</b><br>${note}<br><br>
+      ⏳ Prenotazione valida 30 minuti
+    </p>
+
+    <button class="btn ${method}" onclick="window.open('${paymentUrl}', '_blank')">
+      👉 Vai al pagamento
+    </button>
+
+    <button class="btn cancel" onclick="closeModal()">Chiudi</button>
+  `;
+
+  // aggiorna la griglia → numero giallo
   loadNumbers();
 }
 
