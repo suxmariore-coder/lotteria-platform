@@ -296,9 +296,10 @@ async function loadLottery() {
   document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
   document.getElementById("lottery-description-text").textContent = lot.description || "";
 
-const meta = [];
-if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
-if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
+  const meta = [];
+  if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
+  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
+  document.getElementById("lottery-meta").textContent = meta.join(" • ");  
 
   const banner = document.getElementById("lottery-status-banner");
   banner.style.display = "block";
