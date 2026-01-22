@@ -200,6 +200,10 @@
   margin-right: 8px;
 }
 
+#lottery-meta {
+    white-space: pre-line; /* Permette al browser di visualizzare i \n come a capo */
+}
+
   </style>
 </head>
 
@@ -299,7 +303,9 @@ async function loadLottery() {
   const meta = [];
   if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
   if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
-  document.getElementById("lottery-meta").textContent = meta.join(" • ");  
+  document.getElementById("lottery-meta").textContent = meta.join(" • ");
+// MODIFICA: usa '\n' come separatore
+document.getElementById('lottery-meta').textContent = meta.join('\n');  
 
   const banner = document.getElementById("lottery-status-banner");
   banner.style.display = "block";
