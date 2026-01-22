@@ -104,7 +104,15 @@
     .sold { background: #c82333; cursor: not-allowed; opacity: .85; }
     .pending { background: #ffc107; color: #333; cursor: not-allowed; }
 
-    .buyer { font-size: 11px; margin-top: 4px; }
+    .buyer {
+  font-size: 11px;
+  margin-top: 4px;
+
+  white-space: nowrap;      /* 👈 una sola riga */
+  overflow: hidden;
+  text-overflow: ellipsis;  /* 👈 ... se troppo lungo */
+  max-width: 100%;
+}
 
     .modal {
       position: fixed;
