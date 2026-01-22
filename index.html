@@ -13,6 +13,14 @@
       margin: 0;
     }
 
+/* 📱 MOBILE: data e ruota una sotto l’altra */
+@media (max-width: 600px) {
+  #lottery-meta {
+    white-space: pre-line;
+    line-height: 1.4;
+  }
+}
+
     h1, h3 { text-align: center; margin: 6px 0; }
 
     #lottery-meta { text-align: center; color: #555; margin-bottom: 10px; }
@@ -50,22 +58,6 @@
   .share-box .btn {
     flex: 1;                    /* 👈 stessa larghezza */
     max-width: 48%;
-  }
-}
-
-.lottery-meta {
-  text-align: center;
-  color: #555;
-  margin-bottom: 10px;
-  line-height: 1.4;
-}
-
-/* 📱 MOBILE */
-@media (max-width: 600px) {
-  #lottery-meta {
-    display: flex;
-    flex-direction: column;   /* 👈 UNA SOTTO L’ALTRA */
-    gap: 4px;
   }
 }
 
