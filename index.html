@@ -76,10 +76,17 @@
     }
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 10px;
-    }
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(10, 1fr); /* desktop */
+}
+
+/* 📱 MOBILE */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(6, 1fr); /* 👈 max 6 numeri */
+  }
+}
 
     .number {
       border-radius: 8px;
