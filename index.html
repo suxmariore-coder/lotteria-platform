@@ -24,11 +24,6 @@
       border-radius: 8px;
       text-align: center;
       font-weight: bold;
-
-  display: flex;
-  justify-content: center;
-  gap: 12px;          /* 👈 distanza tra i pulsanti */
-  flex-wrap: wrap;    /* 👈 mobile friendly */
 }
 
     .status-active { background: #e6f4ea; color: #1e7e34; }
@@ -42,8 +37,20 @@
 
   display: flex;
   justify-content: center;
-  gap: 12px;          /* 👈 distanza tra i pulsanti */
-  flex-wrap: wrap;    /* 👈 mobile friendly */
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 📱 MOBILE */
+@media (max-width: 600px) {
+  .share-box {
+    flex-wrap: nowrap;          /* 👈 restano sulla stessa riga */
+  }
+
+  .share-box .btn {
+    flex: 1;                    /* 👈 stessa larghezza */
+    max-width: 48%;
+  }
 }
 
     .btn {
