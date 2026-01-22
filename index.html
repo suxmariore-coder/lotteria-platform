@@ -301,7 +301,15 @@ async function loadLottery() {
   document.getElementById("lottery-description-text").textContent = lot.description || "";
 
   const meta = [];
-  if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
+  if (lot.draw_date) {
+  const d = new Date(lot.draw_date);
+  const formatted =
+    String(d.getDate()).padStart(2, "0") + "/" +
+    String(d.getMonth() + 1).padStart(2, "0") + "/" +
+    d.getFullYear();
+
+  meta.push(`📅 Estrazione: ${formatted}`);
+}
   if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
   document.getElementById("lottery-meta").textContent = meta.join(" • ");
 // MODIFICA: usa '\n' come separatore
