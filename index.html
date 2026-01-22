@@ -89,16 +89,22 @@
 }
 
     .number {
-      border-radius: 8px;
-      padding: 10px 4px;
-      text-align: center;
-      font-weight: bold;
-      color: #fff;
-      min-height: 58px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+  border-radius: 8px;
+  padding: 6px 4px;
+  text-align: center;
+  font-weight: bold;
+  color: #fff;
+
+  height: 64px;          /* 👈 ALTEZZA FISSA */
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;      /* 👈 BLOCCA ESPANSIONE */
+}
 
     .available { background: #1e7e34; cursor: pointer; }
     .sold { background: #c82333; cursor: not-allowed; opacity: .85; }
