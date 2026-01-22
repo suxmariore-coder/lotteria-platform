@@ -314,6 +314,7 @@ async function loadLottery() {
   const meta = [];
   if (lot.draw_date) meta.push(`📅 Estrazione: ${lot.draw_date}`);
   if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
+  document.getElementById("lottery-meta").textContent = meta.join(" • ");
 
   const banner = document.getElementById("lottery-status-banner");
   banner.style.display = "block";
