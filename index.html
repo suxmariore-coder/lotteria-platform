@@ -301,10 +301,8 @@ async function loadLottery() {
      DATI PRINCIPALI
   ------------------------- */
   document.getElementById("lottery-title").textContent = lot.title;
-  document.getElementById("lottery-price").textContent =
-    `Prezzo biglietto: € ${lot.ticket_price}`;
-  document.getElementById("lottery-description-text").textContent =
-    lot.description || "";
+  document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
+  document.getElementById("lottery-description-text").textContent = lot.description || "";
 
   /* -------------------------
      DATA + RUOTA
@@ -373,6 +371,7 @@ async function loadLottery() {
   /* 🔒 salva flag globale (ci servirà per i numeri) */
   window.LOTTERY_EXPIRED = isExpired;
 }
+
 /* GALLERY */
 function renderGallery(images) {
   const gallery = document.getElementById("prize-gallery");
@@ -414,7 +413,11 @@ async function loadNumbers() {
     d.style.opacity = "0.7";
     return;
 }    
-    if (cls === "available") d.onclick = () => openModal(row);
+    if (cls === "available" && !window.LOTTERY_EXPIRED) {
+  d.onclick = () => openModal(row);
+} else {
+  d.style.cursor = "not-allowed";
+  d.style.opacity = "0.85";
     grid.appendChild(d);
   });
 }
