@@ -293,59 +293,86 @@ async function loadLottery() {
     `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-  const [lot] = let isExpired = false;
 
-if (lot.draw_date) {
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  const [lot] = await r.json();
+  if (!lot) return;
 
-  const draw = new Date(lot.draw_date);
-  draw.setHours(0,0,0,0);
-
-  if (today > draw) {
-    isExpired = true;
-  }
-}
-
+  /* -------------------------
+     DATI PRINCIPALI
+  ------------------------- */
   document.getElementById("lottery-title").textContent = lot.title;
-  document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
-  document.getElementById("lottery-description-text").textContent = lot.description || "";
+  document.getElementById("lottery-price").textContent =
+    `Prezzo biglietto: € ${lot.ticket_price}`;
+  document.getElementById("lottery-description-text").textContent =
+    lot.description || "";
 
+  /* -------------------------
+     DATA + RUOTA
+  ------------------------- */
   const meta = [];
+
+  let isExpired = false;
+
   if (lot.draw_date) {
-  const d = new Date(lot.draw_date);
-  const formatted =
-    String(d.getDate()).padStart(2, "0") + "/" +
-    String(d.getMonth() + 1).padStart(2, "0") + "/" +
-    d.getFullYear();
+    const draw = new Date(lot.draw_date);
+    draw.setHours(0, 0, 0, 0);
 
-  meta.push(`📅 Estrazione: ${formatted}`);
-}
-  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
-  document.getElementById("lottery-meta").textContent = meta.join(" • ");
-// MODIFICA: usa '\n' come separatore
-document.getElementById('lottery-meta').textContent = meta.join('\n');  
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
+    if (today > draw) {
+      isExpired = true;
+    }
+
+    const formatted =
+      String(draw.getDate()).padStart(2, "0") + "/" +
+      String(draw.getMonth() + 1).padStart(2, "0") + "/" +
+      draw.getFullYear();
+
+    meta.push(`📅 Estrazione: ${formatted}`);
+  }
+
+  if (lot.wheel) {
+    meta.push(`🎡 Ruota: ${lot.wheel}`);
+  }
+
+  const metaEl = document.getElementById("lottery-meta");
+  metaEl.textContent = meta.join("\n");
+
+  /* -------------------------
+     BANNER STATO LOTTERIA
+  ------------------------- */
   const banner = document.getElementById("lottery-status-banner");
-banner.style.display = "block";
+  banner.style.display = "block";
 
-if (isExpired) {
-  banner.className = "status-banner status-finished";
-  banner.textContent = "🏁 Lotteria conclusa";
-} else {
-  banner.className = "status-banner " + (
-    lot.status === "active" ? "status-active" :
-    lot.status === "closed" ? "status-closed" : "status-finished"
-  );
+  if (isExpired) {
+    banner.className = "status-banner status-finished";
+    banner.textContent = "🏁 Lotteria conclusa";
+  } else {
+    banner.className =
+      "status-banner " +
+      (lot.status === "active"
+        ? "status-active"
+        : lot.status === "closed"
+        ? "status-closed"
+        : "status-finished");
 
-  banner.textContent =
-    lot.status === "active" ? "✅ Lotteria attiva" :
-    lot.status === "closed" ? "⛔ Vendite chiuse" :
-    "🏁 Lotteria conclusa";
+    banner.textContent =
+      lot.status === "active"
+        ? "✅ Lotteria attiva"
+        : lot.status === "closed"
+        ? "⛔ Vendite chiuse"
+        : "🏁 Lotteria conclusa";
+  }
 
+  /* -------------------------
+     GALLERIA PREMI
+  ------------------------- */
   renderGallery(lot.prize_images);
-}
 
+  /* 🔒 salva flag globale (ci servirà per i numeri) */
+  window.LOTTERY_EXPIRED = isExpired;
+}
 /* GALLERY */
 function renderGallery(images) {
   const gallery = document.getElementById("prize-gallery");
