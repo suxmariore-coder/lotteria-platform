@@ -293,10 +293,7 @@ async function loadLottery() {
     `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
-  const [lot] = await r.json();
-  if (!lot) return;
-
-let isExpired = false;
+  const [lot] = let isExpired = false;
 
 if (lot.draw_date) {
   const today = new Date();
