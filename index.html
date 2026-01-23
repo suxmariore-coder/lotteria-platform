@@ -493,18 +493,18 @@ async function payManual(method) {
 
   let paymentUrl = null;
 
-  if (method === "paypal" && paypalUser) {
-    // PayPal: con importo
-    paymentUrl = `https://www.paypal.me/${paypalUser}/${amount}`;
-  }
+  if (method === "paypal" && data.instructions.paypal) {
+  paymentUrl = `https://www.paypal.me/${data.instructions.paypal}/${amount}`;
+}
 
-  if (method === "revolut" && revolutUserOrLink) {
-    // Revolut: SOLO redirect al profilo (senza amount) per evitare 404
-    // può arrivare "marioreita" o "@marioreita" o un link
-    let u = String(revolutUserOrLink).trim();
-    u = u.replace("https://revolut.me/", "").replace("@", "").trim();
-    paymentUrl = `https://revolut.me/${u}`;
-  }
+if (method === "revolut" && data.instructions.revolut) {
+  const username = String(data.instructions.revolut)
+    .replace("https://revolut.me/", "")
+    .replace("@", "")
+    .trim();
+
+  paymentUrl = `https://revolut.me/${username}`;
+}
 
   if (!paymentUrl) return alert("Metodo di pagamento non disponibile (verifica dati owner)");
 
