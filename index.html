@@ -296,6 +296,20 @@ async function loadLottery() {
   const [lot] = await r.json();
   if (!lot) return;
 
+let isExpired = false;
+
+if (lot.draw_date) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const draw = new Date(lot.draw_date);
+  draw.setHours(0,0,0,0);
+
+  if (today > draw) {
+    isExpired = true;
+  }
+}
+
   document.getElementById("lottery-title").textContent = lot.title;
   document.getElementById("lottery-price").textContent = `Prezzo biglietto: € ${lot.ticket_price}`;
   document.getElementById("lottery-description-text").textContent = lot.description || "";
@@ -316,11 +330,17 @@ async function loadLottery() {
 document.getElementById('lottery-meta').textContent = meta.join('\n');  
 
   const banner = document.getElementById("lottery-status-banner");
-  banner.style.display = "block";
+banner.style.display = "block";
+
+if (isExpired) {
+  banner.className = "status-banner status-finished";
+  banner.textContent = "🏁 Lotteria conclusa";
+} else {
   banner.className = "status-banner " + (
     lot.status === "active" ? "status-active" :
     lot.status === "closed" ? "status-closed" : "status-finished"
   );
+
   banner.textContent =
     lot.status === "active" ? "✅ Lotteria attiva" :
     lot.status === "closed" ? "⛔ Vendite chiuse" :
@@ -363,6 +383,13 @@ async function loadNumbers() {
       cls === "pending" ? `<div class="buyer">⏳ ${row.pending_buyer_name||""}</div>` :
       cls === "sold" ? `<div class="buyer">${row.buyer_name||""}</div>` : ""
     }`;
+    if (isExpired) {
+    d.classList.remove("available");
+    d.classList.add("sold");
+    d.style.cursor = "not-allowed";
+    d.style.opacity = "0.7";
+    return;
+}    
     if (cls === "available") d.onclick = () => openModal(row);
     grid.appendChild(d);
   });
