@@ -1,146 +1,202 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<title>Lotteria</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>Lotteria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  padding: 16px;
-  background: #f5f5f5;
-  margin: 0;
-}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      background: #f5f5f5;
+      margin: 0;
+    }
 
-h1, h3 { text-align: center; margin: 6px 0; }
+    h1, h3 { text-align: center; margin: 6px 0; }
 
-#lottery-meta {
-  text-align: center;
-  color: #555;
-  margin-bottom: 10px;
-  white-space: pre-line;
-}
+    #lottery-meta {
+      text-align: center;
+      color: #555;
+      margin-bottom: 10px;
+      white-space: pre-line; /* mostra \n su righe diverse */
+    }
 
-.status-banner {
-  max-width: 600px;
-  margin: 12px auto;
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  font-weight: bold;
-}
+    .status-banner {
+      max-width: 600px;
+      margin: 12px auto;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
 
-.status-active { background: #e6f4ea; color: #1e7e34; }
-.status-closed { background: #fff3cd; color: #856404; }
-.status-finished { background: #f8d7da; color: #842029; }
+    .status-active { background: #e6f4ea; color: #1e7e34; }
+    .status-closed { background: #fff3cd; color: #856404; }
+    .status-finished { background: #f8d7da; color: #842029; }
 
-.share-box {
-  max-width: 600px;
-  margin: 10px auto 16px;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
+    .share-box {
+      max-width: 600px;
+      margin: 10px auto 16px;
+      text-align: center;
 
-@media (max-width:600px){
-  .share-box { flex-wrap: nowrap; }
-  .share-box .btn { flex:1; max-width:48%; }
-}
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-.btn {
-  padding: 12px;
-  border-radius: 6px;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
-}
+    /* 📱 MOBILE: affiancati */
+    @media (max-width: 600px) {
+      .share-box { flex-wrap: nowrap; }
+      .share-box .btn { flex: 1; max-width: 48%; }
+    }
 
-.whatsapp { background:#25D366; color:#fff; }
-.stripe { background:#6772e5; color:#fff; }
-.paypal { background:#003087; color:#fff; }
-.revolut { background:#111; color:#fff; }
-.cancel { background:#ddd; }
+    .btn {
+      padding: 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+    }
 
-.gallery {
-  display:flex;
-  gap:10px;
-  overflow-x:auto;
-  padding:10px 0;
-  max-width:600px;
-  margin:0 auto 16px;
-}
+    .whatsapp { background: #25D366; color: #fff; }
+    .stripe { background: #6772e5; color: #fff; }
+    .paypal { background: #003087; color: #fff; }
+    .revolut { background: #111; color: #fff; }
+    .cancel { background: #ddd; }
 
-.gallery img {
-  height:220px;
-  border-radius:10px;
-  cursor:pointer;
-}
+    .gallery {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      margin: 0 auto 16px;
+      max-width: 600px;
+    }
 
-#lottery-description {
-  background:#fff;
-  padding:12px;
-  border-radius:8px;
-  max-width:600px;
-  margin:12px auto;
-  text-align:center;
-}
+    .gallery img {
+      height: 220px;
+      border-radius: 10px;
+      object-fit: cover;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
-.grid {
-  display:grid;
-  grid-template-columns:repeat(10,1fr);
-  gap:10px;
-}
+    #lottery-description {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px auto;
+      max-width: 600px;
+      text-align: center;
+    }
 
-@media (max-width:600px){
-  .grid { grid-template-columns:repeat(6,1fr); }
-}
+    .grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(10, 1fr); /* desktop */
+    }
 
-.number {
-  height:64px;
-  border-radius:8px;
-  font-weight:bold;
-  color:#fff;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  overflow:hidden;
-}
+    /* 📱 MOBILE */
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: repeat(6, 1fr); }
+    }
 
-.available { background:#1e7e34; cursor:pointer; }
-.sold { background:#c82333; cursor:not-allowed; opacity:.85; }
-.pending { background:#ffc107; color:#333; cursor:not-allowed; }
+    .number {
+      border-radius: 8px;
+      padding: 6px 4px;
+      text-align: center;
+      font-weight: bold;
+      color: #fff;
 
-.buyer {
-  font-size:11px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:100%;
-}
+      height: 64px;          /* altezza fissa */
+      box-sizing: border-box;
 
-.modal {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.55);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-}
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
 
-.modal.show { display:flex; }
+      overflow: hidden;      /* non cresce con nomi lunghi */
+    }
 
-.modal-content {
-  background:#fff;
-  width:100%;
-  max-width:380px;
-  border-radius:12px;
-  padding:20px;
-}
-</style>
+    .available { background: #1e7e34; cursor: pointer; }
+    .sold { background: #c82333; cursor: not-allowed; opacity: .85; }
+    .pending { background: #ffc107; color: #333; cursor: not-allowed; }
+
+    .buyer {
+      font-size: 11px;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal.show { display: flex; }
+
+    .modal-content {
+      background: #fff;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    /* --- STILE MODALE PAGAMENTO --- */
+    .field-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e5e5e5;
+      margin: 16px 0;
+    }
+
+    .pay-title {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .pay-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pay-buttons img {
+      width: 18px;
+      height: 18px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+  </style>
 </head>
 
 <body>
@@ -150,8 +206,14 @@ h1, h3 { text-align: center; margin: 6px 0; }
 <p id="lottery-meta"></p>
 
 <div class="share-box">
-  <button class="btn whatsapp" onclick="shareWhatsapp()">Condividi LotteRiffa</button>
-  <button class="btn" style="background:#000;color:#fff" onclick="goToCreateLottery()">✨ Crea la tua Lotteriffa</button>
+  <button class="btn whatsapp" onclick="shareWhatsapp()" style="display:flex;align-items:center;gap:8px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:18px;height:18px;">
+    Condividi LotteRiffa
+  </button>
+
+  <button class="btn" style="background:#000;color:#fff" onclick="goToCreateLottery()">
+    ✨ Crea la tua Lotteriffa
+  </button>
 </div>
 
 <div id="lottery-status-banner" style="display:none"></div>
@@ -164,97 +226,320 @@ h1, h3 { text-align: center; margin: 6px 0; }
 
 <div id="grid" class="grid"></div>
 
-<div id="modal" class="modal"><div class="modal-content"></div></div>
+<div id="modal" class="modal">
+  <div class="modal-content"></div>
+</div>
 
 <script>
-const SUPABASE_URL="https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-const LOTTERY_ID=new URLSearchParams(location.search).get("id");
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 
-const grid=document.getElementById("grid");
-const modal=document.getElementById("modal");
-const modalContent=document.querySelector(".modal-content");
+const grid = document.getElementById("grid");
+const modal = document.getElementById("modal");
+const modalContent = document.querySelector(".modal-content");
 
-let currentRow=null;
-window.LOTTERY_EXPIRED=false;
+let currentRow = null;
+let LOTTERY_EXPIRED = false;
+let LOTTERY_STATUS = "active"; // active/closed/finished
 
-const originalModalHTML=`
-<h3 id="modalTitle"></h3>
-<input id="nameField" placeholder="Il tuo nome"/>
-<button class="btn stripe" onclick="payWithStripe()">Stripe</button>
-<button class="btn paypal" onclick="payManual('paypal')">PayPal</button>
-<button class="btn revolut" onclick="payManual('revolut')">Revolut</button>
-<button class="btn cancel" onclick="closeModal()">Annulla</button>
+const originalModalHTML = `
+  <h3 id="modalTitle"></h3>
+
+  <label class="field-label">Il tuo nome</label>
+  <input id="nameField" placeholder="Es. Mario Rossi" />
+
+  <div class="divider"></div>
+
+  <div class="pay-title">Scegli il metodo di pagamento</div>
+
+  <div class="pay-buttons">
+    <button class="btn stripe" onclick="payWithStripe()">
+      Paga con Stripe
+    </button>
+
+    <button class="btn paypal" onclick="payManual('paypal')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
+      Paga con PayPal
+    </button>
+
+    <button class="btn revolut" onclick="payManual('revolut')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg" alt="Revolut">
+      Paga con Revolut
+    </button>
+  </div>
+
+  <button class="btn cancel" onclick="closeModal()">Annulla</button>
 `;
 
-function shareWhatsapp(){
-  window.open("https://wa.me/?text="+encodeURIComponent(location.href),"_blank");
+/* WHATSAPP */
+function shareWhatsapp() {
+  const text = encodeURIComponent(
+    "🎟️ Partecipa a questa lotteria!\nProva a vincere un premio 🎁\n\n" + location.href
+  );
+  window.open(`https://wa.me/?text=${text}`, "_blank");
 }
-function goToCreateLottery(){ location.href="login.html"; }
 
-async function loadLottery(){
-  const r=await fetch(`${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=*`,{headers:{apikey:SUPABASE_ANON_KEY}});
-  const [lot]=await r.json(); if(!lot) return;
+function goToCreateLottery() {
+  location.href = "login.html";
+}
 
-  document.getElementById("lottery-title").textContent=lot.title;
-  document.getElementById("lottery-price").textContent=`Prezzo biglietto: € ${lot.ticket_price}`;
-  document.getElementById("lottery-description-text").textContent=lot.description||"";
+/* LOAD LOTTERY */
+async function loadLottery() {
+  const r = await fetch(
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
+    { headers: { apikey: SUPABASE_ANON_KEY } }
+  );
 
-  const meta=[];
-  if(lot.draw_date){
-    const d=new Date(lot.draw_date); d.setHours(0,0,0,0);
-    const t=new Date(); t.setHours(0,0,0,0);
-    window.LOTTERY_EXPIRED = t>d;
-    meta.push(`📅 Estrazione: ${d.toLocaleDateString("it-IT")}`);
+  const json = await r.json();
+  const lot = Array.isArray(json) ? json[0] : null;
+  if (!lot) return;
+
+  LOTTERY_STATUS = lot.status || "active";
+
+  document.getElementById("lottery-title").textContent = lot.title || "";
+  document.getElementById("lottery-price").textContent =
+    `Prezzo biglietto: € ${lot.ticket_price ?? ""}`;
+  document.getElementById("lottery-description-text").textContent =
+    lot.description || "";
+
+  const meta = [];
+
+  // scadenza: se oggi > data estrazione → conclusa
+  if (lot.draw_date) {
+    const draw = new Date(lot.draw_date);
+    draw.setHours(0,0,0,0);
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    LOTTERY_EXPIRED = today > draw;
+
+    const formatted =
+      String(draw.getDate()).padStart(2, "0") + "/" +
+      String(draw.getMonth() + 1).padStart(2, "0") + "/" +
+      draw.getFullYear();
+
+    meta.push(`📅 Estrazione: ${formatted}`);
   }
-  if(lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
-  document.getElementById("lottery-meta").textContent=meta.join("\n");
 
-  const banner=document.getElementById("lottery-status-banner");
-  banner.style.display="block";
-  banner.className="status-banner "+(window.LOTTERY_EXPIRED?"status-finished":"status-active");
-  banner.textContent=window.LOTTERY_EXPIRED?"🏁 Lotteria conclusa":"✅ Lotteria attiva";
+  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
+
+  document.getElementById("lottery-meta").textContent = meta.join("\n");
+
+  const banner = document.getElementById("lottery-status-banner");
+  banner.style.display = "block";
+
+  // priorità: scaduta -> finished
+  const computedStatus = LOTTERY_EXPIRED ? "finished" : LOTTERY_STATUS;
+
+  banner.className =
+    "status-banner " +
+    (computedStatus === "active"
+      ? "status-active"
+      : computedStatus === "closed"
+      ? "status-closed"
+      : "status-finished");
+
+  banner.textContent =
+    computedStatus === "active"
+      ? "✅ Lotteria attiva"
+      : computedStatus === "closed"
+      ? "⛔ Vendite chiuse"
+      : "🏁 Lotteria conclusa";
 
   renderGallery(lot.prize_images);
 }
 
-function renderGallery(images){
-  const g=document.getElementById("prize-gallery");
-  g.innerHTML="";
-  if(!images) return;
-  (Array.isArray(images)?images:JSON.parse(images)).forEach(u=>{
-    const i=document.createElement("img"); i.src=u; g.appendChild(i);
+/* GALLERY */
+function renderGallery(images) {
+  const gallery = document.getElementById("prize-gallery");
+  let arr = [];
+
+  if (Array.isArray(images)) arr = images;
+  else if (typeof images === "string") {
+    try { arr = JSON.parse(images); } catch { arr = []; }
+  }
+
+  if (!arr.length) {
+    gallery.style.display = "none";
+    return;
+  }
+
+  gallery.style.display = "flex";
+  gallery.innerHTML = "";
+
+  arr.forEach(u => {
+    if (!u) return;
+    const i = document.createElement("img");
+    i.src = u;
+    i.onclick = () => window.open(u, "_blank");
+    gallery.appendChild(i);
   });
 }
 
-async function loadNumbers(){
-  const r=await fetch(`${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
-    {headers:{apikey:SUPABASE_ANON_KEY}});
-  const data=await r.json(); grid.innerHTML="";
+/* LOAD NUMBERS */
+async function loadNumbers() {
+  const r = await fetch(
+    `${SUPABASE_URL}/rest/v1/lottery_numbers?lottery_id=eq.${LOTTERY_ID}&order=number.asc`,
+    { headers: { apikey: SUPABASE_ANON_KEY } }
+  );
+  const data = await r.json();
 
-  data.forEach(row=>{
-    const d=document.createElement("div");
-    const cls=row.status==="sold"?"sold":row.payment_status==="pending"?"pending":"available";
-    d.className=`number ${cls}`;
-    d.innerHTML=`<div>${row.number}</div>${row.buyer_name?`<div class="buyer">${row.buyer_name}</div>`:""}`;
-    if(cls==="available" && !window.LOTTERY_EXPIRED) d.onclick=()=>openModal(row);
+  grid.innerHTML = "";
+  if (!Array.isArray(data)) return;
+
+  data.forEach(row => {
+    const d = document.createElement("div");
+    const cls =
+      row.status === "sold"
+        ? "sold"
+        : row.payment_status === "pending"
+        ? "pending"
+        : "available";
+
+    d.className = `number ${cls}`;
+    d.innerHTML = `
+      <div>${row.number}</div>
+      ${
+        cls === "pending"
+          ? `<div class="buyer">⏳ ${row.pending_buyer_name || ""}</div>`
+          : cls === "sold"
+          ? `<div class="buyer">${row.buyer_name || ""}</div>`
+          : ""
+      }
+    `;
+
+    const canBuy = (cls === "available") && !LOTTERY_EXPIRED && LOTTERY_STATUS === "active";
+
+    if (canBuy) {
+      d.onclick = () => openModal(row);
+    } else {
+      d.style.cursor = "not-allowed";
+      d.style.opacity = "0.85";
+    }
+
     grid.appendChild(d);
   });
 }
 
-function openModal(row){
-  currentRow=row;
-  modalContent.innerHTML=originalModalHTML;
-  modalContent.querySelector("#modalTitle").textContent=`Numero ${row.number}`;
+function openModal(row) {
+  currentRow = row;
+  modalContent.innerHTML = originalModalHTML;
+  modalContent.querySelector("#modalTitle").textContent = `Acquista numero ${row.number}`;
+  modalContent.querySelector("#nameField").value = "";
   modal.classList.add("show");
 }
-function closeModal(){ modal.classList.remove("show"); currentRow=null; }
 
-async function payWithStripe(){ alert("Stripe OK"); }
-async function payManual(){ alert("Manual OK"); }
+function closeModal() {
+  modal.classList.remove("show");
+  currentRow = null;
+  // ripulisce sempre, così non resta “incastrato”
+  modalContent.innerHTML = "";
+}
+
+/* STRIPE */
+async function payWithStripe() {
+  if (!currentRow) return;
+
+  const name = modalContent.querySelector("#nameField")?.value.trim() || "";
+  if (!name) return alert("Inserisci il nome");
+
+  const r = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name
+    })
+  });
+
+  const d = await r.json();
+  if (!d?.url) return alert("Errore Stripe");
+
+  location.href = d.url;
+}
+
+/* PAYPAL / REVOLUT */
+async function payManual(method) {
+  if (!currentRow) return;
+
+  const name = modalContent.querySelector("#nameField")?.value.trim() || "";
+  if (!name) return alert("Inserisci il nome");
+
+  const numberLabel = currentRow.number;
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/reserve-number-manual`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: currentRow.id,
+      buyer_name: name,
+      payment_method: method
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) return alert(data?.error || "Errore prenotazione");
+
+  const amount = data?.instructions?.amount;
+  const note = data?.instructions?.note || "";
+
+  // Edge function attuale: instructions.paypal e instructions.revolut
+  const paypalUser = data?.instructions?.paypal || null;
+  const revolutUserOrLink = data?.instructions?.revolut || null;
+
+  let paymentUrl = null;
+
+  if (method === "paypal" && paypalUser) {
+    // PayPal: con importo
+    paymentUrl = `https://www.paypal.me/${paypalUser}/${amount}`;
+  }
+
+  if (method === "revolut" && revolutUserOrLink) {
+    // Revolut: SOLO redirect al profilo (senza amount) per evitare 404
+    // può arrivare "marioreita" o "@marioreita" o un link
+    let u = String(revolutUserOrLink).trim();
+    u = u.replace("https://revolut.me/", "").replace("@", "").trim();
+    paymentUrl = `https://revolut.me/${u}`;
+  }
+
+  if (!paymentUrl) return alert("Metodo di pagamento non disponibile (verifica dati owner)");
+
+  // riepilogo nel modal + bottone Vai al pagamento
+  modalContent.innerHTML = `
+    <h3 style="text-align:center;margin-top:0;">💳 Completa il pagamento</h3>
+
+    <p style="font-size:14px;line-height:1.35;">
+      ✅ Numero <b>${numberLabel}</b> prenotato<br><br>
+      <b>Metodo:</b> ${method.toUpperCase()}<br>
+      <b>Importo:</b> € ${amount ?? "-"} <span style="color:#666;">(su Revolut lo inserisci manualmente)</span><br><br>
+      <b>Causale:</b><br>${note}<br><br>
+      ⏳ Prenotazione valida 30 minuti
+    </p>
+
+    <button class="btn ${method}" id="goPayBtn" style="width:100%;">
+      👉 Vai al pagamento
+    </button>
+
+    <button class="btn cancel" onclick="closeModal()" style="width:100%;">Chiudi</button>
+  `;
+
+  document.getElementById("goPayBtn").onclick = () => {
+    window.open(paymentUrl, "_blank");
+    // importantissimo: chiudi/reset così non resta incastrato
+    closeModal();
+  };
+
+  // aggiorna la griglia (numero diventa giallo)
+  loadNumbers();
+}
 
 loadLottery();
 loadNumbers();
 </script>
+
 </body>
 </html>
