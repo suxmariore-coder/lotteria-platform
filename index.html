@@ -312,6 +312,9 @@ async function loadLottery() {
   const json = await r.json();
   const lot = Array.isArray(json) ? json[0] : null;
   if (!lot) return;
+PAYMENT_METHODS.stripe = !!lot.stripe_enabled;
+PAYMENT_METHODS.paypal = !!lot.paypal_user;
+PAYMENT_METHODS.revolut = !!lot.revolut_link;
 
   LOTTERY_STATUS = lot.status || "active";
 
