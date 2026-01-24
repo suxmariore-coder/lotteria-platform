@@ -253,6 +253,11 @@ const modal = document.getElementById("modal");
 const modalContent = document.querySelector(".modal-content");
 
 let currentRow = null;
+let PAYMENT_METHODS = {
+  stripe: false,
+  paypal: false,
+  revolut: false
+};
 let LOTTERY_EXPIRED = false;
 let LOTTERY_STATUS = "active"; // active/closed/finished
 
@@ -267,19 +272,19 @@ const originalModalHTML = `
   <div class="pay-title">Scegli il metodo di pagamento</div>
 
   <div class="pay-buttons">
-    <button class="btn stripe" onclick="payWithStripe()">
-      Paga con Stripe
-    </button>
+    <button class="btn stripe" id="payStripeBtn" onclick="payWithStripe()">
+  Paga con Stripe
+</button>
 
-    <button class="btn paypal" onclick="payManual('paypal')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
-      Paga con PayPal
-    </button>
+    <button class="btn paypal" id="payPaypalBtn" onclick="payManual('paypal')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg">
+  Paga con PayPal
+</button>
 
-    <button class="btn revolut" onclick="payManual('revolut')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg" alt="Revolut">
-      Paga con Revolut
-    </button>
+    <button class="btn revolut" id="payRevolutBtn" onclick="payManual('revolut')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg">
+  Paga con Revolut
+</button>
   </div>
 
   <button class="btn cancel" onclick="closeModal()">Annulla</button>
@@ -300,7 +305,7 @@ function goToCreateLottery() {
 /* LOAD LOTTERY */
 async function loadLottery() {
   const r = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status,paypal_user,revolut_link,stripe_enabled`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
 
@@ -439,6 +444,30 @@ async function loadNumbers() {
 function openModal(row) {
   currentRow = row;
   modalContent.innerHTML = originalModalHTML;
+// Stripe
+const stripeBtn = modalContent.querySelector("#payStripeBtn");
+if (!PAYMENT_METHODS.stripe) {
+  stripeBtn.disabled = true;
+  stripeBtn.style.opacity = "0.5";
+  stripeBtn.style.cursor = "not-allowed";
+}
+
+// PayPal
+const paypalBtn = modalContent.querySelector("#payPaypalBtn");
+if (!PAYMENT_METHODS.paypal) {
+  paypalBtn.disabled = true;
+  paypalBtn.style.opacity = "0.5";
+  paypalBtn.style.cursor = "not-allowed";
+}
+
+// Revolut
+const revolutBtn = modalContent.querySelector("#payRevolutBtn");
+if (!PAYMENT_METHODS.revolut) {
+  revolutBtn.disabled = true;
+  revolutBtn.style.opacity = "0.5";
+  revolutBtn.style.cursor = "not-allowed";
+}
+
   modalContent.querySelector("#modalTitle").textContent = `Acquista numero ${row.number}`;
   modalContent.querySelector("#nameField").value = "";
   modal.classList.add("show");
