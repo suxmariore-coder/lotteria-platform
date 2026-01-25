@@ -60,18 +60,6 @@
       cursor: pointer;
     }
 
-.btn {
-  transition: transform .12s ease, opacity .12s ease;
-}
-
-.btn:hover:not(:disabled) {
-  transform: scale(1.02);
-}
-
-.btn:disabled {
-  cursor: not-allowed;
-}
-
     .whatsapp { background: #25D366; color: #fff; }
     .stripe { background: #6772e5; color: #fff; }
     .paypal { background: #003087; color: #fff; }
@@ -217,7 +205,7 @@
 /* 📱 MOBILE: logo più grande */
 @media (max-width: 600px) {
   .share-box img {
-    width: 26px; /* prova 26px se lo vuoi ancora più evidente */
+    width: 24px; /* prova 26px se lo vuoi ancora più evidente */
   }
 }
 
@@ -265,11 +253,6 @@ const modal = document.getElementById("modal");
 const modalContent = document.querySelector(".modal-content");
 
 let currentRow = null;
-let PAYMENT_METHODS = {
-  stripe: false,
-  paypal: false,
-  revolut: false
-};
 let LOTTERY_EXPIRED = false;
 let LOTTERY_STATUS = "active"; // active/closed/finished
 
@@ -284,19 +267,19 @@ const originalModalHTML = `
   <div class="pay-title">Scegli il metodo di pagamento</div>
 
   <div class="pay-buttons">
-    <button class="btn stripe" id="payStripeBtn" onclick="payWithStripe()">
-  Paga con Stripe
-</button>
+    <button class="btn stripe" onclick="payWithStripe()">
+      Paga con Stripe
+    </button>
 
-    <button class="btn paypal" id="payPaypalBtn" onclick="payManual('paypal')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg">
-  Paga con PayPal
-</button>
+    <button class="btn paypal" onclick="payManual('paypal')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
+      Paga con PayPal
+    </button>
 
-    <button class="btn revolut" id="payRevolutBtn" onclick="payManual('revolut')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg">
-  Paga con Revolut
-</button>
+    <button class="btn revolut" onclick="payManual('revolut')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg" alt="Revolut">
+      Paga con Revolut
+    </button>
   </div>
 
   <button class="btn cancel" onclick="closeModal()">Annulla</button>
@@ -317,21 +300,13 @@ function goToCreateLottery() {
 /* LOAD LOTTERY */
 async function loadLottery() {
   const r = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status,paypal_user,revolut_link`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
 
   const json = await r.json();
-// 🔐 abilita/disabilita metodi pagamento
-PAYMENT_METHODS.paypal = !!lot.paypal_user;
-PAYMENT_METHODS.revolut = !!lot.revolut_link;
-// stripe sempre attivo se usi Stripe
-PAYMENT_METHODS.stripe = true;
   const lot = Array.isArray(json) ? json[0] : null;
   if (!lot) return;
-PAYMENT_METHODS.stripe = true;              // ✅ Stripe sempre disponibile
-PAYMENT_METHODS.paypal = !!lot.paypal_user;
-PAYMENT_METHODS.revolut = !!lot.revolut_link;
 
   LOTTERY_STATUS = lot.status || "active";
 
@@ -464,40 +439,6 @@ async function loadNumbers() {
 function openModal(row) {
   currentRow = row;
   modalContent.innerHTML = originalModalHTML;
-if (!PAYMENT_METHODS.paypal) {
-  modalContent.querySelector(".paypal").disabled = true;
-  modalContent.querySelector(".paypal").style.opacity = "0.4";
-}
-
-if (!PAYMENT_METHODS.revolut) {
-  modalContent.querySelector(".revolut").disabled = true;
-  modalContent.querySelector(".revolut").style.opacity = "0.4";
-}
-
-// Stripe
-const stripeBtn = modalContent.querySelector("#payStripeBtn");
-if (!PAYMENT_METHODS.stripe) {
-  stripeBtn.disabled = true;
-  stripeBtn.style.opacity = "0.5";
-  stripeBtn.style.cursor = "not-allowed";
-}
-
-// PayPal
-const paypalBtn = modalContent.querySelector("#payPaypalBtn");
-if (!PAYMENT_METHODS.paypal) {
-  paypalBtn.disabled = true;
-  paypalBtn.style.opacity = "0.5";
-  paypalBtn.style.cursor = "not-allowed";
-}
-
-// Revolut
-const revolutBtn = modalContent.querySelector("#payRevolutBtn");
-if (!PAYMENT_METHODS.revolut) {
-  revolutBtn.disabled = true;
-  revolutBtn.style.opacity = "0.5";
-  revolutBtn.style.cursor = "not-allowed";
-}
-
   modalContent.querySelector("#modalTitle").textContent = `Acquista numero ${row.number}`;
   modalContent.querySelector("#nameField").value = "";
   modal.classList.add("show");
@@ -605,7 +546,7 @@ if (method === "revolut" && data.instructions.revolut) {
   document.getElementById("goPayBtn").onclick = () => {
     window.open(paymentUrl, "_blank");
 // 🔒 disabilita pulsanti per evitare doppi click
-modalContent.querySelectorAll("button").forEach(b => b.disabled = false);
+modalContent.querySelectorAll("button").forEach(b => b.disabled = true);
 
 // 🔁 schermata finale di conferma
 modalContent.innerHTML = `
