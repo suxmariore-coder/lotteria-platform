@@ -60,6 +60,18 @@
       cursor: pointer;
     }
 
+.btn {
+  transition: transform .12s ease, opacity .12s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}
+
     .whatsapp { background: #25D366; color: #fff; }
     .stripe { background: #6772e5; color: #fff; }
     .paypal { background: #003087; color: #fff; }
@@ -310,6 +322,11 @@ async function loadLottery() {
   );
 
   const json = await r.json();
+// 🔐 abilita/disabilita metodi pagamento
+PAYMENT_METHODS.paypal = !!lot.paypal_user;
+PAYMENT_METHODS.revolut = !!lot.revolut_link;
+// stripe sempre attivo se usi Stripe
+PAYMENT_METHODS.stripe = true;
   const lot = Array.isArray(json) ? json[0] : null;
   if (!lot) return;
 PAYMENT_METHODS.stripe = true;              // ✅ Stripe sempre disponibile
@@ -447,6 +464,16 @@ async function loadNumbers() {
 function openModal(row) {
   currentRow = row;
   modalContent.innerHTML = originalModalHTML;
+if (!PAYMENT_METHODS.paypal) {
+  modalContent.querySelector(".paypal").disabled = true;
+  modalContent.querySelector(".paypal").style.opacity = "0.4";
+}
+
+if (!PAYMENT_METHODS.revolut) {
+  modalContent.querySelector(".revolut").disabled = true;
+  modalContent.querySelector(".revolut").style.opacity = "0.4";
+}
+
 // Stripe
 const stripeBtn = modalContent.querySelector("#payStripeBtn");
 if (!PAYMENT_METHODS.stripe) {
@@ -577,6 +604,29 @@ if (method === "revolut" && data.instructions.revolut) {
 
   document.getElementById("goPayBtn").onclick = () => {
     window.open(paymentUrl, "_blank");
+// 🔒 disabilita pulsanti per evitare doppi click
+modalContent.querySelectorAll("button").forEach(b => b.disabled = false);
+
+// 🔁 schermata finale di conferma
+modalContent.innerHTML = `
+  <h3 style="text-align:center">✅ Pagamento inviato</h3>
+
+  <p style="font-size:14px; line-height:1.4; text-align:center">
+    Grazie per aver partecipato 🎉<br><br>
+    Il pagamento è stato <b>inviato correttamente</b>.<br>
+    L’organizzatore verificherà a breve.
+  </p>
+
+  <div class="divider"></div>
+
+  <p style="font-size:13px;color:#555;text-align:center">
+    ⏳ Il numero resterà <b>In attesa</b> fino alla conferma.<br>
+    Se non viene confermato entro 30 minuti, tornerà disponibile.
+  </p>
+
+  <button class="btn cancel" onclick="closeModal()">Chiudi</button>
+`;
+
     // importantissimo: chiudi/reset così non resta incastrato
     closeModal();
   };
