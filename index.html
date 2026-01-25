@@ -479,6 +479,15 @@ async function loadNumbers() {
 function openModal(row) {
   currentRow = row;
   modalContent.innerHTML = originalModalHTML;
+if (!PAYMENT_METHODS.paypal) {
+  modalContent.querySelector(".paypal").disabled = true;
+  modalContent.querySelector(".paypal").style.opacity = "0.4";
+}
+
+if (!PAYMENT_METHODS.revolut) {
+  modalContent.querySelector(".revolut").disabled = true;
+  modalContent.querySelector(".revolut").style.opacity = "0.4";
+}
   modalContent.querySelector("#modalTitle").textContent = `Acquista numero ${row.number}`;
   modalContent.querySelector("#nameField").value = "";
   modal.classList.add("show");
