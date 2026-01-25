@@ -317,41 +317,47 @@ function goToCreateLottery() {
 /* LOAD LOTTERY */
 async function loadLottery() {
   const r = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status,paypal_user,revolut_link`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
 
   const json = await r.json();
-const lot = json[0];
-if (!lot) return;
-
-// 🔐 abilita/disabilita metodi pagamento
-PAYMENT_METHODS.paypal = !!lot.paypal_user;
-PAYMENT_METHODS.revolut = !!lot.revolut_link;
-
-// Stripe sempre attivo (se usi Stripe)
-PAYMENT_METHODS.stripe = true;
-
   const lot = Array.isArray(json) ? json[0] : null;
   if (!lot) return;
 
+  /* -------------------------
+     ABILITA METODI PAGAMENTO
+  ------------------------- */
+  PAYMENT_METHODS.paypal = !!lot.paypal_user;
+  PAYMENT_METHODS.revolut = !!lot.revolut_link;
+  PAYMENT_METHODS.stripe = true; // Stripe sempre attivo
+
+  /* -------------------------
+     STATO LOTTERIA
+  ------------------------- */
   LOTTERY_STATUS = lot.status || "active";
 
+  /* -------------------------
+     DATI PRINCIPALI
+  ------------------------- */
   document.getElementById("lottery-title").textContent = lot.title || "";
   document.getElementById("lottery-price").textContent =
     `Prezzo biglietto: € ${lot.ticket_price ?? ""}`;
   document.getElementById("lottery-description-text").textContent =
     lot.description || "";
 
+  /* -------------------------
+     DATA ESTRAZIONE + RUOTA
+  ------------------------- */
   const meta = [];
+  LOTTERY_EXPIRED = false;
 
-  // scadenza: se oggi > data estrazione → conclusa
   if (lot.draw_date) {
     const draw = new Date(lot.draw_date);
-    draw.setHours(0,0,0,0);
+    draw.setHours(0, 0, 0, 0);
 
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
 
     LOTTERY_EXPIRED = today > draw;
 
@@ -363,14 +369,18 @@ PAYMENT_METHODS.stripe = true;
     meta.push(`📅 Estrazione: ${formatted}`);
   }
 
-  if (lot.wheel) meta.push(`🎡 Ruota: ${lot.wheel}`);
+  if (lot.wheel) {
+    meta.push(`🎡 Ruota: ${lot.wheel}`);
+  }
 
   document.getElementById("lottery-meta").textContent = meta.join("\n");
 
+  /* -------------------------
+     BANNER STATO
+  ------------------------- */
   const banner = document.getElementById("lottery-status-banner");
   banner.style.display = "block";
 
-  // priorità: scaduta -> finished
   const computedStatus = LOTTERY_EXPIRED ? "finished" : LOTTERY_STATUS;
 
   banner.className =
@@ -388,6 +398,9 @@ PAYMENT_METHODS.stripe = true;
       ? "⛔ Vendite chiuse"
       : "🏁 Lotteria conclusa";
 
+  /* -------------------------
+     GALLERIA PREMI
+  ------------------------- */
   renderGallery(lot.prize_images);
 }
 
