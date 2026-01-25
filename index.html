@@ -60,6 +60,18 @@
       cursor: pointer;
     }
 
+    .btn {
+     transition: transform .12s ease, opacity .12s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+     transform: scale(1.02);
+    }
+
+    .btn:disabled {
+     cursor: not-allowed;
+    }
+
     .whatsapp { background: #25D366; color: #fff; }
     .stripe { background: #6772e5; color: #fff; }
     .paypal { background: #003087; color: #fff; }
