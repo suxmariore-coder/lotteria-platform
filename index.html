@@ -265,6 +265,11 @@ const modal = document.getElementById("modal");
 const modalContent = document.querySelector(".modal-content");
 
 let currentRow = null;
+let PAYMENT_METHODS = {
+  stripe: false,
+  paypal: false,
+  revolut: false,
+};
 let LOTTERY_EXPIRED = false;
 let LOTTERY_STATUS = "active"; // active/closed/finished
 
