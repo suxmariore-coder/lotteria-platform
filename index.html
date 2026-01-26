@@ -580,22 +580,23 @@ if (method === "revolut" && data.instructions.revolut) {
   <p>
     <b>Numero scelto:</b> ${numberLabel}<br>
     <b>Metodo:</b> ${method.toUpperCase()}<br>
-    <b>Importo:</b> € ${amount}
+    <b>Importo:</b> ${amount ?? "-"} <span style="color:#666;">(su Revolut lo inserisci manualmente)</span><br><br>
   </p>
 
   <div class="divider"></div>
 
   <p style="font-size:14px; color:#444;">
     💡 <b>Come funziona</b><br>
-    Dopo il pagamento, l’owner controllerà manualmente l’operazione.<br>
-    Appena confermata, il numero sarà definitivamente tuo 🎉
+    ⏳ Numero prenotato, hai 30 minuti per eseguire il pagamento.
+    Dopo il pagamento, l’owner controllerà l’operazione.<br>
+    Appena confermata, il numero sarà tuo 🎉
   </p>
 
-  <button class="btn ${method}" id="goPayBtn">
-    Acquista
+  <button class="btn ${method}" id="goPayBtn" style="width:80%;">
+    👉 Acquista
   </button>
 
-  <button class="btn cancel" onclick="closeModal()">Annulla</button>
+  <button class="btn cancel" onclick="closeModal()" style="width:80%;">Annulla</button>
 `;
 
   document.getElementById("goPayBtn").onclick = () => {
