@@ -575,22 +575,28 @@ if (method === "revolut" && data.instructions.revolut) {
 
   // riepilogo nel modal + bottone Vai al pagamento
   modalContent.innerHTML = `
-    <h3 style="text-align:center;margin-top:0;">💳 Completa il pagamento</h3>
+  <h3>💳 Completa l’acquisto</h3>
 
-    <p style="font-size:14px;line-height:1.35;">
-      ✅ Numero <b>${numberLabel}</b> prenotato<br><br>
-      <b>Metodo:</b> ${method.toUpperCase()}<br>
-      <b>Importo:</b> € ${amount ?? "-"} <span style="color:#666;">(su Revolut lo inserisci manualmente)</span><br><br>
-      <b>Causale:</b><br>${note}<br><br>
-      ⏳ Prenotazione valida 30 minuti
-    </p>
+  <p>
+    <b>Numero scelto:</b> ${numberLabel}<br>
+    <b>Metodo:</b> ${method.toUpperCase()}<br>
+    <b>Importo:</b> € ${amount}
+  </p>
 
-    <button class="btn ${method}" id="goPayBtn" style="width:100%;">
-      👉 Vai al pagamento
-    </button>
+  <div class="divider"></div>
 
-    <button class="btn cancel" onclick="closeModal()" style="width:100%;">Chiudi</button>
-  `;
+  <p style="font-size:14px; color:#444;">
+    💡 <b>Come funziona</b><br>
+    Dopo il pagamento, l’owner controllerà manualmente l’operazione.<br>
+    Appena confermata, il numero sarà definitivamente tuo 🎉
+  </p>
+
+  <button class="btn ${method}" id="goPayBtn">
+    Acquista
+  </button>
+
+  <button class="btn cancel" onclick="closeModal()">Annulla</button>
+`;
 
   document.getElementById("goPayBtn").onclick = () => {
     window.open(paymentUrl, "_blank");
