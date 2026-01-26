@@ -166,13 +166,23 @@
       padding: 20px;
     }
 
+    /* 📱 MOBILE */
+    @media (max-width: 600px) {
+    .modal-content {
+    max-width: 320px; /* 👈 più compatta su mobile */
+    padding: 16px;
+  }
+}
+
     .modal input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  text-align: center;       /* 👈 simmetria */
+  font-size: 15px;
+}
 
     /* --- STILE MODALE PAGAMENTO --- */
     .field-label {
@@ -196,18 +206,20 @@
       margin-bottom: 10px;
     }
 
-    .pay-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
     .pay-buttons img {
-      width: 18px;
-      height: 18px;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.pay-buttons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 /* Dimensione logo WhatsApp */
 .share-box img {
   width: 20px;
@@ -284,22 +296,26 @@ const originalModalHTML = `
   <div class="pay-title">Scegli il metodo di pagamento</div>
 
   <div class="pay-buttons">
-    <button class="btn stripe" onclick="payWithStripe()">
-      Paga con Stripe
+
+    <button class="btn stripe">
+      💳 Paga con Stripe
     </button>
 
-    <button class="btn paypal" onclick="payManual('paypal')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
+    <button class="btn paypal" onclick="payManual('paypal')">
+      <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal">
       Paga con PayPal
     </button>
 
-    <button class="btn revolut" onclick="payManual('revolut')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg" alt="Revolut">
+    <button class="btn revolut" onclick="payManual('revolut')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Revolut_white.svg" alt="Revolut">
       Paga con Revolut
     </button>
-  </div>
 
-  <button class="btn cancel" onclick="closeModal()">Annulla</button>
+    <button class="btn cancel" onclick="closeModal()">
+      Annulla
+    </button>
+
+  </div>
 `;
 
 /* WHATSAPP */
