@@ -585,18 +585,18 @@ if (method === "revolut" && data.instructions.revolut) {
 
   <div class="divider"></div>
 
-  <p style="font-size:16px; color:#444;">
+  <p style="font-size:15px; color:#444;">
     💡 <b>Come funziona:</b><br>
     ⏳ Numero prenotato, hai 30 minuti per eseguire il pagamento.<br>
     Dopo il pagamento, l’owner controllerà l’operazione.<br>
     Appena confermata, il numero sarà tuo 🎉.
   </p>
 
-  <h3><button class="btn ${method}" id="goPayBtn" style="width:40%;">
+  <h3><button class="btn ${method}" id="goPayBtn" style="width:60%;">
     👉 Acquista
   </button><h3>
 
-  <button class="btn cancel" onclick="closeModal()" style="width:40%;">Annulla</button>
+  <button class="btn cancel" onclick="closeModal()" style="width:60%;">Annulla</button>
 `;
 
   document.getElementById("goPayBtn").onclick = () => {
