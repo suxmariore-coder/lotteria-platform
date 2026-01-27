@@ -305,33 +305,27 @@ function buildPurchaseModalHTML() {
     <div class="pay-title">Scegli il metodo di pagamento</div>
 
     <div class="pay-buttons">
-      ${
-        PAYMENT_METHODS.stripe
-          ? `<button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>`
-          : ``
-      }
+      <button class="btn stripe" onclick="payWithStripe()">
+      💳 Paga con Stripe
+    </button>
 
-      ${
-        PAYMENT_METHODS.paypal
-          ? `<button class="btn paypal" onclick="payManual('paypal')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
-              Paga con PayPal
-            </button>`
-          : ``
-      }
+    <button class="btn paypal" onclick="payManual('paypal')">
+      <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal">
+      Paga con PayPal
+    </button>
 
-      ${
-        PAYMENT_METHODS.revolut
-          ? `<button class="btn revolut" onclick="payManual('revolut')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg" alt="Revolut">
-              Paga con Revolut
-            </button>`
-          : ``
-      }
-    </div>
+    <button class="btn revolut" onclick="payManual('revolut')">
+      <span style="font-weight:700;">R</span>
+      Paga con Revolut
+    </button>
 
-    <button class="btn cancel" onclick="closeModal()">Annulla</button>
-  `;
+    <button class="btn cancel" onclick="closeModal()">
+      Annulla
+    </button>
+
+  </div>
+`;
+}
 
 /* WHATSAPP */
 function shareWhatsapp() {
