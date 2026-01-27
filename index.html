@@ -289,7 +289,7 @@ const modal = document.getElementById("modal");
 const modalContent = document.querySelector(".modal-content");
 
 let currentRow = null;
-let PAYMENT_METHODS = {  stripe: true,  paypal: false,  revolut: false};
+let PAYMENT_METHODS = { stripe: true/false, paypal: false, revolut: false };
 let LOTTERY_EXPIRED = false;
 let LOTTERY_STATUS = "active"; // active/closed/finished
 
@@ -305,26 +305,29 @@ function buildPurchaseModalHTML() {
     <div class="pay-title">Scegli il metodo di pagamento</div>
 
     <div class="pay-buttons">
-      <button class="btn stripe" onclick="payWithStripe()">
-      💳 Paga con Stripe
-    </button>
 
-    <button class="btn paypal" onclick="payManual('paypal')">
-      <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal">
-      Paga con PayPal
-    </button>
+      <button id="btnStripe" class="btn stripe" onclick="payWithStripe()">
+        💳 Acquista con Stripe
+      </button>
 
-    <button class="btn revolut" onclick="payManual('revolut')">
-      <span style="font-weight:700;">R</span>
-      Paga con Revolut
-    </button>
+      <button id="btnPaypal" class="btn paypal" onclick="payManual('paypal')">
+        <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal">
+        Acquista con PayPal
+      </button>
 
-    <button class="btn cancel" onclick="closeModal()">
+      <button id="btnRevolut" class="btn revolut outlined" onclick="payManual('revolut')">
+        <span class="revolut-icon">R</span>
+        Acquista con Revolut
+      </button>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn cancel full" onclick="closeModal()">
       Annulla
     </button>
-
-  </div>
-`;
+  `;
 }
 
 /* WHATSAPP */
@@ -516,6 +519,16 @@ if (!PAYMENT_METHODS.revolut) {
   modalContent.querySelector(".revolut").style.opacity = "0.4";
 }
   modalContent.querySelector("#modalTitle").textContent = `Acquista numero ${row.number}`;
+// mostra solo i metodi abilitati
+document.getElementById("btnStripe").style.display =
+  PAYMENT_METHODS.stripe ? "flex" : "none";
+
+document.getElementById("btnPaypal").style.display =
+  PAYMENT_METHODS.paypal ? "flex" : "none";
+
+document.getElementById("btnRevolut").style.display =
+  PAYMENT_METHODS.revolut ? "flex" : "none";
+
   modalContent.querySelector("#nameField").value = "";
   modal.classList.add("show");
 }
