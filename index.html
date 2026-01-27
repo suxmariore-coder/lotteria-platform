@@ -379,7 +379,7 @@ function goToCreateLottery() {
 /* LOAD LOTTERY */
 async function loadLottery() {
   const r = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status,paypal_user,revolut_link`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status,paypal_user,revolut_link,stripe_enabled`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
 
@@ -539,10 +539,6 @@ async function loadNumbers() {
 function openModal(row) {
   currentRow = row;
   modalContent.innerHTML = buildPurchaseModalHTML();
-if (!PAYMENT_METHODS.stripe) {
-  modalContent.querySelector(".stripe").disabled = true;
-  modalContent.querySelector(".stripe").style.opacity = "0.4";
-}
 
 if (!PAYMENT_METHODS.paypal) {
   modalContent.querySelector(".paypal").disabled = true;
