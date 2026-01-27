@@ -390,11 +390,7 @@ async function loadLottery() {
 // 🔐 abilita/disabilita metodi pagamento (in base alla configurazione owner)
 PAYMENT_METHODS.paypal = !!lot.paypal_user;
 PAYMENT_METHODS.revolut = !!lot.revolut_link;
-
-// Stripe: oggi sempre attivo.
-// Se in futuro aggiungi una colonna boolean "stripe_enabled", decommenta questo:
-// PAYMENT_METHODS.stripe = !!lot.stripe_enabled;
-PAYMENT_METHODS.stripe = true;
+PAYMENT_METHODS.stripe = !!lot.stripe_enabled;
 
   /* -------------------------
      STATO LOTTERIA
