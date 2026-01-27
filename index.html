@@ -289,46 +289,50 @@ const modal = document.getElementById("modal");
 const modalContent = document.querySelector(".modal-content");
 
 let currentRow = null;
-let PAYMENT_METHODS = {
-  stripe: false,
-  paypal: false,
-  revolut: false,
-};
+let PAYMENT_METHODS = {  stripe: true,  paypal: false,  revolut: false};
 let LOTTERY_EXPIRED = false;
 let LOTTERY_STATUS = "active"; // active/closed/finished
 
-const originalModalHTML = `
-  <h3 id="modalTitle"></h3>
+function buildPurchaseModalHTML() {
+  return `
+    <h3 id="modalTitle"></h3>
 
-  <label class="field-label">Il tuo nome</label>
-  <input id="nameField" placeholder="Es. Mario Rossi" />
+    <label class="field-label">Il tuo nome</label>
+    <input id="nameField" placeholder="Es. Mario Rossi" />
 
-  <div class="divider"></div>
+    <div class="divider"></div>
 
-  <div class="pay-title">Scegli il metodo di pagamento</div>
+    <div class="pay-title">Scegli il metodo di pagamento</div>
 
-  <div class="pay-buttons">
+    <div class="pay-buttons">
+      ${
+        PAYMENT_METHODS.stripe
+          ? `<button class="btn stripe" onclick="payWithStripe()">Paga con Stripe</button>`
+          : ``
+      }
 
-    <button class="btn stripe" onclick="payWithStripe()">
-      💳 Paga con Stripe
-    </button>
+      ${
+        PAYMENT_METHODS.paypal
+          ? `<button class="btn paypal" onclick="payManual('paypal')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
+              Paga con PayPal
+            </button>`
+          : ``
+      }
 
-    <button class="btn paypal" onclick="payManual('paypal')">
-      <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal">
-      Paga con PayPal
-    </button>
+      ${
+        PAYMENT_METHODS.revolut
+          ? `<button class="btn revolut" onclick="payManual('revolut')" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Revolut_logo.svg" alt="Revolut">
+              Paga con Revolut
+            </button>`
+          : ``
+      }
+    </div>
 
-    <button class="btn revolut" onclick="payManual('revolut')">
-      <span style="font-weight:700;">R</span>
-      Paga con Revolut
-    </button>
-
-    <button class="btn cancel" onclick="closeModal()">
-      Annulla
-    </button>
-
-  </div>
-`;
+    <button class="btn cancel" onclick="closeModal()">Annulla</button>
+  `;
+}
 
 /* WHATSAPP */
 function shareWhatsapp() {
@@ -353,12 +357,14 @@ async function loadLottery() {
   const lot = Array.isArray(json) ? json[0] : null;
   if (!lot) return;
 
-  /* -------------------------
-     ABILITA METODI PAGAMENTO
-  ------------------------- */
-  PAYMENT_METHODS.paypal = !!lot.paypal_user;
-  PAYMENT_METHODS.revolut = !!lot.revolut_link;
-  PAYMENT_METHODS.stripe = true; // Stripe sempre attivo
+// 🔐 abilita/disabilita metodi pagamento (in base alla configurazione owner)
+PAYMENT_METHODS.paypal = !!lot.paypal_user;
+PAYMENT_METHODS.revolut = !!lot.revolut_link;
+
+// Stripe: oggi sempre attivo.
+// Se in futuro aggiungi una colonna boolean "stripe_enabled", decommenta questo:
+// PAYMENT_METHODS.stripe = !!lot.stripe_enabled;
+PAYMENT_METHODS.stripe = true;
 
   /* -------------------------
      STATO LOTTERIA
@@ -506,7 +512,7 @@ async function loadNumbers() {
 
 function openModal(row) {
   currentRow = row;
-  modalContent.innerHTML = originalModalHTML;
+  modalContent.innerHTML = buildPurchaseModalHTML();
 if (!PAYMENT_METHODS.paypal) {
   modalContent.querySelector(".paypal").disabled = true;
   modalContent.querySelector(".paypal").style.opacity = "0.4";
