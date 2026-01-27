@@ -391,7 +391,6 @@ async function loadLottery() {
 PAYMENT_METHODS.paypal = !!lot.paypal_user;
 PAYMENT_METHODS.revolut = !!lot.revolut_link;
 PAYMENT_METHODS.stripe = !!lot.stripe_enabled;
-PAYMENT_METHODS.stripe = true/false;
 
   /* -------------------------
      STATO LOTTERIA
@@ -540,6 +539,11 @@ async function loadNumbers() {
 function openModal(row) {
   currentRow = row;
   modalContent.innerHTML = buildPurchaseModalHTML();
+if (!PAYMENT_METHODS.stripe) {
+  modalContent.querySelector(".stripe").disabled = true;
+  modalContent.querySelector(".stripe").style.opacity = "0.4";
+}
+
 if (!PAYMENT_METHODS.paypal) {
   modalContent.querySelector(".paypal").disabled = true;
   modalContent.querySelector(".paypal").style.opacity = "0.4";
