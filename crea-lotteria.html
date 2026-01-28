@@ -98,6 +98,11 @@
   <label>Link Revolut (opzionale)</label>
   <input id="revolut_link">
 
+<label>
+  <input type="checkbox" id="enableStripe">
+  Abilita pagamento con Stripe
+</label>
+
   <label>Metodi di pagamento</label>
   <select id="payment_methods" multiple>
     <option value="stripe" selected>Stripe</option>
@@ -126,7 +131,7 @@ async function createLottery() {
     window.location.href = "login.html";
     return;
   }
-
+  const enableStripe = document.getElementById("enableStripe").checked;
   const imagesInput = document.getElementById("prize_images");
   const files = imagesInput.files;
 
