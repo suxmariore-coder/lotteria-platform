@@ -8,11 +8,17 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       background: #f5f5f5;
       padding: 20px;
+      margin: 0;
     }
+
     .container {
       max-width: 500px;
       background: #fff;
@@ -20,20 +26,39 @@
       border-radius: 10px;
       margin: auto;
     }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+
     label {
       font-weight: bold;
-      margin-top: 15px;
+      margin-top: 14px;
       display: block;
+      font-size: 14px;
     }
-    input, textarea, select {
+
+    input,
+    textarea,
+    select {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
     }
+
     textarea {
       resize: vertical;
       min-height: 80px;
     }
+
+    select[multiple] {
+      min-height: 90px;
+    }
+
     button {
       width: 100%;
       margin-top: 20px;
@@ -45,10 +70,12 @@
       font-size: 16px;
       cursor: pointer;
     }
+
     .error {
       color: red;
       margin-top: 15px;
       text-align: center;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -76,17 +103,17 @@
   <label>Ruota di riferimento</label>
   <select id="wheel">
     <option value="">Seleziona ruota</option>
-    <option value="Bari">Bari</option>
-    <option value="Cagliari">Cagliari</option>
-    <option value="Firenze">Firenze</option>
-    <option value="Genova">Genova</option>
-    <option value="Milano">Milano</option>
-    <option value="Napoli">Napoli</option>
-    <option value="Palermo">Palermo</option>
-    <option value="Roma">Roma</option>
-    <option value="Torino">Torino</option>
-    <option value="Venezia">Venezia</option>
-    <option value="Nazionale">Nazionale</option>
+    <option>Bari</option>
+    <option>Cagliari</option>
+    <option>Firenze</option>
+    <option>Genova</option>
+    <option>Milano</option>
+    <option>Napoli</option>
+    <option>Palermo</option>
+    <option>Roma</option>
+    <option>Torino</option>
+    <option>Venezia</option>
+    <option>Nazionale</option>
   </select>
 
   <label>Immagini premio (max 5)</label>
@@ -98,12 +125,7 @@
   <label>Link Revolut (opzionale)</label>
   <input id="revolut_link">
 
-<label>
-  <input type="checkbox" id="enableStripe">
-  Abilita pagamento con Stripe
-</label>
-
-  <label>Metodi di pagamento</label>
+  <label>Metodi di pagamento disponibili</label>
   <select id="payment_methods" multiple>
     <option value="stripe" selected>Stripe</option>
     <option value="paypal">PayPal</option>
@@ -131,93 +153,42 @@ async function createLottery() {
     window.location.href = "login.html";
     return;
   }
-  const enableStripe = document.getElementById("enableStripe").checked;
-  const imagesInput = document.getElementById("prize_images");
-  const files = imagesInput.files;
 
+  const files = document.getElementById("prize_images").files;
   if (files.length > 5) {
     alert("Puoi caricare massimo 5 immagini");
     return;
   }
 
-  // 1️⃣ CREA LOTTERIA (senza immagini)
   const body = {
-    title: document.getElementById("title").value.trim(),
-    description: document.getElementById("description").value.trim(),
-    ticket_price: Number(document.getElementById("ticket_price").value),
-    admin_password: document.getElementById("admin_password").value,
-    draw_date: document.getElementById("draw_date").value,
-    wheel: document.getElementById("wheel").value,
-    paypal_user: document.getElementById("paypal_user").value,
-    revolut_link: document.getElementById("revolut_link").value,
+    title: title.value.trim(),
+    description: description.value.trim(),
+    ticket_price: Number(ticket_price.value),
+    admin_password: admin_password.value,
+    draw_date: draw_date.value,
+    wheel: wheel.value,
+    paypal_user: paypal_user.value,
+    revolut_link: revolut_link.value,
     payment_methods: Array.from(
-      document.getElementById("payment_methods").selectedOptions
+      payment_methods.selectedOptions
     ).map(o => o.value)
   };
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/create-lottery`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`
-      },
-      body: JSON.stringify(body)
-    }
-  );
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`
+    },
+    body: JSON.stringify(body)
+  });
 
   const data = await res.json();
-  console.log("CREATE LOTTERY RESPONSE:", data);
-
   if (!res.ok) {
-    document.getElementById("result").innerText =
-      data.error || "Errore creazione lotteria";
+    result.textContent = data.error || "Errore creazione lotteria";
     return;
   }
 
-  const lotteryId = data.lottery_id;
-
-  // 2️⃣ UPLOAD IMMAGINI SU STORAGE
-  const uploadedUrls = [];
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const ext = file.name.split(".").pop();
-    const filePath = `lotteries/${lotteryId}/${Date.now()}_${i}.${ext}`;
-
-    const { error: uploadError } = await supabaseClient
-      .storage
-      .from("lottery-images")
-      .upload(filePath, file, { upsert: false });
-
-    if (uploadError) {
-      console.error(uploadError);
-      alert("Errore upload immagine");
-      return;
-    }
-
-    const { data: publicData } = supabaseClient
-      .storage
-      .from("lottery-images")
-      .getPublicUrl(filePath);
-
-    uploadedUrls.push(publicData.publicUrl);
-  }
-
-  // 3️⃣ SALVA URL IMMAGINI NEL DB
-  const { error: updateError } = await supabaseClient
-    .from("lotteries")
-    .update({ prize_images: uploadedUrls })
-    .eq("id", lotteryId);
-
-  if (updateError) {
-    console.error(updateError);
-    alert("Errore salvataggio immagini");
-    return;
-  }
-
-  // 4️⃣ REDIRECT
   window.location.href = data.url;
 }
 </script>
