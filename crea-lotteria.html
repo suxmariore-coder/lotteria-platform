@@ -119,7 +119,7 @@
   </div>
 
   <label>Immagini premio (max 5)</label>
-  <input id="prize_images" type="file" multiple>
+  <input id="prize_images" type="file" accept="image/*" multiple>>
 
   <button onclick="createLottery()">Crea lotteria</button>
   <div id="result" class="error"></div>
@@ -163,7 +163,49 @@ async function createLottery() {
     return;
   }
 
-  location.href = data.url;
+  const lotteryId = data.lottery_id;
+
+  // 2️⃣ UPLOAD IMMAGINI SU STORAGE
+  const uploadedUrls = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const ext = file.name.split(".").pop();
+    const filePath = `lotteries/${lotteryId}/${Date.now()}_${i}.${ext}`;
+
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from("lottery-images")
+      .upload(filePath, file, { upsert: false });
+
+    if (uploadError) {
+      console.error(uploadError);
+      alert("Errore upload immagine");
+      return;
+    }
+
+    const { data: publicData } = supabaseClient
+      .storage
+      .from("lottery-images")
+      .getPublicUrl(filePath);
+
+    uploadedUrls.push(publicData.publicUrl);
+  }
+
+  // 3️⃣ SALVA URL IMMAGINI NEL DB
+  const { error: updateError } = await supabaseClient
+    .from("lotteries")
+    .update({ prize_images: uploadedUrls })
+    .eq("id", lotteryId);
+
+  if (updateError) {
+    console.error(updateError);
+    alert("Errore salvataggio immagini");
+    return;
+  }
+
+  // 4️⃣ REDIRECT
+  window.location.href = data.url;
 }
 </script>
 
