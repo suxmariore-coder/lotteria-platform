@@ -8,54 +8,32 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    * { box-sizing: border-box; }
-
     body {
       font-family: Arial, sans-serif;
       background: #f5f5f5;
       padding: 20px;
-      margin: 0;
     }
-
     .container {
-      max-width: 520px;
+      max-width: 500px;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
       margin: auto;
     }
-
-    h2 { text-align: center; margin-top: 0; }
-
     label {
       font-weight: bold;
-      margin-top: 14px;
+      margin-top: 15px;
       display: block;
-      font-size: 14px;
     }
-
     input, textarea, select {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
     }
-
     textarea {
       resize: vertical;
       min-height: 80px;
     }
-
-    .checkbox {
-      margin-top: 10px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      font-size: 14px;
-    }
-
     button {
       width: 100%;
       margin-top: 20px;
@@ -67,12 +45,10 @@
       font-size: 16px;
       cursor: pointer;
     }
-
     .error {
       color: red;
       margin-top: 15px;
       text-align: center;
-      font-size: 14px;
     }
   </style>
 </head>
@@ -86,26 +62,35 @@
   <input id="title">
 
   <label>Descrizione premio</label>
-  <textarea id="description"></textarea>
+  <textarea id="description" placeholder="Descrivi cosa si vince..."></textarea>
 
   <label>Prezzo biglietto (€)</label>
   <input id="ticket_price" type="number" min="1">
 
-  <label>Password admin</label>
+  <label>Password admin (reset numeri)</label>
   <input id="admin_password" type="password">
 
   <label>Data estrazione</label>
   <input id="draw_date" type="date">
 
-  <label>Ruota</label>
+  <label>Ruota di riferimento</label>
   <select id="wheel">
-    <option value="">Seleziona</option>
-    <option>Bari</option><option>Roma</option><option>Milano</option>
-    <option>Napoli</option><option>Torino</option><option>Nazionale</option>
+    <option value="">Seleziona ruota</option>
+    <option value="Bari">Bari</option>
+    <option value="Cagliari">Cagliari</option>
+    <option value="Firenze">Firenze</option>
+    <option value="Genova">Genova</option>
+    <option value="Milano">Milano</option>
+    <option value="Napoli">Napoli</option>
+    <option value="Palermo">Palermo</option>
+    <option value="Roma">Roma</option>
+    <option value="Torino">Torino</option>
+    <option value="Venezia">Venezia</option>
+    <option value="Nazionale">Nazionale</option>
   </select>
 
-  <label>WhatsApp contatto owner</label>
-  <input id="whatsapp_contact" placeholder="+39 333 1234567">
+  <label>Immagini premio (max 5)</label>
+  <input id="prize_images" type="file" accept="image/*" multiple>
 
   <label>User PayPal (opzionale)</label>
   <input id="paypal_user">
@@ -113,15 +98,15 @@
   <label>Link Revolut (opzionale)</label>
   <input id="revolut_link">
 
-  <div class="checkbox">
-    <input type="checkbox" id="stripe_enabled" checked>
-    <label for="stripe_enabled">Abilita pagamento con Stripe</label>
-  </div>
-
-  <label>Immagini premio (max 5)</label>
-  <input id="prize_images" type="file" multiple>
+  <label>Metodi di pagamento</label>
+  <select id="payment_methods" multiple>
+    <option value="stripe" selected>Stripe</option>
+    <option value="paypal">PayPal</option>
+    <option value="revolut">Revolut</option>
+  </select>
 
   <button onclick="createLottery()">Crea lotteria</button>
+
   <div id="result" class="error"></div>
 </div>
 
@@ -129,41 +114,106 @@
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 async function createLottery() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return location.href = "login.html";
+  const { data: { session } } = await supabaseClient.auth.getSession();
 
-  const body = {
-    title: title.value.trim(),
-    description: description.value.trim(),
-    ticket_price: Number(ticket_price.value),
-    admin_password: admin_password.value,
-    draw_date: draw_date.value || null,
-    wheel: wheel.value || null,
-    paypal_user: paypal_user.value || null,
-    revolut_link: revolut_link.value || null,
-    stripe_enabled: stripe_enabled.checked,
-    whatsapp_contact: whatsapp_contact.value || null,
-  };
-
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/create-lottery`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${session.access_token}`
-    },
-    body: JSON.stringify(body)
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    result.textContent = data.error || "Errore";
+  if (!session) {
+    window.location.href = "login.html";
     return;
   }
 
-  location.href = data.url;
+  const imagesInput = document.getElementById("prize_images");
+  const files = imagesInput.files;
+
+  if (files.length > 5) {
+    alert("Puoi caricare massimo 5 immagini");
+    return;
+  }
+
+  // 1️⃣ CREA LOTTERIA (senza immagini)
+  const body = {
+    title: document.getElementById("title").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    ticket_price: Number(document.getElementById("ticket_price").value),
+    admin_password: document.getElementById("admin_password").value,
+    draw_date: document.getElementById("draw_date").value,
+    wheel: document.getElementById("wheel").value,
+    paypal_user: document.getElementById("paypal_user").value,
+    revolut_link: document.getElementById("revolut_link").value,
+    payment_methods: Array.from(
+      document.getElementById("payment_methods").selectedOptions
+    ).map(o => o.value)
+  };
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/create-lottery`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify(body)
+    }
+  );
+
+  const data = await res.json();
+  console.log("CREATE LOTTERY RESPONSE:", data);
+
+  if (!res.ok) {
+    document.getElementById("result").innerText =
+      data.error || "Errore creazione lotteria";
+    return;
+  }
+
+  const lotteryId = data.lottery_id;
+
+  // 2️⃣ UPLOAD IMMAGINI SU STORAGE
+  const uploadedUrls = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const ext = file.name.split(".").pop();
+    const filePath = `lotteries/${lotteryId}/${Date.now()}_${i}.${ext}`;
+
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from("lottery-images")
+      .upload(filePath, file, { upsert: false });
+
+    if (uploadError) {
+      console.error(uploadError);
+      alert("Errore upload immagine");
+      return;
+    }
+
+    const { data: publicData } = supabaseClient
+      .storage
+      .from("lottery-images")
+      .getPublicUrl(filePath);
+
+    uploadedUrls.push(publicData.publicUrl);
+  }
+
+  // 3️⃣ SALVA URL IMMAGINI NEL DB
+  const { error: updateError } = await supabaseClient
+    .from("lotteries")
+    .update({ prize_images: uploadedUrls })
+    .eq("id", lotteryId);
+
+  if (updateError) {
+    console.error(updateError);
+    alert("Errore salvataggio immagini");
+    return;
+  }
+
+  // 4️⃣ REDIRECT
+  window.location.href = data.url;
 }
 </script>
 
