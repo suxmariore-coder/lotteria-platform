@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it">	
 <head>
   <meta charset="UTF-8" />
   <title>Lotteria</title>
@@ -323,7 +323,7 @@ const modal = document.getElementById("modal");
 const modalContent = document.querySelector(".modal-content");
 
 let currentRow = null;
-let PAYMENT_METHODS = { stripe: true/false, paypal: false, revolut: false };
+let PAYMENT_METHODS = { paypal: false, revolut: false };
 let LOTTERY_EXPIRED = false;
 let LOTTERY_STATUS = "active"; // active/closed/finished
 
@@ -339,10 +339,6 @@ function buildPurchaseModalHTML() {
     <div class="pay-title">Scegli il metodo di pagamento</div>
 
     <div class="pay-buttons">
-
-      <button id="btnStripe" class="btn stripe" onclick="payWithStripe()">
-        💳 Acquista con Stripe
-      </button>
 
       <button id="btnPaypal" class="btn paypal" onclick="payManual('paypal')">
         <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal">
@@ -379,7 +375,7 @@ function goToCreateLottery() {
 /* LOAD LOTTERY */
 async function loadLottery() {
   const r = await fetch(
-    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status,paypal_user,revolut_link,stripe_enabled`,
+    `${SUPABASE_URL}/rest/v1/lotteries?id=eq.${LOTTERY_ID}&select=title,ticket_price,description,draw_date,wheel,prize_images,status,paypal_user,revolut_link`,
     { headers: { apikey: SUPABASE_ANON_KEY } }
   );
 
@@ -387,10 +383,18 @@ async function loadLottery() {
   const lot = Array.isArray(json) ? json[0] : null;
   if (!lot) return;
 
-// 🔐 abilita/disabilita metodi pagamento (in base alla configurazione owner)
-PAYMENT_METHODS.paypal = !!lot.paypal_user;
-PAYMENT_METHODS.revolut = !!lot.revolut_link;
-PAYMENT_METHODS.stripe = !!lot.stripe_enabled;
+// reset
+PAYMENT_METHODS = { paypal: false, revolut: false };
+
+// se usi payment_methods (ARRAY)
+if (Array.isArray(lot.payment_methods)) {
+  PAYMENT_METHODS.paypal  = lot.payment_methods.includes("paypal");
+  PAYMENT_METHODS.revolut = lot.payment_methods.includes("revolut");
+}
+
+// sicurezza extra: se manca user/link → disabilita
+if (!lot.paypal_user)  PAYMENT_METHODS.paypal = false;
+if (!lot.revolut_link) PAYMENT_METHODS.revolut = false;
 
   /* -------------------------
      STATO LOTTERIA
@@ -551,8 +555,6 @@ if (!PAYMENT_METHODS.revolut) {
 }
   modalContent.querySelector("#modalTitle").textContent = `Acquista numero ${row.number}`;
 // mostra solo i metodi abilitati
-document.getElementById("btnStripe").style.display =
-  PAYMENT_METHODS.stripe ? "flex" : "none";
 
 document.getElementById("btnPaypal").style.display =
   PAYMENT_METHODS.paypal ? "flex" : "none";
@@ -569,29 +571,6 @@ function closeModal() {
   currentRow = null;
   // ripulisce sempre, così non resta “incastrato”
   modalContent.innerHTML = "";
-}
-
-/* STRIPE */
-async function payWithStripe() {
-  if (!currentRow) return;
-
-  const name = modalContent.querySelector("#nameField")?.value.trim() || "";
-  if (!name) return alert("Inserisci il nome");
-
-  const r = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-    body: JSON.stringify({
-      lottery_id: LOTTERY_ID,
-      number_id: currentRow.id,
-      buyer_name: name
-    })
-  });
-
-  const d = await r.json();
-  if (!d?.url) return alert("Errore Stripe");
-
-  location.href = d.url;
 }
 
 /* PAYPAL / REVOLUT */
