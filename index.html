@@ -387,10 +387,20 @@ async function loadLottery() {
   const lot = Array.isArray(json) ? json[0] : null;
   if (!lot) return;
 
-// 🔐 abilita/disabilita metodi pagamento (in base alla configurazione owner)
-PAYMENT_METHODS.paypal = !!lot.paypal_user;
-PAYMENT_METHODS.revolut = !!lot.revolut_link;
-PAYMENT_METHODS.stripe = !!lot.stripe_enabled;
+// reset
+PAYMENT_METHODS = { stripe: false, paypal: false, revolut: false };
+
+// se usi payment_methods (ARRAY)
+if (Array.isArray(lot.payment_methods)) {
+  PAYMENT_METHODS.stripe  = lot.payment_methods.includes("stripe");
+  PAYMENT_METHODS.paypal  = lot.payment_methods.includes("paypal");
+  PAYMENT_METHODS.revolut = lot.payment_methods.includes("revolut");
+}
+
+// sicurezza extra: se manca user/link → disabilita
+if (!lot.paypal_user)  PAYMENT_METHODS.paypal = false;
+if (!lot.revolut_link) PAYMENT_METHODS.revolut = false;
+if (!lot.stripe_enabled) PAYMENT_METHODS.stripe = false;
 
   /* -------------------------
      STATO LOTTERIA
