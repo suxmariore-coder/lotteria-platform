@@ -98,12 +98,14 @@
   <label>Link Revolut (opzionale)</label>
   <input id="revolut_link">
 
-  <label>Metodi di pagamento</label>
-  <select id="payment_methods" multiple>
-    <option value="stripe" selected>Stripe</option>
-    <option value="paypal">PayPal</option>
-    <option value="revolut">Revolut</option>
-  </select>
+<label>
+  <input type="checkbox" id="stripe_enabled" checked>
+  Abilita pagamento con Stripe
+</label>
+
+<label>Contatto WhatsApp owner (opzionale)</label>
+<input id="whatsapp_contact" placeholder="+39 333 1234567">
+
 
   <button onclick="createLottery()">Crea lotteria</button>
 
@@ -145,9 +147,9 @@ async function createLottery() {
     wheel: document.getElementById("wheel").value,
     paypal_user: document.getElementById("paypal_user").value,
     revolut_link: document.getElementById("revolut_link").value,
-    payment_methods: Array.from(
-      document.getElementById("payment_methods").selectedOptions
-    ).map(o => o.value)
+    stripe_enabled: document.getElementById("stripe_enabled").checked,
+whatsapp_contact: document.getElementById("whatsapp_contact").value.trim(),
+
   };
 
   const res = await fetch(
