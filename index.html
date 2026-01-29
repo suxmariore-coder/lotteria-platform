@@ -390,13 +390,6 @@ async function loadLottery() {
 // reset
 PAYMENT_METHODS = { stripe: false, paypal: false, revolut: false };
 
-// se usi payment_methods (ARRAY)
-if (Array.isArray(lot.payment_methods)) {
-  PAYMENT_METHODS.stripe  = lot.payment_methods.includes("stripe");
-  PAYMENT_METHODS.paypal  = lot.payment_methods.includes("paypal");
-  PAYMENT_METHODS.revolut = lot.payment_methods.includes("revolut");
-}
-
 // sicurezza extra: se manca user/link → disabilita
 if (!lot.paypal_user)  PAYMENT_METHODS.paypal = false;
 if (!lot.revolut_link) PAYMENT_METHODS.revolut = false;
@@ -719,3 +712,4 @@ loadNumbers();
 
 </body>
 </html>
+
