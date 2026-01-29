@@ -125,11 +125,6 @@
   <label>Link Revolut (opzionale)</label>
   <input id="revolut_link">
 
-<label>
-  <input type="checkbox" id="stripe_enabled" checked>
-  Abilita pagamento con Stripe
-</label>
-
 <label>Contatto WhatsApp owner (opzionale)</label>
 <input id="whatsapp_contact" placeholder="+39 333 1234567">
 
@@ -174,7 +169,6 @@ async function createLottery() {
     wheel: document.getElementById("wheel").value,
     paypal_user: document.getElementById("paypal_user").value,
     revolut_link: document.getElementById("revolut_link").value,
-    stripe_enabled: document.getElementById("stripe_enabled").checked,
 whatsapp_contact: document.getElementById("whatsapp_contact").value.trim(),
 
   };
