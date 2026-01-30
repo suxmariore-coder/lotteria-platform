@@ -434,6 +434,8 @@ async function handlePayment(numberId, action) {
       : "Rifiutare e liberare il numero?"
   )) return;
 
+  showToast("Operazione in corso…", "warning");
+
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
     alert("Sessione scaduta");
@@ -470,6 +472,8 @@ async function askResetNumber(numberId, numberLabel) {
     `Inserisci la password admin per resettare il numero ${numberLabel}:`
   );
   if (!pwd) return;
+  showToast("Reset in corso…", "warning");
+
 
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
