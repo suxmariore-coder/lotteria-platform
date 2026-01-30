@@ -1,326 +1,404 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <title>Gestione Lotteria</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Gestisci Lotteria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 16px;
     }
 
-    .container {
-      max-width: 520px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      margin: auto;
-    }
+    h1, h2 { text-align: center; margin: 6px 0; }
 
-    h2, h3 {
-      text-align: center;
-    }
+    .container { max-width: 600px; margin: 0 auto; }
 
-    .info {
-      margin: 10px 0;
-      color: #333;
-    }
-
-    .status {
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .status.active { color: green; }
-    .status.closed { color: red; }
-
-    button {
-      width: 100%;
-      margin-top: 12px;
-      padding: 12px;
-      font-size: 15px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .close-btn {
-      background: #dc3545;
-      color: #fff;
-    }
-
-    .close-btn:disabled {
-      background: #aaa;
-      cursor: not-allowed;
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
     .back {
-      background: #6c757d;
-      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      color: #333;
     }
 
-    .pending-box {
-      border: 1px solid #ddd;
+    #statusMsg {
+      text-align: center;
+      color: #444;
+      margin: 10px 0 14px;
+      font-size: 14px;
+    }
+
+    /* STATUS */
+    .status-banner {
+      padding: 12px;
       border-radius: 8px;
-      padding: 10px;
-      margin-top: 10px;
-      background: #fafafa;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 12px;
     }
+    .status-active { background: #e6f4ea; color: #1e7e34; }
+    .status-closed { background: #fff3cd; color: #856404; }
+    .status-finished { background: #f8d7da; color: #842029; }
+    .status-archived { background: #e2e3e5; color: #41464b; }
 
-    .pending-box button {
-      margin-top: 6px;
-      width: 48%;
-    }
-
-    .confirm {
-      background: #1e7e34;
-      color: white;
-    }
-
-    .cancel {
-      background: #dc3545;
-      color: white;
+    /* CARD */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
     }
 
     .row {
       display: flex;
       justify-content: space-between;
-      gap: 4%;
+      gap: 12px;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .row span { color: #555; }
+    .row b { color: #111; }
+
+    /* BUTTONS */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .primary { background: #1e7e34; color: #fff; }
+    .secondary { background: #6c757d; color: #fff; }
+    .warning { background: #ffc107; color: #333; }
+    .disabled { opacity: .6; cursor: not-allowed; }
+
+    /* IMAGES */
+    .images {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .images img {
+      height: 90px;
+      width: 120px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #eee;
+      flex: 0 0 auto;
+    }
+
+    /* NUMBERS GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .number {
+      height: 52px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .available { background: #1e7e34; }
+    .pending { background: #ffc107; color: #333; }
+    .sold { background: #c82333; }
+
+    .buyer {
+      font-size: 11px;
+      margin-top: 2px;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 4px;
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 768px) {
+      .grid { grid-template-columns: repeat(10, 1fr); }
+    }
+
+    /* PAYMENTS LIST */
+    .payment {
+      font-size: 14px;
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .payment:last-child { border-bottom: none; }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #f0f2f5;
+      color: #333;
+      width: fit-content;
     }
   </style>
 </head>
 
 <body>
-
 <div class="container">
-  <h2>⚙️ Gestione Lotteria</h2>
 
-  <div class="info"><strong>Titolo:</strong> <span id="title"></span></div>
-  <div class="info"><strong>Data estrazione:</strong> <span id="draw_date"></span></div>
-  <div class="info status" id="status"></div>
+  <div class="header">
+    <a class="back" href="dashboard.html">← Dashboard</a>
+  </div>
 
-  <button id="closeBtn" class="close-btn" onclick="closeLottery()">
-    🔒 Chiudi definitivamente la lotteria
-  </button>
+  <h1 id="pageTitle">Gestisci Lotteria</h1>
+  <div id="statusMsg"></div>
 
-  <hr style="margin:20px 0">
+  <div id="statusBanner" class="status-banner" style="display:none;"></div>
 
-  <h3>📊 Vendite</h3>
-  <div class="info"><strong>Numeri venduti:</strong> <span id="soldCount">0</span></div>
-  <div class="info"><strong>Numeri in attesa:</strong> <span id="pendingCount">0</span></div>
-  <div class="info"><strong>Numeri disponibili:</strong> <span id="availableCount">0</span></div>
+  <!-- PANORAMICA -->
+  <div class="card">
+    <h2>Panoramica</h2>
+    <div class="row"><span>Prezzo biglietto</span><b id="pTicket">—</b></div>
+    <div class="row"><span>Data estrazione</span><b id="pDraw">—</b></div>
+    <div class="row"><span>Ruota</span><b id="pWheel">—</b></div>
+    <div class="row"><span>Venduti</span><b id="pSold">—</b></div>
+    <div class="row"><span>In attesa</span><b id="pPending">—</b></div>
+  </div>
 
-  <hr style="margin:20px 0">
+  <!-- MODIFICA (solo UI, agganceremo dopo) -->
+  <div class="card">
+    <h2>Azioni</h2>
+    <button class="btn secondary disabled" disabled>✏️ Modifica dati (step successivo)</button>
+    <button class="btn warning disabled" disabled>⛔ Chiudi vendite (step successivo)</button>
+  </div>
 
-  <h3>💰 Incassi</h3>
-  <div class="info"><strong>Incasso confermato:</strong> € <span id="revenuePaid">0</span></div>
-  <div class="info"><strong>Incasso potenziale:</strong> € <span id="revenuePending">0</span></div>
-  <div class="info"><strong>Totale:</strong> € <span id="revenueTotal">0</span></div>
+  <!-- IMMAGINI -->
+  <div class="card">
+    <h2>Immagini premio</h2>
+    <div id="imagesBox" class="images"></div>
+    <button class="btn secondary disabled" disabled>➕ Gestisci immagini (step successivo)</button>
+  </div>
 
-  <hr style="margin:20px 0">
+  <!-- NUMERI -->
+  <div class="card">
+    <h2>Numeri</h2>
+    <div id="numbersGrid" class="grid"></div>
+  </div>
 
-  <h3>⏳ Pagamenti manuali in attesa</h3>
-  <div id="pendingList"></div>
+  <!-- PAGAMENTI PENDING -->
+  <div class="card">
+    <h2>Pagamenti in attesa</h2>
+    <div id="pendingList"></div>
+    <button class="btn primary disabled" disabled>✅ Conferma pagamento (step successivo)</button>
+  </div>
 
-  <button class="back" onclick="goBack()">⬅️ Torna alla dashboard</button>
 </div>
 
 <script>
-/* CONFIG */
-const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+  // ✅ CONFIG
+  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 
-/* LOTTERY ID */
-const params = new URLSearchParams(window.location.search);
-const LOTTERY_ID = params.get("id");
+  const elStatusMsg = document.getElementById("statusMsg");
+  const elStatusBanner = document.getElementById("statusBanner");
 
-if (!LOTTERY_ID) {
-  document.body.innerHTML = "<h2>ID lotteria mancante</h2>";
-  throw new Error("Missing lottery id");
-}
+  const elTicket = document.getElementById("pTicket");
+  const elDraw = document.getElementById("pDraw");
+  const elWheel = document.getElementById("pWheel");
+  const elSold = document.getElementById("pSold");
+  const elPending = document.getElementById("pPending");
 
-let LOTTERY_STATUS = "active";
+  const elImagesBox = document.getElementById("imagesBox");
+  const elNumbersGrid = document.getElementById("numbersGrid");
+  const elPendingList = document.getElementById("pendingList");
 
-/* AUTH */
-async function checkAuth() {
-  const { data } = await sb.auth.getSession();
-  if (!data.session) {
-    window.location.href = "login.html";
-    return;
-  }
-  await loadLottery();
-  await loadSalesStats();
-  await loadPendingNumbers();
-}
-
-/* LOAD LOTTERY */
-async function loadLottery() {
-  const { data, error } = await sb
-    .from("lotteries")
-    .select("title, draw_date, status")
-    .eq("id", LOTTERY_ID)
-    .single();
-
-  if (error || !data) {
-    alert("Errore caricamento lotteria");
-    return;
+  function fmtDateIT(dateStr) {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return "—";
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
   }
 
-  document.getElementById("title").textContent = data.title;
-  document.getElementById("draw_date").textContent = data.draw_date || "—";
+  function setBanner(status) {
+    elStatusBanner.style.display = "block";
 
-  LOTTERY_STATUS = data.status || "active";
+    const cls =
+      status === "active" ? "status-active" :
+      status === "closed" ? "status-closed" :
+      status === "archived" ? "status-archived" :
+      "status-finished";
 
-  const statusEl = document.getElementById("status");
-  statusEl.textContent =
-    LOTTERY_STATUS === "active"
-      ? "🟢 Lotteria attiva"
-      : "🔴 Lotteria chiusa";
+    elStatusBanner.className = `status-banner ${cls}`;
 
-  statusEl.className = "info status " + LOTTERY_STATUS;
-
-  if (LOTTERY_STATUS !== "active") {
-    document.getElementById("closeBtn").disabled = true;
-  }
-}
-
-/* SALES STATS */
-async function loadSalesStats() {
-  const { data: lottery } = await sb
-    .from("lotteries")
-    .select("ticket_price")
-    .eq("id", LOTTERY_ID)
-    .single();
-
-  if (!lottery) return;
-  const price = Number(lottery.ticket_price);
-
-  const { data: numbers } = await sb
-    .from("lottery_numbers")
-    .select("status, payment_status")
-    .eq("lottery_id", LOTTERY_ID);
-
-  let sold = 0;
-  let pending = 0;
-  let available = 0;
-
-  numbers.forEach(n => {
-    if (n.status === "sold") sold++;
-    else if (n.payment_status === "pending") pending++;
-    else available++;
-  });
-
-  document.getElementById("soldCount").textContent = sold;
-  document.getElementById("pendingCount").textContent = pending;
-  document.getElementById("availableCount").textContent = available;
-
-  document.getElementById("revenuePaid").textContent = (sold * price).toFixed(2);
-  document.getElementById("revenuePending").textContent = (pending * price).toFixed(2);
-  document.getElementById("revenueTotal").textContent =
-    ((sold + pending) * price).toFixed(2);
-}
-
-/* PENDING NUMBERS */
-async function loadPendingNumbers() {
-  const { data } = await sb
-    .from("lottery_numbers")
-    .select("id, number, pending_buyer_name, payment_method")
-    .eq("lottery_id", LOTTERY_ID)
-    .eq("payment_status", "pending")
-    .order("number");
-
-  const box = document.getElementById("pendingList");
-  box.innerHTML = "";
-
-  if (!data || data.length === 0) {
-    box.innerHTML = "<p>Nessun pagamento in attesa.</p>";
-    return;
+    elStatusBanner.textContent =
+      status === "active" ? "✅ Lotteria attiva" :
+      status === "closed" ? "⛔ Vendite chiuse" :
+      status === "archived" ? "🗂️ Lotteria archiviata" :
+      "🏁 Lotteria conclusa";
   }
 
-  data.forEach(n => {
-    const div = document.createElement("div");
-    div.className = "pending-box";
-    div.innerHTML = `
-      <b>Numero ${n.number}</b><br>
-      👤 ${n.pending_buyer_name}<br>
-      💳 ${n.payment_method}
-      <div class="row">
-        <button class="confirm" onclick="confirmManual('${n.id}')">✅ Conferma</button>
-        <button class="cancel" onclick="cancelManual('${n.id}')">❌ Annulla</button>
-      </div>
-    `;
-    box.appendChild(div);
-  });
-}
+  async function requireAuth() {
+    const { data, error } = await sb.auth.getUser();
+    if (error || !data?.user) {
+      location.href = "login.html";
+      return null;
+    }
+    return data.user;
+  }
 
-/* CONFIRM */
-async function confirmManual(id) {
-  if (!confirm("Confermi pagamento ricevuto?")) return;
+  async function loadLottery(ownerId) {
+    elStatusMsg.textContent = "Caricamento lotteria…";
 
-  const { data } = await sb
-    .from("lottery_numbers")
-    .select("pending_buyer_name")
-    .eq("id", id)
-    .single();
+    // Nota: selezioniamo solo ciò che serve (aggiungerai campi dopo)
+    const { data, error } = await sb
+      .from("lotteries")
+      .select("id,title,description,ticket_price,draw_date,wheel,status,prize_images,owner_id")
+      .eq("id", LOTTERY_ID)
+      .maybeSingle();
 
-  await sb
-    .from("lottery_numbers")
-    .update({
-      status: "sold",
-      buyer_name: data.pending_buyer_name,
-      payment_status: "paid",
-      pending_buyer_name: null
-    })
-    .eq("id", id);
+    if (error || !data) {
+      elStatusMsg.textContent = "Lotteria non trovata.";
+      return null;
+    }
 
-  await loadSalesStats();
-  await loadPendingNumbers();
-}
+    if (data.owner_id !== ownerId) {
+      elStatusMsg.textContent = "Non hai accesso a questa lotteria.";
+      return null;
+    }
 
-/* CANCEL */
-async function cancelManual(id) {
-  if (!confirm("Annullare la prenotazione?")) return;
+    document.getElementById("pageTitle").textContent = `Gestisci: ${data.title || "Lotteria"}`;
+    elTicket.textContent = data.ticket_price != null ? `€ ${data.ticket_price}` : "—";
+    elDraw.textContent = fmtDateIT(data.draw_date);
+    elWheel.textContent = data.wheel || "—";
+    setBanner(data.status || "active");
 
-  await sb
-    .from("lottery_numbers")
-    .update({
-      status: "available",
-      payment_status: null,
-      pending_buyer_name: null
-    })
-    .eq("id", id);
+    // immagini
+    elImagesBox.innerHTML = "";
+    const imgs = Array.isArray(data.prize_images) ? data.prize_images : [];
+    if (!imgs.length) {
+      elImagesBox.innerHTML = `<div style="color:#666;font-size:14px;">Nessuna immagine</div>`;
+    } else {
+      imgs.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "premio";
+        img.onclick = () => window.open(url, "_blank");
+        elImagesBox.appendChild(img);
+      });
+    }
 
-  await loadSalesStats();
-  await loadPendingNumbers();
-}
+    elStatusMsg.textContent = "";
+    return data;
+  }
 
-/* CLOSE LOTTERY */
-async function closeLottery() {
-  if (!confirm("Sei sicuro? Questa operazione è DEFINITIVA.")) return;
+  async function loadNumbersAndPending() {
+    elNumbersGrid.innerHTML = "";
+    elPendingList.innerHTML = `<div style="color:#666;font-size:14px;">Caricamento…</div>`;
 
-  await sb
-    .from("lotteries")
-    .update({ status: "closed" })
-    .eq("id", LOTTERY_ID);
+    const { data, error } = await sb
+      .from("lottery_numbers")
+      .select("id,number,status,payment_status,pending_buyer_name,buyer_name,payment_method")
+      .eq("lottery_id", LOTTERY_ID)
+      .order("number", { ascending: true });
 
-  alert("Lotteria chiusa");
-  await loadLottery();
-}
+    if (error || !Array.isArray(data)) {
+      elPendingList.innerHTML = `<div style="color:#c00;font-size:14px;">Errore caricamento numeri.</div>`;
+      return;
+    }
 
-/* BACK */
-function goBack() {
-  window.location.href = "dashboard.html";
-}
+    let soldCount = 0;
+    let pendingCount = 0;
 
-/* INIT */
-checkAuth();
+    // render griglia
+    data.forEach(row => {
+      const cls = row.status === "sold"
+        ? "sold"
+        : row.payment_status === "pending"
+        ? "pending"
+        : "available";
+
+      if (cls === "sold") soldCount++;
+      if (cls === "pending") pendingCount++;
+
+      const d = document.createElement("div");
+      d.className = `number ${cls}`;
+      d.innerHTML = `
+        <div>${row.number}</div>
+        ${
+          cls === "pending"
+            ? `<div class="buyer">⏳ ${row.pending_buyer_name || ""}</div>`
+            : cls === "sold"
+            ? `<div class="buyer">${row.buyer_name || ""}</div>`
+            : ``
+        }
+      `;
+      elNumbersGrid.appendChild(d);
+    });
+
+    elSold.textContent = `${soldCount} / 90`;
+    elPending.textContent = `${pendingCount}`;
+
+    // lista pending
+    const pendings = data.filter(r => r.payment_status === "pending");
+    if (!pendings.length) {
+      elPendingList.innerHTML = `<div style="color:#666;font-size:14px;">Nessun pagamento in attesa.</div>`;
+      return;
+    }
+
+    elPendingList.innerHTML = "";
+    pendings.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "payment";
+      div.innerHTML = `
+        <div><b>${p.pending_buyer_name || "—"}</b> – Numero <b>${p.number}</b></div>
+        <div class="pill">Metodo: ${(p.payment_method || "manuale").toUpperCase()}</div>
+      `;
+      elPendingList.appendChild(div);
+    });
+  }
+
+  (async () => {
+    if (!LOTTERY_ID) {
+      elStatusMsg.textContent = "ID lotteria mancante nell’URL.";
+      return;
+    }
+
+    const user = await requireAuth();
+    if (!user) return;
+
+    const lot = await loadLottery(user.id);
+    if (!lot) return;
+
+    await loadNumbersAndPending();
+  })();
 </script>
 
 </body>
