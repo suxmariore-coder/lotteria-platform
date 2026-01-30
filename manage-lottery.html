@@ -448,7 +448,7 @@ async function handlePayment(numberId, action) {
 
   const data = await res.json();
   if (!res.ok) {
-    alert(data.error || "Errore operazione");
+    showToast(data.error || "Errore operazione", "error");
     return;
   }
 
@@ -485,14 +485,33 @@ async function askResetNumber(numberId, numberLabel) {
 
   const data = await res.json();
   if (!res.ok) {
-    alert(data.error || "Errore reset numero");
+    showToast(data.error || "Errore operazione", "error");
     return;
   }
 
-  alert("Numero resettato correttamente");
+  showToast("Numero resettato correttamente", "success");
+
   loadNumbersAndPending();
 }
 
+function showToast(msg, type = "info") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+
+  t.style.background =
+    type === "success" ? "#1e7e34" :
+    type === "error"   ? "#c82333" :
+    type === "warning" ? "#ffc107" :
+    "#333";
+
+  t.style.color = type === "warning" ? "#111" : "#fff";
+
+  t.style.display = "block";
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.display = "none";
+  }, 2500);
+}
 </script>
 
 <div id="toast" style="
