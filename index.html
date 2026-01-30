@@ -388,17 +388,16 @@ async function loadLottery() {
   if (!lot) return;
 
 // reset
-PAYMENT_METHODS = { stripe: false, paypal: false, revolut: false };
+PAYMENT_METHODS = { paypal: false, revolut: false };
 
-// 🔐 abilita/disabilita metodi pagamento (in base alla configurazione owner)
-PAYMENT_METHODS.paypal = !!lot.paypal_user;
-PAYMENT_METHODS.revolut = !!lot.revolut_link;
-PAYMENT_METHODS.stripe = !!lot.stripe_enabled;
-  
-// sicurezza extra: se manca user/link → disabilita
-if (!lot.paypal_user)  PAYMENT_METHODS.paypal = false;
-if (!lot.revolut_link) PAYMENT_METHODS.revolut = false;
-if (!lot.stripe_enabled) PAYMENT_METHODS.stripe = false;
+// abilita SOLO se i dati owner esistono
+if (lot.paypal_user && lot.paypal_user.trim() !== "") {
+  PAYMENT_METHODS.paypal = true;
+}
+
+if (lot.revolut_link && lot.revolut_link.trim() !== "") {
+  PAYMENT_METHODS.revolut = true;
+}
 
   /* -------------------------
      STATO LOTTERIA
@@ -717,5 +716,3 @@ loadNumbers();
 
 </body>
 </html>
-
-
