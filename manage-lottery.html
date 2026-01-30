@@ -348,6 +348,11 @@
       if (cls === "sold") soldCount++;
       if (cls === "pending") pendingCount++;
 
+if (cls === "sold") {
+  d.style.cursor = "pointer";
+  d.onclick = () => askResetNumber(row.id, row.number);
+}
+
       const d = document.createElement("div");
       d.className = `number ${cls}`;
       d.innerHTML = `
@@ -445,6 +450,43 @@ async function handlePayment(numberId, action) {
 
   // 🔄 refresh dati
   await loadNumbersAndPending();
+}
+
+async function askResetNumber(numberId, numberLabel) {
+  const pwd = prompt(
+    `Inserisci la password admin per resettare il numero ${numberLabel}:`
+  );
+  if (!pwd) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    alert("Sessione scaduta");
+    return;
+  }
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/reset-number`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        number_id: numberId,
+        admin_password: pwd,
+      }),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || "Errore reset numero");
+    return;
+  }
+
+  alert("Numero resettato correttamente");
+  loadNumbersAndPending();
 }
 
 </script>
