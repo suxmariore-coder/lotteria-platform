@@ -339,32 +339,38 @@
 
     // render griglia
     data.forEach(row => {
-      const cls = row.status === "sold"
-        ? "sold"
-        : row.payment_status === "pending"
-        ? "pending"
-        : "available";
+  const cls = row.status === "sold"
+    ? "sold"
+    : row.payment_status === "pending"
+    ? "pending"
+    : "available";
 
+  if (cls === "sold") soldCount++;
+  if (cls === "pending") pendingCount++;
 
-if (cls === "sold") {
-  d.style.cursor = "pointer";
-  d.onclick = () => askResetNumber(row.id, row.number);
-}
+  const d = document.createElement("div");
+  d.className = `number ${cls}`;
 
-      const d = document.createElement("div");
-      d.className = `number ${cls}`;
-      d.innerHTML = `
-        <div>${row.number}</div>
-        ${
-          cls === "pending"
-            ? `<div class="buyer">⏳ ${row.pending_buyer_name || ""}</div>`
-            : cls === "sold"
-            ? `<div class="buyer">${row.buyer_name || ""}</div>`
-            : ``
-        }
-      `;
-      elNumbersGrid.appendChild(d);
-    });
+  d.innerHTML = `
+    <div>${row.number}</div>
+    ${
+      cls === "pending"
+        ? `<div class="buyer">⏳ ${row.pending_buyer_name || ""}</div>`
+        : cls === "sold"
+        ? `<div class="buyer">${row.buyer_name || ""}</div>`
+        : ``
+    }
+  `;
+
+  // ✅ CLICK SOLO SU SOLD (RESET)
+  if (cls === "sold") {
+    d.style.cursor = "pointer";
+    d.onclick = () => askResetNumber(row.id, row.number);
+  }
+
+  elNumbersGrid.appendChild(d);
+});
+
 
     elSold.textContent = `${soldCount} / 90`;
     elPending.textContent = `${pendingCount}`;
