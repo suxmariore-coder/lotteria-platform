@@ -199,7 +199,7 @@
   <!-- MODIFICA (solo UI, agganceremo dopo) -->
   <div class="card">
     <h2>Azioni</h2>
-    <button class="btn secondary disabled" disabled>✏️ Modifica dati (step successivo)</button>
+    <button class="btn secondary" id="btnEdit">✏️ Modifica dati</button>
     <button class="btn warning disabled" disabled>⛔ Chiudi vendite (step successivo)</button>
   </div>
 
@@ -232,6 +232,10 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const LOTTERY_ID = new URLSearchParams(location.search).get("id");
+
+document.getElementById("btnEdit").onclick = () => {
+  location.href = `edit-lottery.html?id=${LOTTERY_ID}`;
+};
 
   const elStatusMsg = document.getElementById("statusMsg");
   const elStatusBanner = document.getElementById("statusBanner");
