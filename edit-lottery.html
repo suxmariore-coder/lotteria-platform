@@ -146,21 +146,18 @@
     </select>
 
 <div class="card">
-  <h2>💳 Metodi di pagamento</h2>
+  <h2>💳 Dati pagamento</h2>
 
-  <label style="margin-top:8px;">
-    <input type="checkbox" id="pay_paypal"> PayPal
-  </label>
+  <label>PayPal username</label>
+  <input id="paypal_user" placeholder="es. reimar2002">
 
-  <label style="margin-top:8px;">
-    <input type="checkbox" id="pay_revolut"> Revolut
-  </label>
+  <label style="margin-top:12px;">Link Revolut</label>
+  <input id="revolut_link" placeholder="es. https://revolut.me/tuonome">
 
-  <div style="font-size:13px;color:#666;margin-top:8px;">
-    I metodi selezionati saranno disponibili per l’acquisto dei numeri.
+  <div style="font-size:13px;color:#666;margin-top:10px;line-height:1.4;">
+    Nota: i metodi compariranno agli utenti solo se il campo è compilato.
   </div>
 </div>
-
 
     <label>WhatsApp owner</label>
     <input id="whatsapp_contact" placeholder="+39 333 1234567">
@@ -287,15 +284,8 @@ async function loadLottery() {
   document.getElementById("draw_date").value = data.draw_date || "";
   document.getElementById("wheel").value = data.wheel || "";
   document.getElementById("whatsapp_contact").value = data.whatsapp_contact || "";
-const methods = Array.isArray(data.payment_methods)
-  ? data.payment_methods
-  : [];
-
-document.getElementById("pay_paypal").checked =
-  methods.includes("paypal");
-
-document.getElementById("pay_revolut").checked =
-  methods.includes("revolut");
+  document.getElementById("paypal_user").value = data.paypal_user || "";
+  document.getElementById("revolut_link").value = data.revolut_link || ""
 
   CURRENT_IMAGES = Array.isArray(data.prize_images) ? data.prize_images : [];
   renderImages();
@@ -312,17 +302,12 @@ async function saveChanges() {
     wheel: document.getElementById("wheel").value || null,
     whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
     prize_images: CURRENT_IMAGES,
-    payment_methods
+    paypal_user: paypal_user || null,
+    revolut_link: revolut_link || null,
   };
 
-const payment_methods = [];
-
-if (document.getElementById("pay_paypal").checked) {
-  payment_methods.push("paypal");
-}
-if (document.getElementById("pay_revolut").checked) {
-  payment_methods.push("revolut");
-}
+const paypal_user = document.getElementById("paypal_user").value.trim();
+const revolut_link = document.getElementById("revolut_link").value.trim();
 
   const { error } = await sb
     .from("lotteries")
