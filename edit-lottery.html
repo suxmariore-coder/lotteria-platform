@@ -308,18 +308,20 @@ async function saveChanges() {
   const revolutLink = document.getElementById("revolut_link").value.trim();
 
   const payload = {
-    title: document.getElementById("title").value.trim(),
-    description: document.getElementById("description").value.trim(),
-    ticket_price: Number(document.getElementById("ticket_price").value),
-    draw_date: document.getElementById("draw_date").value || null,
-    wheel: document.getElementById("wheel").value || null,
-    whatsapp_contact: document.getElementById("whatsapp_contact").value.trim() || null,
-    prize_images: CURRENT_IMAGES,
+  title: document.getElementById("title").value.trim(),
+  description: document.getElementById("description").value.trim(),
+  ticket_price: Number(document.getElementById("ticket_price").value),
+  draw_date: document.getElementById("draw_date").value || null,
+  wheel: document.getElementById("wheel").value || null,
+  whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
+  paypal_user: paypal_user || null,
+  revolut_link: revolut_link || null,
+};
 
-    // ✅ QUESTI ORA FUNZIONANO DAVVERO
-    paypal_user: paypalUser || null,
-    revolut_link: revolutLink || null,
-  };
+// 👉 aggiorna le immagini SOLO se esistono
+if (Array.isArray(CURRENT_IMAGES) && CURRENT_IMAGES.length > 0) {
+  payload.prize_images = CURRENT_IMAGES;
+}
 
   const { error } = await sb
     .from("lotteries")
