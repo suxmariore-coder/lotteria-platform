@@ -306,6 +306,9 @@ async function saveChanges() {
     revolut_link: revolut_link || null,
   };
 
+const paypal_user = document.getElementById("paypal_user").value.trim();
+const revolut_link = document.getElementById("revolut_link").value.trim();
+
   const { error } = await sb
     .from("lotteries")
     .update(payload)
