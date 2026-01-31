@@ -15,22 +15,14 @@
       padding: 16px;
     }
 
+    h1, h2 {
+      text-align: center;
+      margin: 8px 0;
+    }
+
     .container {
       max-width: 600px;
       margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      margin: 10px 0 16px;
-    }
-
-    .back {
-      display: inline-block;
-      margin-bottom: 12px;
-      font-size: 14px;
-      text-decoration: none;
-      color: #333;
     }
 
     .card {
@@ -40,28 +32,18 @@
       margin-bottom: 14px;
     }
 
-    .card h2 {
-      font-size: 16px;
-      margin: 0 0 10px;
-    }
-
     label {
-      display: block;
-      font-size: 13px;
       font-weight: bold;
-      margin-top: 10px;
+      display: block;
+      margin-top: 12px;
+      font-size: 14px;
     }
 
-    input,
-    textarea,
-    select {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
       box-sizing: border-box;
-      font-size: 14px;
     }
 
     textarea {
@@ -69,30 +51,57 @@
       min-height: 80px;
     }
 
-    .checkbox-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 8px;
-      font-size: 14px;
-    }
-
     .btn {
       width: 100%;
-      padding: 14px;
-      border-radius: 8px;
+      padding: 12px;
+      border-radius: 6px;
       border: none;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
-      margin-top: 16px;
-      background: #1e7e34;
-      color: #fff;
+      margin-top: 12px;
     }
 
-    .hint {
-      font-size: 12px;
-      color: #666;
-      margin-top: 4px;
+    .primary { background:#1e7e34; color:#fff; }
+    .secondary { background:#6c757d; color:#fff; }
+
+    .images {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-top: 8px;
+    }
+
+    .img-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .img-wrap img {
+      height: 90px;
+      width: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #eee;
+    }
+
+    .img-wrap button {
+      padding: 6px 10px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      background: #dc3545;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 10px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -100,11 +109,11 @@
 <body>
 <div class="container">
 
-  <a class="back" href="manage-lottery.html">← Torna alla gestione</a>
+  <a class="back" href="#" id="backBtn">← Torna a Gestisci</a>
 
-  <h1>✏️ Modifica lotteria</h1>
+  <h1>✏️ Modifica Lotteria</h1>
 
-  <!-- DATI BASE -->
+  <!-- DATI -->
   <div class="card">
     <h2>Dati principali</h2>
 
@@ -116,11 +125,6 @@
 
     <label>Prezzo biglietto (€)</label>
     <input id="ticket_price" type="number" min="1">
-  </div>
-
-  <!-- ESTRAZIONE -->
-  <div class="card">
-    <h2>Estrazione</h2>
 
     <label>Data estrazione</label>
     <input id="draw_date" type="date">
@@ -140,57 +144,169 @@
       <option>Venezia</option>
       <option>Nazionale</option>
     </select>
+
+    <label>WhatsApp owner</label>
+    <input id="whatsapp_contact" placeholder="+39 333 1234567">
   </div>
 
-  <!-- PAGAMENTI -->
+  <!-- IMMAGINI -->
   <div class="card">
-    <h2>Metodi di pagamento</h2>
+    <h2>📷 Immagini premio</h2>
 
-    <label>PayPal</label>
-    <input id="paypal_user" placeholder="es. nomeutente">
+    <div id="imagesPreview" class="images"></div>
 
-    <label>Revolut</label>
-    <input id="revolut_link" placeholder="https://revolut.me/...">
-
-    <div class="checkbox-row">
-      <input type="checkbox" id="stripe_enabled">
-      <label for="stripe_enabled">Abilita Stripe</label>
-    </div>
-
-    <div class="hint">
-      Stripe è utilizzabile solo se configurato correttamente.
-    </div>
+    <label>Aggiungi immagini (max 5 totali)</label>
+    <input id="new_images" type="file" accept="image/*" multiple>
   </div>
 
-  <!-- CONTATTO -->
+  <!-- SALVA -->
   <div class="card">
-    <h2>Contatto owner</h2>
-
-    <label>WhatsApp</label>
-    <input id="whatsapp_contact" placeholder="+39 3XX XXXXXXX">
-
-    <div class="hint">
-      Visibile agli utenti per richieste informazioni.
-    </div>
+    <button class="btn primary" onclick="saveChanges()">💾 Salva modifiche</button>
+    <button class="btn secondary" onclick="goBack()">Annulla</button>
   </div>
-
-  <button class="btn" onclick="saveChanges()">💾 Salva modifiche</button>
-
-</div>
-
-<h3 style="margin-top:18px;">📷 Immagini premio</h3>
-
-<div id="imagesPreview" style="display:flex; gap:10px; overflow-x:auto; padding:8px 0;"></div>
-
-<label style="font-weight:bold; margin-top:10px; display:block;">
-  Aggiungi immagini (max 5 totali)
-</label>
-<input id="new_images" type="file" accept="image/*" multiple />
 
 </div>
 
 <script>
-  Sostituisci interamente lo script in fondo a edit-lottery.html con questo:
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const LOTTERY_ID = new URLSearchParams(location.search).get("id");
+
+let CURRENT_IMAGES = [];
+
+document.getElementById("backBtn").onclick = () => {
+  location.href = `manage-lottery.html?id=${LOTTERY_ID}`;
+};
+
+function goBack() {
+  location.href = `manage-lottery.html?id=${LOTTERY_ID}`;
+}
+
+async function requireAuth() {
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) {
+    location.href = "login.html";
+    return null;
+  }
+  return data.user;
+}
+
+function renderImages() {
+  const box = document.getElementById("imagesPreview");
+  box.innerHTML = "";
+
+  if (!CURRENT_IMAGES.length) {
+    box.innerHTML = `<div style="color:#666;font-size:14px;">Nessuna immagine</div>`;
+    return;
+  }
+
+  CURRENT_IMAGES.forEach((url, idx) => {
+    const wrap = document.createElement("div");
+    wrap.className = "img-wrap";
+    wrap.innerHTML = `
+      <img src="${url}">
+      <button>Rimuovi</button>
+    `;
+    wrap.querySelector("button").onclick = () => {
+      CURRENT_IMAGES.splice(idx, 1);
+      renderImages();
+    };
+    box.appendChild(wrap);
+  });
+}
+
+async function uploadNewImages() {
+  const input = document.getElementById("new_images");
+  const files = input.files;
+
+  if (!files || !files.length) return;
+
+  if (CURRENT_IMAGES.length + files.length > 5) {
+    alert("Massimo 5 immagini totali");
+    return;
+  }
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const ext = file.name.split(".").pop();
+    const path = `lotteries/${LOTTERY_ID}/${Date.now()}_${i}.${ext}`;
+
+    const { error } = await sb.storage
+      .from("lottery-images")
+      .upload(path, file, { upsert: false });
+
+    if (error) {
+      alert("Errore upload immagine");
+      return;
+    }
+
+    const { data } = sb.storage
+      .from("lottery-images")
+      .getPublicUrl(path);
+
+    CURRENT_IMAGES.push(data.publicUrl);
+  }
+
+  input.value = "";
+}
+
+async function loadLottery() {
+  const { data } = await sb
+    .from("lotteries")
+    .select("*")
+    .eq("id", LOTTERY_ID)
+    .maybeSingle();
+
+  if (!data) {
+    alert("Lotteria non trovata");
+    return;
+  }
+
+  document.getElementById("title").value = data.title || "";
+  document.getElementById("description").value = data.description || "";
+  document.getElementById("ticket_price").value = data.ticket_price || "";
+  document.getElementById("draw_date").value = data.draw_date || "";
+  document.getElementById("wheel").value = data.wheel || "";
+  document.getElementById("whatsapp_contact").value = data.whatsapp_contact || "";
+
+  CURRENT_IMAGES = Array.isArray(data.prize_images) ? data.prize_images : [];
+  renderImages();
+}
+
+async function saveChanges() {
+  await uploadNewImages();
+
+  const payload = {
+    title: document.getElementById("title").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    ticket_price: Number(document.getElementById("ticket_price").value),
+    draw_date: document.getElementById("draw_date").value || null,
+    wheel: document.getElementById("wheel").value || null,
+    whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
+    prize_images: CURRENT_IMAGES
+  };
+
+  const { error } = await sb
+    .from("lotteries")
+    .update(payload)
+    .eq("id", LOTTERY_ID);
+
+  if (error) {
+    alert("Errore salvataggio");
+    return;
+  }
+
+  alert("Modifiche salvate");
+  goBack();
+}
+
+(async () => {
+  const user = await requireAuth();
+  if (!user) return;
+  await loadLottery();
+})();
 </script>
 
 </body>
