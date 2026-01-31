@@ -302,8 +302,8 @@ async function saveChanges() {
     wheel: document.getElementById("wheel").value || null,
     whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
     prize_images: CURRENT_IMAGES,
-    paypal_user: paypal_user || null,
-    revolut_link: revolut_link || null,
+    const paypal_user = document.getElementById("paypal_user").value.trim();
+    const revolut_link = document.getElementById("revolut_link").value.trim();
   };
 
   const { error } = await sb
