@@ -145,23 +145,24 @@
       <option>Nazionale</option>
     </select>
 
+</div> <!-- chiude DATI PRINCIPALI -->
+
 <div class="card">
   <h2>💳 Dati pagamento</h2>
 
   <label>PayPal username</label>
-  <input id="paypal_user" placeholder="es. reimar2002">
+  <input id="paypal_user">
 
-  <label style="margin-top:12px;">Link Revolut</label>
-  <input id="revolut_link" placeholder="es. https://revolut.me/tuonome">
+  <label>Link Revolut</label>
+  <input id="revolut_link">
 
-  <div style="font-size:13px;color:#666;margin-top:10px;line-height:1.4;">
-    Nota: i metodi compariranno agli utenti solo se il campo è compilato.
+  <div style="font-size:13px;color:#666;margin-top:10px;">
+    Nota: il metodo appare solo se compilato.
   </div>
+
+  <label style="margin-top:12px;">WhatsApp owner</label>
+  <input id="whatsapp_contact">
 </div>
-
-    <label>WhatsApp owner</label>
-    <input id="whatsapp_contact" placeholder="+39 333 1234567">
-  </div>
 
   <!-- IMMAGINI -->
   <div class="card">
@@ -278,6 +279,15 @@ async function loadLottery() {
     return;
   }
 
+const user = await requireAuth();
+if (!user) return;
+
+if (data.owner_id !== user.id) {
+  alert("Accesso non autorizzato");
+  location.href = "dashboard.html";
+  return;
+}
+
   document.getElementById("title").value = data.title || "";
   document.getElementById("description").value = data.description || "";
   document.getElementById("ticket_price").value = data.ticket_price || "";
@@ -294,20 +304,22 @@ async function loadLottery() {
 async function saveChanges() {
   await uploadNewImages();
 
+  const paypalUser = document.getElementById("paypal_user").value.trim();
+  const revolutLink = document.getElementById("revolut_link").value.trim();
+
   const payload = {
     title: document.getElementById("title").value.trim(),
     description: document.getElementById("description").value.trim(),
     ticket_price: Number(document.getElementById("ticket_price").value),
     draw_date: document.getElementById("draw_date").value || null,
     wheel: document.getElementById("wheel").value || null,
-    whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
+    whatsapp_contact: document.getElementById("whatsapp_contact").value.trim() || null,
     prize_images: CURRENT_IMAGES,
-    paypal_user: paypal_user || null,
-    revolut_link: revolut_link || null,
-  };
 
-const paypal_user = document.getElementById("paypal_user").value.trim();
-const revolut_link = document.getElementById("revolut_link").value.trim();
+    // ✅ QUESTI ORA FUNZIONANO DAVVERO
+    paypal_user: paypalUser || null,
+    revolut_link: revolutLink || null,
+  };
 
   const { error } = await sb
     .from("lotteries")
