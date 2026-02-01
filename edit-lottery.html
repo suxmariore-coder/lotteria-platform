@@ -144,25 +144,24 @@
       <option>Venezia</option>
       <option>Nazionale</option>
     </select>
-
-</div> <!-- chiude DATI PRINCIPALI -->
-
-<div class="card">
-  <h2>💳 Dati pagamento</h2>
-
-  <label>PayPal username</label>
-  <input id="paypal_user">
-
-  <label>Link Revolut</label>
-  <input id="revolut_link">
-
-  <div style="font-size:13px;color:#666;margin-top:10px;">
-    Nota: il metodo appare solo se compilato.
   </div>
 
-  <label style="margin-top:12px;">WhatsApp owner</label>
-  <input id="whatsapp_contact">
-</div>
+  <div class="card">
+    <h2>💳 Dati pagamento</h2>
+
+    <label>PayPal username</label>
+    <input id="paypal_user">
+
+    <label>Link Revolut</label>
+    <input id="revolut_link">
+
+    <div style="font-size:13px;color:#666;margin-top:10px;">
+      Nota: il metodo appare solo se compilato.
+    </div>
+
+    <label style="margin-top:12px;">WhatsApp owner</label>
+    <input id="whatsapp_contact">
+  </div>
 
   <!-- IMMAGINI -->
   <div class="card">
@@ -200,8 +199,8 @@ function goBack() {
 }
 
 async function requireAuth() {
-  const { data } = await sb.auth.getUser();
-  if (!data?.user) {
+  const { data, error } = await sb.auth.getUser();
+  if (error || !data?.user) {
     location.href = "login.html";
     return null;
   }
@@ -212,7 +211,7 @@ function renderImages() {
   const box = document.getElementById("imagesPreview");
   box.innerHTML = "";
 
-  if (!CURRENT_IMAGES.length) {
+  if (!Array.isArray(CURRENT_IMAGES) || CURRENT_IMAGES.length === 0) {
     box.innerHTML = `<div style="color:#666;font-size:14px;">Nessuna immagine</div>`;
     return;
   }
@@ -222,7 +221,7 @@ function renderImages() {
     wrap.className = "img-wrap";
     wrap.innerHTML = `
       <img src="${url}">
-      <button>Rimuovi</button>
+      <button type="button">Rimuovi</button>
     `;
     wrap.querySelector("button").onclick = () => {
       CURRENT_IMAGES.splice(idx, 1);
@@ -236,7 +235,7 @@ async function uploadNewImages() {
   const input = document.getElementById("new_images");
   const files = input.files;
 
-  if (!files || !files.length) return;
+  if (!files || files.length === 0) return;
 
   if (CURRENT_IMAGES.length + files.length > 5) {
     alert("Massimo 5 immagini totali");
@@ -253,6 +252,7 @@ async function uploadNewImages() {
       .upload(path, file, { upsert: false });
 
     if (error) {
+      console.error(error);
       alert("Errore upload immagine");
       return;
     }
@@ -267,35 +267,38 @@ async function uploadNewImages() {
   input.value = "";
 }
 
-async function loadLottery() {
-  const { data } = await sb
+async function loadLottery(user) {
+  const { data, error } = await sb
     .from("lotteries")
     .select("*")
     .eq("id", LOTTERY_ID)
     .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    alert("Errore caricamento lotteria");
+    return;
+  }
 
   if (!data) {
     alert("Lotteria non trovata");
     return;
   }
 
-const user = await requireAuth();
-if (!user) return;
-
-if (data.owner_id !== user.id) {
-  alert("Accesso non autorizzato");
-  location.href = "dashboard.html";
-  return;
-}
+  if (data.owner_id !== user.id) {
+    alert("Accesso non autorizzato");
+    location.href = "dashboard.html";
+    return;
+  }
 
   document.getElementById("title").value = data.title || "";
   document.getElementById("description").value = data.description || "";
-  document.getElementById("ticket_price").value = data.ticket_price || "";
+  document.getElementById("ticket_price").value = data.ticket_price ?? "";
   document.getElementById("draw_date").value = data.draw_date || "";
   document.getElementById("wheel").value = data.wheel || "";
   document.getElementById("whatsapp_contact").value = data.whatsapp_contact || "";
   document.getElementById("paypal_user").value = data.paypal_user || "";
-  document.getElementById("revolut_link").value = data.revolut_link || ""
+  document.getElementById("revolut_link").value = data.revolut_link || "";
 
   CURRENT_IMAGES = Array.isArray(data.prize_images) ? data.prize_images : [];
   renderImages();
@@ -313,16 +316,11 @@ async function saveChanges() {
     ticket_price: Number(document.getElementById("ticket_price").value),
     draw_date: document.getElementById("draw_date").value || null,
     wheel: document.getElementById("wheel").value || null,
-    whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
+    whatsapp_contact: document.getElementById("whatsapp_contact").value.trim() || null,
     paypal_user: paypalUser || null,
     revolut_link: revolutLink || null,
-    prize_images: CURRENT_IMAGES,
+    prize_images: Array.isArray(CURRENT_IMAGES) ? CURRENT_IMAGES : [],
   };
-
-  // 👉 aggiorna immagini solo se presenti
-  if (Array.isArray(CURRENT_IMAGES)) {
-    payload.prize_images = CURRENT_IMAGES;
-  }
 
   const { error } = await sb
     .from("lotteries")
@@ -338,8 +336,21 @@ async function saveChanges() {
   alert("Modifiche salvate");
   goBack();
 }
-</script>
 
+/* ✅ AVVIO PAGINA */
+(async () => {
+  if (!LOTTERY_ID) {
+    alert("ID lotteria mancante nell'URL");
+    location.href = "dashboard.html";
+    return;
+  }
+
+  const user = await requireAuth();
+  if (!user) return;
+
+  await loadLottery(user);
+})();
+</script>
 
 </body>
 </html>
