@@ -191,6 +191,19 @@ const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 let EXISTING_IMAGES = []; // immagini già presenti nel DB
 let NEW_IMAGES = [];      // immagini caricate ora
 
+function normalizeImages(v) {
+  if (Array.isArray(v)) return v;
+  if (typeof v === "string") {
+    try {
+      const parsed = JSON.parse(v);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 document.getElementById("backBtn").onclick = () => {
   location.href = `manage-lottery.html?id=${LOTTERY_ID}`;
 };
@@ -246,10 +259,11 @@ async function uploadNewImages() {
 
   if (!files || files.length === 0) return;
 
-  if (NEW_IMAGES.length + files.length > 5) {
-    alert("Massimo 5 immagini totali");
-    return;
-  }
+  const totalAfter = EXISTING_IMAGES.length + NEW_IMAGES.length + files.length;
+if (totalAfter > 5) {
+  alert("Massimo 5 immagini totali");
+  return;
+}
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
@@ -272,7 +286,7 @@ async function uploadNewImages() {
 
     NEW_IMAGES.push(data.publicUrl);
   }
-
+  renderImages();
   input.value = "";
 }
 
@@ -309,12 +323,8 @@ async function loadLottery(user) {
   document.getElementById("paypal_user").value = data.paypal_user || "";
   document.getElementById("revolut_link").value = data.revolut_link || "";
 
-  EXISTING_IMAGES = Array.isArray(data.prize_images)
-  ? [...data.prize_images]
-  : [];
-
+  EXISTING_IMAGES = normalizeImages(data.prize_images);
 NEW_IMAGES = [];
-
 renderImages();
 
 }
