@@ -238,12 +238,7 @@ async function uploadNewImages() {
 
   if (!files || !files.length) return;
 
-  // 🔒 copia di sicurezza delle immagini esistenti
-  const existingImages = Array.isArray(CURRENT_IMAGES)
-    ? [...CURRENT_IMAGES]
-    : [];
-
-  if (existingImages.length + files.length > 5) {
+  if (CURRENT_IMAGES.length + files.length > 5) {
     alert("Massimo 5 immagini totali");
     return;
   }
@@ -266,11 +261,8 @@ async function uploadNewImages() {
       .from("lottery-images")
       .getPublicUrl(path);
 
-    existingImages.push(data.publicUrl);
+    CURRENT_IMAGES.push(data.publicUrl);
   }
-
-  // ✅ solo qui aggiorniamo CURRENT_IMAGES
-  CURRENT_IMAGES = existingImages;
 
   input.value = "";
 }
@@ -316,20 +308,21 @@ async function saveChanges() {
   const revolutLink = document.getElementById("revolut_link").value.trim();
 
   const payload = {
-  title: document.getElementById("title").value.trim(),
-  description: document.getElementById("description").value.trim(),
-  ticket_price: Number(document.getElementById("ticket_price").value),
-  draw_date: document.getElementById("draw_date").value || null,
-  wheel: document.getElementById("wheel").value || null,
-  whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
-  paypal_user: paypaluser || null,
-  revolut_link: revolutlink || null,
-};
+    title: document.getElementById("title").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    ticket_price: Number(document.getElementById("ticket_price").value),
+    draw_date: document.getElementById("draw_date").value || null,
+    wheel: document.getElementById("wheel").value || null,
+    whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
+    paypal_user: paypalUser || null,
+    revolut_link: revolutLink || null,
+    prize_images: CURRENT_IMAGES,
+  };
 
-// 👉 aggiorna le immagini SOLO se esistono
-if (Array.isArray(CURRENT_IMAGES) && CURRENT_IMAGES.length > 0) {
-  payload.prize_images = CURRENT_IMAGES;
-}
+  // 👉 aggiorna immagini solo se presenti
+  if (Array.isArray(CURRENT_IMAGES)) {
+    payload.prize_images = CURRENT_IMAGES;
+  }
 
   const { error } = await sb
     .from("lotteries")
@@ -337,6 +330,7 @@ if (Array.isArray(CURRENT_IMAGES) && CURRENT_IMAGES.length > 0) {
     .eq("id", LOTTERY_ID);
 
   if (error) {
+    console.error(error);
     alert("Errore salvataggio");
     return;
   }
@@ -344,14 +338,8 @@ if (Array.isArray(CURRENT_IMAGES) && CURRENT_IMAGES.length > 0) {
   alert("Modifiche salvate");
   goBack();
 }
-
-(async () => {
-  const user = await requireAuth();
-  if (!user) return;
-  await loadLottery();
-})();
 </script>
+
 
 </body>
 </html>
-
