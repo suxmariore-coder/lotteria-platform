@@ -238,7 +238,12 @@ async function uploadNewImages() {
 
   if (!files || !files.length) return;
 
-  if (CURRENT_IMAGES.length + files.length > 5) {
+  // 🔒 copia di sicurezza delle immagini esistenti
+  const existingImages = Array.isArray(CURRENT_IMAGES)
+    ? [...CURRENT_IMAGES]
+    : [];
+
+  if (existingImages.length + files.length > 5) {
     alert("Massimo 5 immagini totali");
     return;
   }
@@ -261,8 +266,11 @@ async function uploadNewImages() {
       .from("lottery-images")
       .getPublicUrl(path);
 
-    CURRENT_IMAGES.push(data.publicUrl);
+    existingImages.push(data.publicUrl);
   }
+
+  // ✅ solo qui aggiorniamo CURRENT_IMAGES
+  CURRENT_IMAGES = existingImages;
 
   input.value = "";
 }
