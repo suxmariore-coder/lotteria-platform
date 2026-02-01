@@ -188,7 +188,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 
-let CURRENT_IMAGES = [];
+let EXISTING_IMAGES = []; // immagini già presenti nel DB
+let NEW_IMAGES = [];      // immagini caricate ora
 
 document.getElementById("backBtn").onclick = () => {
   location.href = `manage-lottery.html?id=${LOTTERY_ID}`;
@@ -211,22 +212,30 @@ function renderImages() {
   const box = document.getElementById("imagesPreview");
   box.innerHTML = "";
 
-  if (!Array.isArray(CURRENT_IMAGES) || CURRENT_IMAGES.length === 0) {
+  const allImages = [...EXISTING_IMAGES, ...NEW_IMAGES];
+
+  if (!allImages.length) {
     box.innerHTML = `<div style="color:#666;font-size:14px;">Nessuna immagine</div>`;
     return;
   }
 
-  CURRENT_IMAGES.forEach((url, idx) => {
+  allImages.forEach((url, idx) => {
     const wrap = document.createElement("div");
     wrap.className = "img-wrap";
     wrap.innerHTML = `
       <img src="${url}">
-      <button type="button">Rimuovi</button>
+      <button>Rimuovi</button>
     `;
+
     wrap.querySelector("button").onclick = () => {
-      CURRENT_IMAGES.splice(idx, 1);
+      if (idx < EXISTING_IMAGES.length) {
+        EXISTING_IMAGES.splice(idx, 1);
+      } else {
+        NEW_IMAGES.splice(idx - EXISTING_IMAGES.length, 1);
+      }
       renderImages();
     };
+
     box.appendChild(wrap);
   });
 }
@@ -237,7 +246,7 @@ async function uploadNewImages() {
 
   if (!files || files.length === 0) return;
 
-  if (CURRENT_IMAGES.length + files.length > 5) {
+  if (NEW_IMAGES.length + files.length > 5) {
     alert("Massimo 5 immagini totali");
     return;
   }
@@ -261,7 +270,7 @@ async function uploadNewImages() {
       .from("lottery-images")
       .getPublicUrl(path);
 
-    CURRENT_IMAGES.push(data.publicUrl);
+    NEW_IMAGES.push(data.publicUrl);
   }
 
   input.value = "";
@@ -300,8 +309,14 @@ async function loadLottery(user) {
   document.getElementById("paypal_user").value = data.paypal_user || "";
   document.getElementById("revolut_link").value = data.revolut_link || "";
 
-  CURRENT_IMAGES = Array.isArray(data.prize_images) ? data.prize_images : [];
-  renderImages();
+  EXISTING_IMAGES = Array.isArray(data.prize_images)
+  ? [...data.prize_images]
+  : [];
+
+NEW_IMAGES = [];
+
+renderImages();
+
 }
 
 async function saveChanges() {
@@ -319,8 +334,10 @@ async function saveChanges() {
     whatsapp_contact: document.getElementById("whatsapp_contact").value.trim() || null,
     paypal_user: paypalUser || null,
     revolut_link: revolutLink || null,
-    prize_images: Array.isArray(CURRENT_IMAGES) ? CURRENT_IMAGES : [],
   };
+
+const finalImages = [...EXISTING_IMAGES, ...NEW_IMAGES];
+payload.prize_images = finalImages;
 
   const { error } = await sb
     .from("lotteries")
