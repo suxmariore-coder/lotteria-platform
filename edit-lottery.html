@@ -322,8 +322,8 @@ async function saveChanges() {
   draw_date: document.getElementById("draw_date").value || null,
   wheel: document.getElementById("wheel").value || null,
   whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
-  paypal_user: paypal_user || null,
-  revolut_link: revolut_link || null,
+  paypal_user: paypaluser || null,
+  revolut_link: revolutlink || null,
 };
 
 // 👉 aggiorna le immagini SOLO se esistono
@@ -354,3 +354,4 @@ if (Array.isArray(CURRENT_IMAGES) && CURRENT_IMAGES.length > 0) {
 
 </body>
 </html>
+
