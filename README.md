@@ -1,2 +1,2 @@
 # lotteria-platform
-Progetto lotteria
+Progetto lotteria 
