@@ -77,6 +77,24 @@
       text-align: center;
       font-size: 14px;
     }
+
+.promo-card {
+  background: #f8f9fa;
+  border: 1px dashed #ccc;
+}
+
+.promo-card h3 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.promo-hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+}
+
   </style>
 </head>
 
@@ -132,6 +150,32 @@
   <button onclick="createLottery()">Crea lotteria</button>
 
   <div id="result" class="error"></div>
+
+<div class="card promo-card">
+  <h3>🎁 Codice promo</h3>
+
+  <input
+    id="promo_code"
+    placeholder="Inserisci codice promo"
+    style="text-transform: uppercase;"
+  >
+
+  <button class="btn secondary" onclick="createWithPromo()">
+    🚀 Crea gratis
+  </button>
+
+  <div class="promo-hint">
+    Hai un codice promo? Inseriscilo qui per creare la lotteria gratuitamente.
+  </div>
+</div>
+
+<hr style="margin:24px 0;">
+
+<button class="btn primary" onclick="payAndCreate()">
+  💳 Paga e crea la tua Lotteriffa
+</button>
+
+
 </div>
 
 <script>
@@ -238,7 +282,33 @@ whatsapp_contact: document.getElementById("whatsapp_contact").value.trim(),
   // 4️⃣ REDIRECT
   window.location.href = data.url;
 }
+
+function createWithPromo() {
+  const code = document.getElementById("promo_code").value.trim();
+
+  if (!code) {
+    alert("Inserisci un codice promo valido");
+    return;
+  }
+
+  // 🚧 per ora SOLO placeholder
+  alert(
+    "Codice inserito: " + code +
+    "\n\n(La validazione verrà fatta lato server)"
+  );
+
+  // TODO:
+  // chiamata edge function create-lottery-with-promo
+}
+
+function payAndCreate() {
+  // TODO:
+  // Stripe Checkout fee creazione
+  alert("Qui partirà Stripe per la fee di creazione");
+}
+
 </script>
+
 
 </body>
 </html>
