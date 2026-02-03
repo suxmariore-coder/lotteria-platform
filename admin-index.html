@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel – Promo Codes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 16px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .primary {
+      background: #1e7e34;
+      color: #fff;
+    }
+
+    .secondary {
+      background: #6c757d;
+      color: #fff;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #555;
+      font-size: 13px;
+    }
+
+    .pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      display: inline-block;
+    }
+
+    .ok {
+      background: #e6f4ea;
+      color: #1e7e34;
+    }
+
+    .off {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .edit {
+      background: #ffc107;
+    }
+
+    .toggle {
+      background: #6c757d;
+      color: #fff;
+    }
+
+    .danger {
+      background: #dc3545;
+      color: #fff;
+    }
+
+    @media (max-width: 640px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      tr {
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 12px;
+      }
+
+      th {
+        display: none;
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #555;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🛠️ Superpannello Admin</h1>
+  <div class="subtitle">Gestione codici promozionali</div>
+
+  <div class="top-actions">
+    <button class="btn primary" onclick="openCreatePromo()">➕ Crea promo</button>
+    <button class="btn secondary" onclick="logout()">Esci</button>
+  </div>
+
+  <div class="card">
+    <h3>🎁 Codici Promo</h3>
+
+    <table id="promoTable">
+      <thead>
+        <tr>
+          <th>Codice</th>
+          <th>Stato</th>
+          <th>Usati</th>
+          <th>Max</th>
+          <th>Scadenza</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- righe dinamiche -->
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function logout() {
+    await sb.auth.signOut();
+    location.href = "/login.html";
+  }
+
+  function openCreatePromo() {
+    alert("Qui apriremo la modale / pagina di creazione promo (step successivo)");
+  }
+
+  // 🔁 MOCK DATA (finché non colleghiamo il backend)
+  const MOCK_PROMOS = [
+    {
+      code: "FREE2026",
+      active: true,
+      used: 3,
+      max: 10,
+      expires_at: "2026-12-31"
+    },
+    {
+      code: "TEST",
+      active: false,
+      used: 5,
+      max: null,
+      expires_at: null
+    }
+  ];
+
+  function renderPromos(promos) {
+    const tbody = document.querySelector("#promoTable tbody");
+    tbody.innerHTML = "";
+
+    promos.forEach(p => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td data-label="Codice"><b>${p.code}</b></td>
+        <td data-label="Stato">
+          <span class="pill ${p.active ? "ok" : "off"}">
+            ${p.active ? "Attivo" : "Disattivo"}
+          </span>
+        </td>
+        <td data-label="Usati">${p.used}</td>
+        <td data-label="Max">${p.max ?? "∞"}</td>
+        <td data-label="Scadenza">${p.expires_at ?? "—"}</td>
+        <td data-label="Azioni">
+          <div class="actions">
+            <button class="edit">✏️</button>
+            <button class="toggle">${p.active ? "Disattiva" : "Attiva"}</button>
+            <button class="danger">🗑️</button>
+          </div>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // AVVIO
+  renderPromos(MOCK_PROMOS);
+</script>
+
+</body>
+</html>
