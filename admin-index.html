@@ -197,32 +197,46 @@
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  async function logout() {
-    await sb.auth.signOut();
-    location.href = "/login.html";
-  }
-
-  function openCreatePromo() {
-    alert("Qui apriremo la modale / pagina di creazione promo (step successivo)");
-  }
-
-  // 🔁 MOCK DATA (finché non colleghiamo il backend)
-  const MOCK_PROMOS = [
-    {
-      code: "FREE2026",
-      active: true,
-      used: 3,
-      max: 10,
-      expires_at: "2026-12-31"
-    },
-    {
-      code: "TEST",
-      active: false,
-      used: 5,
-      max: null,
-      expires_at: null
+  async function requireAuth() {
+    const { data } = await sb.auth.getUser();
+    if (!data?.user) {
+      location.href = "/login.html";
+      return null;
     }
-  ];
+    return data.user;
+  }
+
+  async function loadPromos() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+
+    const res = await fetch(
+      `${SUPABASE_URL}/functions/v1/admin-list-promos`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Errore caricamento promo");
+      return;
+    }
+
+    renderPromos(data);
+  }
+
+  // AVVIO
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+    await loadPromos();
+  })();
 
   function renderPromos(promos) {
     const tbody = document.querySelector("#promoTable tbody");
@@ -254,8 +268,6 @@
     });
   }
 
-  // AVVIO
-  renderPromos(MOCK_PROMOS);
 </script>
 
 </body>
