@@ -147,7 +147,8 @@
 <input id="whatsapp_contact" placeholder="+39 333 1234567">
 
 
-  <button onclick="createLottery()">Crea lotteria</button>
+  <button class="btn primary" onclick="payAndCreate()">  💳 Paga e crea la tua Lotteriffa
+</button>
 
   <div id="result" class="error"></div>
 
@@ -170,11 +171,6 @@
 </div>
 
 <hr style="margin:24px 0;">
-
-<button class="btn primary" onclick="payAndCreate()">
-  💳 Paga e crea la tua Lotteriffa
-</button>
-
 
 </div>
 
@@ -301,10 +297,28 @@ function createWithPromo() {
   // chiamata edge function create-lottery-with-promo
 }
 
-function payAndCreate() {
-  // TODO:
-  // Stripe Checkout fee creazione
-  alert("Qui partirà Stripe per la fee di creazione");
+async function payAndCreate() {
+  const body = { lottery_payload: buildLotteryPayload() };
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/create-fee-checkout`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || "Errore pagamento");
+    return;
+  }
+
+  window.location.href = data.checkout_url;
 }
 
 </script>
