@@ -71,6 +71,11 @@
       gap: 10px;
     }
 
+    .pending {
+      background: #fff3cd;
+      border: 1px dashed #ffc107;
+    }
+
     .card-top {
       display: flex;
       gap: 12px;
@@ -83,21 +88,12 @@
       border-radius: 10px;
       background: #eee;
       flex: 0 0 84px;
-      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #666;
       font-size: 12px;
       text-align: center;
-      padding: 6px;
-      box-sizing: border-box;
-    }
-    .thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
     }
 
     .meta {
@@ -122,19 +118,6 @@
       color: #555;
       font-size: 13px;
       line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .images-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-      color: #666;
-      font-size: 12px;
     }
 
     .pill {
@@ -142,12 +125,12 @@
       border-radius: 999px;
       padding: 6px 10px;
       display: inline-block;
+      font-size: 12px;
     }
 
     .actions {
       display: flex;
       gap: 10px;
-      margin-top: 4px;
     }
 
     .actions button {
@@ -159,20 +142,8 @@
       font-size: 14px;
     }
 
-    .open {
-      background: #1e7e34;
-      color: white;
-    }
-
-    .manage {
-      background: #6c757d;
-      color: white;
-    }
-
-    .danger {
-      background: #dc3545;
-      color: white;
-    }
+    .open { background: #1e7e34; color: white; }
+    .manage { background: #6c757d; color: white; }
   </style>
 </head>
 
@@ -186,121 +157,110 @@
 </div>
 
 <div id="status"></div>
-
 <div id="lotteries" class="grid"></div>
 
 <script>
-  // ✅ CONFIG
-  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-  // Evitiamo il conflitto “supabase già dichiarato”
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const elGrid = document.getElementById("lotteries");
-  const elStatus = document.getElementById("status");
+const elGrid = document.getElementById("lotteries");
+const elStatus = document.getElementById("status");
 
-  document.getElementById("btnCreate").addEventListener("click", () => {
-    window.location.href = "crea-lotteria.html";
-  });
+document.getElementById("btnCreate").onclick = () => {
+  location.href = "crea-lotteria.html";
+};
 
-  document.getElementById("btnLogout").addEventListener("click", async () => {
-    await sb.auth.signOut();
-    window.location.href = "login.html";
-  });
+document.getElementById("btnLogout").onclick = async () => {
+  await sb.auth.signOut();
+  location.href = "login.html";
+};
 
-  async function requireAuth() {
-    const { data, error } = await sb.auth.getUser();
-    if (error || !data?.user) {
-      window.location.href = "login.html";
-      return null;
-    }
-    return data.user;
+async function requireAuth() {
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) {
+    location.href = "login.html";
+    return null;
   }
+  return data.user;
+}
 
-  function safeText(v) {
-    return (v ?? "").toString();
-  }
+async function loadDashboard(ownerId) {
+  elGrid.innerHTML = "";
+  elStatus.textContent = "Caricamento…";
 
-  function truncate(s, n) {
-    s = safeText(s);
-    return s.length > n ? s.slice(0, n - 1) + "…" : s;
-  }
+  // 🔴 LOTTERIE IN CREAZIONE (A2)
+  const { data: pendings } = await sb
+    .from("pending_lotteries")
+    .select("id, created_at, fee_amount, currency")
+    .eq("owner_id", ownerId)
+    .is("lottery_id", null);
 
-  async function loadLotteries(ownerId) {
-    elStatus.textContent = "Caricamento lotterie…";
-    elGrid.innerHTML = "";
-
-    // ✅ NOTA: qui chiediamo anche description + prize_images
-    const { data, error } = await sb
-      .from("lotteries")
-      .select("id, title, ticket_price, description, prize_images, created_at")
-      .eq("owner_id", ownerId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      elStatus.textContent = `Errore caricamento lotterie: ${error.message}`;
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      elStatus.textContent = "";
-      elGrid.innerHTML = "<div class='card'><b>Nessuna lotteria creata.</b><div style='color:#555;margin-top:6px;'>Clicca su “Crea nuova lotteria”.</div></div>";
-      return;
-    }
-
-    elStatus.textContent = "";
-
-    data.forEach(l => {
-      const images = Array.isArray(l.prize_images) ? l.prize_images : [];
-      const firstImg = images.length > 0 ? images[0] : null;
-
+  if (pendings?.length) {
+    pendings.forEach(p => {
       const card = document.createElement("div");
-      card.className = "card";
-
+      card.className = "card pending";
       card.innerHTML = `
-        <div class="card-top">
-          <div class="thumb">
-            ${firstImg ? `<img src="${firstImg}" alt="premio">` : `Nessuna<br>foto`}
-          </div>
-          <div class="meta">
-            <h3 class="title">${safeText(l.title)}</h3>
-            <div class="price">Prezzo biglietto: € ${safeText(l.ticket_price)}</div>
-            <div class="desc">${safeText(l.description) ? truncate(l.description, 160) : "<i style='color:#777'>Nessuna descrizione</i>"}</div>
-          </div>
+        <h3 class="title">⏳ Creazione lotteria in corso</h3>
+        <div class="desc">
+          Pagamento ricevuto (€ ${p.fee_amount} ${p.currency}).<br>
+          Stiamo completando la creazione…
         </div>
-
-        <div class="images-row">
-          <span class="pill">📷 Foto premio: ${images.length}/5</span>
-          <span class="pill">🔗 ID: ${safeText(l.id).slice(0, 8)}…</span>
-        </div>
-
-        <div class="actions">
-          <button class="open" data-open="${l.id}">Apri</button>
-          <button class="manage" data-manage="${l.id}">Gestisci</button>
-        </div>
+        <span class="pill">⏱ Attendi qualche secondo</span>
       `;
-
-      card.querySelector("[data-open]").addEventListener("click", (e) => {
-        const id = e.currentTarget.getAttribute("data-open");
-        window.open(`index.html?id=${id}`, "_blank");
-      });
-
-
-      card.querySelector("[data-manage]").addEventListener("click", (e) => {
-      const id = e.currentTarget.getAttribute("data-manage");
-      window.location.href = `manage-lottery.html?id=${id}`;
-      });
-
       elGrid.appendChild(card);
     });
+
+    // 🔁 auto refresh
+    setTimeout(() => location.reload(), 7000);
   }
 
-  (async () => {
-    const user = await requireAuth();
-    if (!user) return;
-    await loadLotteries(user.id);
-  })();
+  // 🟢 LOTTERIE CREATE
+  const { data: lotteries } = await sb
+    .from("lotteries")
+    .select("id,title,ticket_price,description,prize_images,created_at")
+    .eq("owner_id", ownerId)
+    .order("created_at", { ascending: false });
+
+  elStatus.textContent = "";
+
+  lotteries?.forEach(l => {
+    const img = Array.isArray(l.prize_images) && l.prize_images[0];
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="thumb">${img ? `<img src="${img}" />` : "Nessuna<br>foto"}</div>
+        <div class="meta">
+          <h3 class="title">${l.title}</h3>
+          <div class="price">€ ${l.ticket_price}</div>
+          <div class="desc">${l.description || ""}</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="open">Apri</button>
+        <button class="manage">Gestisci</button>
+      </div>
+    `;
+
+    card.querySelector(".open").onclick = () =>
+      window.open(`index.html?id=${l.id}`, "_blank");
+
+    card.querySelector(".manage").onclick = () =>
+      location.href = `manage-lottery.html?id=${l.id}`;
+
+    elGrid.appendChild(card);
+  });
+}
+
+(async () => {
+  const user = await requireAuth();
+  if (!user) return;
+  await loadDashboard(user.id);
+})();
 </script>
 
 </body>
