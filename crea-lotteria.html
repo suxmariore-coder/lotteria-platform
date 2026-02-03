@@ -152,22 +152,16 @@
 
   <div id="result" class="error"></div>
 
-<div class="card promo-card">
-  <h3>🎁 Codice promo</h3>
-
-  <input
-    id="promo_code"
-    placeholder="Inserisci codice promo"
-    style="text-transform: uppercase;"
-  >
-
-  <button class="btn secondary" onclick="createWithPromo()">
-    🚀 Crea gratis
+<label>Codice promo (opzionale)</label>
+<div style="display:flex;gap:10px;align-items:center;">
+  <input id="promo_code" placeholder="ES: FREE2026" style="flex:1;">
+  <button type="button" id="btnCreateFree" style="width:auto;white-space:nowrap;background:#111;">
+    🎁 Crea gratis
   </button>
+</div>
 
-  <div class="promo-hint">
-    Hai un codice promo? Inseriscilo qui per creare la lotteria gratuitamente.
-  </div>
+<div style="font-size:13px;color:#666;margin-top:8px;line-height:1.4;">
+  Se hai un codice promo puoi creare la lotteria senza pagare la fee.
 </div>
 
 <hr style="margin:24px 0;">
@@ -319,6 +313,93 @@ async function payAndCreate() {
   }
 
   window.location.href = data.checkout_url;
+}
+
+document.getElementById("btnCreateFree").addEventListener("click", createLotteryFreeWithPromo);
+
+async function createLotteryFreeWithPromo() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) { location.href = "login.html"; return; }
+
+  const promo = document.getElementById("promo_code").value.trim();
+  if (!promo) {
+    alert("Inserisci un codice promo");
+    return;
+  }
+
+  // riusa lo stesso body che già mandi a Stripe/creazione
+  const imagesInput = document.getElementById("prize_images");
+  const files = imagesInput.files;
+
+  if (files.length > 5) { alert("Puoi caricare massimo 5 immagini"); return; }
+
+  const lottery_payload = {
+    title: document.getElementById("title").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    ticket_price: Number(document.getElementById("ticket_price").value),
+    admin_password: document.getElementById("admin_password").value,
+    draw_date: document.getElementById("draw_date").value,
+    wheel: document.getElementById("wheel").value,
+    paypal_user: document.getElementById("paypal_user").value,
+    revolut_link: document.getElementById("revolut_link").value,
+    whatsapp_contact: document.getElementById("whatsapp_contact")?.value || null,
+    // se hai stripe_enabled in create page, mettilo qui; altrimenti lascia true/false come vuoi
+    stripe_enabled: true,
+    payment_methods: Array.from(document.getElementById("payment_methods").selectedOptions).map(o => o.value),
+  };
+
+  // 1) crea lotteria GRATIS via promo
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/redeem-promo-and-create-lottery`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`
+    },
+    body: JSON.stringify({ promo_code: promo, lottery_payload })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || "Errore codice promo");
+    return;
+  }
+
+  const lotteryId = data.lottery_id;
+
+  // 2) upload immagini IDENTICO a prima
+  const uploadedUrls = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const ext = file.name.split(".").pop();
+    const filePath = `lotteries/${lotteryId}/${Date.now()}_${i}.${ext}`;
+
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from("lottery-images")
+      .upload(filePath, file, { upsert: false });
+
+    if (uploadError) { console.error(uploadError); alert("Errore upload immagine"); return; }
+
+    const { data: publicData } = supabaseClient
+      .storage
+      .from("lottery-images")
+      .getPublicUrl(filePath);
+
+    uploadedUrls.push(publicData.publicUrl);
+  }
+
+  // 3) salva url immagini
+  if (uploadedUrls.length) {
+    const { error: updateError } = await supabaseClient
+      .from("lotteries")
+      .update({ prize_images: uploadedUrls })
+      .eq("id", lotteryId);
+
+    if (updateError) { console.error(updateError); alert("Errore salvataggio immagini"); return; }
+  }
+
+  // 4) redirect
+  window.location.href = data.url;
 }
 
 </script>
