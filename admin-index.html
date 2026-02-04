@@ -217,30 +217,43 @@ async function loadPromos() {
     }
   );
 
-  const promos = await res.json();
-  renderPromos(promos);
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "Errore caricamento promo");
+    return;
+  }
+
+  if (!Array.isArray(data)) {
+    console.error("Expected array, got:", data);
+    alert("Risposta non valida dal server");
+    return;
+  }
+
+  renderPromos(data);
 }
+
 
 function renderPromos(promos) {
   const tbody = document.querySelector("#promoTable tbody");
   tbody.innerHTML = "";
 
-  promos.forEach(p => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><b>${p.code}</b></td>
-      <td>
-        <span class="pill ${p.active ? "ok" : "off"}">
-          ${p.active ? "Attivo" : "Disattivo"}
-        </span>
-      </td>
-      <td>${p.used}</td>
-      <td>${p.max ?? "∞"}</td>
-      <td>${p.expires_at ?? "—"}</td>
+  if (!Array.isArray(promos) || promos.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;color:#666">
+          Nessun codice promo
+        </td>
+      </tr>
     `;
-    tbody.appendChild(tr);
+    return;
+  }
+
+  promos.forEach(p => {
+    ...
   });
 }
+
 
 /* MODAL */
 function openCreatePromo() {
