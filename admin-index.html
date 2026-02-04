@@ -250,7 +250,32 @@ function renderPromos(promos) {
   }
 
   promos.forEach(p => {
-    ...
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td data-label="Codice"><b>${p.code}</b></td>
+
+      <td data-label="Stato">
+        <span class="pill ${p.active ? "ok" : "off"}">
+          ${p.active ? "Attivo" : "Disattivo"}
+        </span>
+      </td>
+
+      <td data-label="Usati">${p.used ?? 0}</td>
+      <td data-label="Max">${p.max_uses ?? "∞"}</td>
+      <td data-label="Scadenza">${p.expires_at ?? "—"}</td>
+
+      <td data-label="Azioni">
+        <div class="actions">
+          <button class="toggle" onclick="togglePromo('${p.id}', ${!p.active})">
+            ${p.active ? "Disattiva" : "Attiva"}
+          </button>
+          <button class="danger" onclick="deletePromo('${p.id}')">🗑️</button>
+        </div>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
   });
 }
 
