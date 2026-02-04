@@ -190,7 +190,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 async function requireAuth() {
   const { data } = await sb.auth.getUser();
   if (!data?.user) {
-    location.href = "login.html";
+    window.location.replace("login.html");
     return null;
   }
   return data.user;
@@ -198,7 +198,7 @@ async function requireAuth() {
 
 async function logout() {
   await sb.auth.signOut();
-  location.href = "login.html";
+  window.location.replace("login.html");
 }
 
 /* PROMO LIST */
