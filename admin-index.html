@@ -265,18 +265,12 @@ function closeCreatePromo() {
 }
 
 /* CREA PROMO */
-async function createPromo() {
-  const code = document.getElementById("promoCode").value.trim();
-  const max = document.getElementById("promoMax").value;
-  const exp = document.getElementById("promoExpire").value;
-
-  if (!code) {
-    alert("Inserisci un codice");
+async function createPromo(payload) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    alert("Sessione non valida");
     return;
   }
-
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return;
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/admin-create-promo`,
@@ -286,27 +280,21 @@ async function createPromo() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({
-        code,
-        max_uses: max ? Number(max) : null,
-        expires_at: exp || null,
-      }),
+      body: JSON.stringify(payload),
     }
   );
 
+  const data = await res.json();
+
   if (!res.ok) {
-    const e = await res.json();
-    alert(e.error || "Errore creazione promo");
+    alert(data.error || "Errore creazione promo");
     return;
   }
 
-  document.getElementById("promoCode").value = "";
-  document.getElementById("promoMax").value = "";
-  document.getElementById("promoExpire").value = "";
-
-  closeCreatePromo();
-  await loadPromos();
+  alert("✅ Codice promo creato");
+  loadPromos();
 }
+
 
 /* START */
 (async () => {
@@ -314,6 +302,24 @@ async function createPromo() {
   if (!user) return;
   await loadPromos();
 })();
+
+function openCreatePromo() {
+  const code = prompt("Inserisci codice promo (es: FREE2026)");
+  if (!code) return;
+
+  const maxUsesRaw = prompt("Numero massimo utilizzi? (vuoto = infinito)");
+  const maxUses = maxUsesRaw ? Number(maxUsesRaw) : null;
+
+  const expiresAt = prompt("Data scadenza (YYYY-MM-DD) opzionale");
+
+  createPromo({
+    code: code.trim().toUpperCase(),
+    max_uses: maxUses,
+    expires_at: expiresAt || null,
+  });
+}
+
+
 </script>
 
 </body>
