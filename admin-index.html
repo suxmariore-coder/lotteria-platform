@@ -47,15 +47,9 @@
       font-size: 14px;
     }
 
-    .primary {
-      background: #1e7e34;
-      color: #fff;
-    }
-
-    .secondary {
-      background: #6c757d;
-      color: #fff;
-    }
+    .primary { background: #1e7e34; color: #fff; }
+    .secondary { background: #6c757d; color: #fff; }
+    .danger { background: #dc3545; color: #fff; }
 
     .card {
       background: #fff;
@@ -75,7 +69,6 @@
       text-align: left;
       padding: 8px;
       border-bottom: 1px solid #eee;
-      vertical-align: middle;
     }
 
     th {
@@ -90,69 +83,45 @@
       display: inline-block;
     }
 
-    .ok {
-      background: #e6f4ea;
-      color: #1e7e34;
+    .ok { background: #e6f4ea; color: #1e7e34; }
+    .off { background: #f8d7da; color: #842029; }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
     }
 
-    .off {
-      background: #f8d7da;
-      color: #842029;
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      width: 100%;
+      max-width: 420px;
     }
 
-    .actions {
+    .modal-box label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    .modal-box input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+    }
+
+    .modal-actions {
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .actions button {
-      font-size: 12px;
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .edit {
-      background: #ffc107;
-    }
-
-    .toggle {
-      background: #6c757d;
-      color: #fff;
-    }
-
-    .danger {
-      background: #dc3545;
-      color: #fff;
-    }
-
-    @media (max-width: 640px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-
-      tr {
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 12px;
-      }
-
-      th {
-        display: none;
-      }
-
-      td {
-        display: flex;
-        justify-content: space-between;
-        padding: 6px 0;
-      }
-
-      td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #555;
-      }
+      gap: 10px;
+      margin-top: 16px;
     }
   </style>
 </head>
@@ -180,94 +149,156 @@
           <th>Usati</th>
           <th>Max</th>
           <th>Scadenza</th>
-          <th>Azioni</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- righe dinamiche -->
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 
 </div>
 
+<!-- MODAL CREA PROMO -->
+<div class="modal" id="promoModal">
+  <div class="modal-box">
+    <h3>Crea codice promo</h3>
+
+    <label>Codice</label>
+    <input id="promoCode" placeholder="ES. FREE100">
+
+    <label>Max utilizzi (opzionale)</label>
+    <input id="promoMax" type="number" min="1">
+
+    <label>Scadenza (opzionale)</label>
+    <input id="promoExpire" type="date">
+
+    <div class="modal-actions">
+      <button class="btn primary" onclick="createPromo()">Crea</button>
+      <button class="btn secondary" onclick="closeCreatePromo()">Annulla</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  async function requireAuth() {
-    const { data } = await sb.auth.getUser();
-    if (!data?.user) {
-      location.href = "/login.html";
-      return null;
+/* AUTH */
+async function requireAuth() {
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) {
+    location.href = "/login.html";
+    return null;
+  }
+  return data.user;
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  location.href = "/login.html";
+}
+
+/* PROMO LIST */
+async function loadPromos() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/admin-list-promos`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
     }
-    return data.user;
+  );
+
+  const promos = await res.json();
+  renderPromos(promos);
+}
+
+function renderPromos(promos) {
+  const tbody = document.querySelector("#promoTable tbody");
+  tbody.innerHTML = "";
+
+  promos.forEach(p => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><b>${p.code}</b></td>
+      <td>
+        <span class="pill ${p.active ? "ok" : "off"}">
+          ${p.active ? "Attivo" : "Disattivo"}
+        </span>
+      </td>
+      <td>${p.used}</td>
+      <td>${p.max ?? "∞"}</td>
+      <td>${p.expires_at ?? "—"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* MODAL */
+function openCreatePromo() {
+  document.getElementById("promoModal").style.display = "flex";
+}
+
+function closeCreatePromo() {
+  document.getElementById("promoModal").style.display = "none";
+}
+
+/* CREA PROMO */
+async function createPromo() {
+  const code = document.getElementById("promoCode").value.trim();
+  const max = document.getElementById("promoMax").value;
+  const exp = document.getElementById("promoExpire").value;
+
+  if (!code) {
+    alert("Inserisci un codice");
+    return;
   }
 
-  async function loadPromos() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
 
-    const res = await fetch(
-      `${SUPABASE_URL}/functions/v1/admin-list-promos`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.error || "Errore caricamento promo");
-      return;
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/admin-create-promo`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        code,
+        max_uses: max ? Number(max) : null,
+        expires_at: exp || null,
+      }),
     }
+  );
 
-    renderPromos(data);
+  if (!res.ok) {
+    const e = await res.json();
+    alert(e.error || "Errore creazione promo");
+    return;
   }
 
-  // AVVIO
-  (async () => {
-    const user = await requireAuth();
-    if (!user) return;
-    await loadPromos();
-  })();
+  document.getElementById("promoCode").value = "";
+  document.getElementById("promoMax").value = "";
+  document.getElementById("promoExpire").value = "";
 
-  function renderPromos(promos) {
-    const tbody = document.querySelector("#promoTable tbody");
-    tbody.innerHTML = "";
+  closeCreatePromo();
+  await loadPromos();
+}
 
-    promos.forEach(p => {
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td data-label="Codice"><b>${p.code}</b></td>
-        <td data-label="Stato">
-          <span class="pill ${p.active ? "ok" : "off"}">
-            ${p.active ? "Attivo" : "Disattivo"}
-          </span>
-        </td>
-        <td data-label="Usati">${p.used}</td>
-        <td data-label="Max">${p.max ?? "∞"}</td>
-        <td data-label="Scadenza">${p.expires_at ?? "—"}</td>
-        <td data-label="Azioni">
-          <div class="actions">
-            <button class="edit">✏️</button>
-            <button class="toggle">${p.active ? "Disattiva" : "Attiva"}</button>
-            <button class="danger">🗑️</button>
-          </div>
-        </td>
-      `;
-
-      tbody.appendChild(tr);
-    });
-  }
-
+/* START */
+(async () => {
+  const user = await requireAuth();
+  if (!user) return;
+  await loadPromos();
+})();
 </script>
 
 </body>
