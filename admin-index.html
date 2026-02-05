@@ -4,181 +4,16 @@
   <meta charset="UTF-8">
   <title>Admin Panel – Promo Codes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 16px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .primary { background: #1e7e34; color: #fff; }
-    .secondary { background: #6c757d; color: #fff; }
-    .danger { background: #dc3545; color: #fff; }
-
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 8px;
-      border-bottom: 1px solid #eee;
-    }
-
-    th {
-      color: #555;
-      font-size: 13px;
-    }
-
-    .pill {
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      display: inline-block;
-    }
-
-    .ok { background: #e6f4ea; color: #1e7e34; }
-    .off { background: #f8d7da; color: #842029; }
-
-    /* MODAL */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-
-    .modal-box {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
-      width: 100%;
-      max-width: 420px;
-    }
-
-    .modal-box label {
-      font-weight: bold;
-      display: block;
-      margin-top: 12px;
-      font-size: 13px;
-    }
-
-    .modal-box input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 6px;
-      box-sizing: border-box; 
-      display: block;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-    }
-  </style>
 </head>
 
 <body>
-
-<div class="container">
-
   <h1>🛠️ Superpannello Admin</h1>
-  <div class="subtitle">Gestione codici promozionali</div>
 
-  <div class="top-actions">
-    <button class="btn primary" onclick="openCreatePromo()">➕ Crea promo</button>
-    <button class="btn secondary" onclick="logout()">Esci</button>
-  </div>
+  <button onclick="createPromoPrompt()">➕ Crea promo</button>
+  <button onclick="logout()">Esci</button>
 
-  <div class="card">
-    <h3>🎁 Codici Promo</h3>
-
-    <table id="promoTable">
-      <thead>
-        <tr>
-          <th>Codice</th>
-          <th>Stato</th>
-          <th>Usati</th>
-          <th>Max</th>
-          <th>Scadenza</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-</div>
-
-<!-- MODAL CREA PROMO -->
-<div class="modal" id="promoModal">
-  <div class="modal-box">
-    <h3>Crea codice promo</h3>
-
-    <label>Codice</label>
-    <input id="promoCode" placeholder="ES. FREE100">
-
-    <label>Max utilizzi (opzionale)</label>
-    <input id="promoMax" type="number" min="1">
-
-    <label>Scadenza (opzionale)</label>
-    <input id="promoExpire" type="date">
-
-    <div class="modal-actions">
-      <button class="btn primary" onclick="createPromo()">Crea</button>
-      <button class="btn secondary" onclick="closeCreatePromo()">Annulla</button>
-    </div>
-  </div>
-</div>
+  <pre id="output"></pre>
 
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
@@ -186,22 +21,20 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* AUTH */
+async function logout() {
+  await sb.auth.signOut();
+  location.href = "login.html";
+}
+
 async function requireAuth() {
   const { data } = await sb.auth.getUser();
   if (!data?.user) {
-    window.location.replace("login.html");
+    location.href = "login.html";
     return null;
   }
   return data.user;
 }
 
-async function logout() {
-  await sb.auth.signOut();
-  window.location.replace("login.html");
-}
-
-/* PROMO LIST */
 async function loadPromos() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return;
@@ -211,141 +44,50 @@ async function loadPromos() {
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
+        apikey: SUPABASE_ANON_KEY,
+        "Content-Type": "application/json",
       },
     }
   );
 
   const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.error || "Errore caricamento promo");
-    return;
-  }
-
-  if (!Array.isArray(data)) {
-    console.error("Expected array, got:", data);
-    alert("Risposta non valida dal server");
-    return;
-  }
-
-  renderPromos(data);
+  document.getElementById("output").textContent =
+    JSON.stringify(data, null, 2);
 }
 
+async function createPromoPrompt() {
+  const code = prompt("Codice promo");
+  if (!code) return;
 
-function renderPromos(promos) {
-  const tbody = document.querySelector("#promoTable tbody");
-  tbody.innerHTML = "";
-
-  if (!Array.isArray(promos) || promos.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align:center;color:#666">
-          Nessun codice promo
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  promos.forEach(p => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td data-label="Codice"><b>${p.code}</b></td>
-
-      <td data-label="Stato">
-        <span class="pill ${p.active ? "ok" : "off"}">
-          ${p.active ? "Attivo" : "Disattivo"}
-        </span>
-      </td>
-
-      <td data-label="Usati">${p.used ?? 0}</td>
-      <td data-label="Max">${p.max_uses ?? "∞"}</td>
-      <td data-label="Scadenza">${p.expires_at ?? "—"}</td>
-
-      <td data-label="Azioni">
-        <div class="actions">
-          <button class="toggle" onclick="togglePromo('${p.id}', ${!p.active})">
-            ${p.active ? "Disattiva" : "Attiva"}
-          </button>
-          <button class="danger" onclick="deletePromo('${p.id}')">🗑️</button>
-        </div>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-}
-
-
-/* MODAL */
-function openCreatePromo() {
-  document.getElementById("promoModal").style.display = "flex";
-}
-
-function closeCreatePromo() {
-  document.getElementById("promoModal").style.display = "none";
-}
-
-/* CREA PROMO */
-async function createPromo(payload) {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    alert("Sessione non valida");
-    return;
-  }
+  if (!session) return;
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/admin-create-promo`,
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
+        apikey: SUPABASE_ANON_KEY,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        code: code.toUpperCase(),
+      }),
     }
   );
 
   const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.error || "Errore creazione promo");
-    return;
-  }
-
-  alert("✅ Codice promo creato");
+  alert(JSON.stringify(data));
   loadPromos();
 }
 
-
-/* START */
 (async () => {
   const user = await requireAuth();
   if (!user) return;
-  await loadPromos();
+  loadPromos();
 })();
-
-function openCreatePromo() {
-  const code = prompt("Inserisci codice promo (es: FREE2026)");
-  if (!code) return;
-
-  const maxUsesRaw = prompt("Numero massimo utilizzi? (vuoto = infinito)");
-  const maxUses = maxUsesRaw ? Number(maxUsesRaw) : null;
-
-  const expiresAt = prompt("Data scadenza (YYYY-MM-DD) opzionale");
-
-  createPromo({
-    code: code.trim().toUpperCase(),
-    max_uses: maxUses,
-    expires_at: expiresAt || null,
-  });
-}
-
-
 </script>
-
 </body>
 </html>
