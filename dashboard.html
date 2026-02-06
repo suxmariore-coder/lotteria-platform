@@ -35,6 +35,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     .top-actions button.secondary {
       background: #6c757d;
     }
@@ -71,11 +72,6 @@
       gap: 10px;
     }
 
-    .pending {
-      background: #fff3cd;
-      border: 1px dashed #ffc107;
-    }
-
     .card-top {
       display: flex;
       gap: 12px;
@@ -91,9 +87,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #666;
-      font-size: 12px;
-      text-align: center;
       overflow: hidden;
     }
 
@@ -103,26 +96,13 @@
       object-fit: cover;
     }
 
-    .meta { flex: 1; min-width: 0; }
+    .meta { flex: 1; }
 
-    .title { margin: 0; font-size: 16px; line-height: 1.2; }
+    .title { margin: 0; font-size: 16px; }
 
-    .price { margin: 6px 0 0; color: #333; font-weight: bold; }
+    .price { margin: 6px 0 0; font-weight: bold; }
 
-    .desc {
-      margin: 6px 0 0;
-      color: #555;
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .pill {
-      background: #f0f2f5;
-      border-radius: 999px;
-      padding: 6px 10px;
-      display: inline-block;
-      font-size: 12px;
-    }
+    .desc { margin: 6px 0 0; font-size: 13px; color: #555; }
 
     .actions {
       display: flex;
@@ -173,7 +153,7 @@ document.getElementById("btnLogout").onclick = async () => {
   location.href = "login.html";
 };
 
-async function requireAuth() {
+async function getUserSafe() {
   const { data } = await sb.auth.getUser();
   if (!data?.user) {
     location.href = "login.html";
@@ -182,13 +162,16 @@ async function requireAuth() {
   return data.user;
 }
 
-async function confirmStripeIfNeeded(session, ownerId) {
+async function confirmStripeIfNeeded() {
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get("session_id");
 
   if (!sessionId) return;
 
   elStatus.textContent = "Conferma pagamento in corso…";
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/confirm-owner-payment`,
@@ -205,10 +188,11 @@ async function confirmStripeIfNeeded(session, ownerId) {
   const data = await res.json();
 
   if (!res.ok) {
+    console.error(data);
     alert(data.error || "Errore conferma pagamento");
   }
 
-  // pulisce URL
+  // Pulisce URL
   window.history.replaceState({}, document.title, "dashboard.html");
 }
 
@@ -232,7 +216,7 @@ async function loadDashboard(ownerId) {
     card.innerHTML = `
       <div class="card-top">
         <div class="thumb">
-          ${img ? `<img src="${img}" />` : "Nessuna<br>foto"}
+          ${img ? `<img src="${img}" />` : "Nessuna foto"}
         </div>
         <div class="meta">
           <h3 class="title">${l.title}</h3>
@@ -257,15 +241,10 @@ async function loadDashboard(ownerId) {
 }
 
 (async () => {
-  const user = await requireAuth();
+  const user = await getUserSafe();
   if (!user) return;
 
-  const { data: { session } } = await sb.auth.getSession();
-
-  // 🔥 Prima confermiamo Stripe se necessario
-  await confirmStripeIfNeeded(session, user.id);
-
-  // 🔥 Poi carichiamo le lotterie aggiornate
+  await confirmStripeIfNeeded();
   await loadDashboard(user.id);
 })();
 </script>
