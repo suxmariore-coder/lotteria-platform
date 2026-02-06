@@ -94,24 +94,20 @@
       color: #666;
       font-size: 12px;
       text-align: center;
+      overflow: hidden;
     }
 
-    .meta {
-      flex: 1;
-      min-width: 0;
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .title {
-      margin: 0;
-      font-size: 16px;
-      line-height: 1.2;
-    }
+    .meta { flex: 1; min-width: 0; }
 
-    .price {
-      margin: 6px 0 0;
-      color: #333;
-      font-weight: bold;
-    }
+    .title { margin: 0; font-size: 16px; line-height: 1.2; }
+
+    .price { margin: 6px 0 0; color: #333; font-weight: bold; }
 
     .desc {
       margin: 6px 0 0;
@@ -161,7 +157,7 @@
 
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+const SUPABASE_ANON_KEY = "TUO_ANON_KEY";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -186,37 +182,40 @@ async function requireAuth() {
   return data.user;
 }
 
+async function confirmStripeIfNeeded(session, ownerId) {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get("session_id");
+
+  if (!sessionId) return;
+
+  elStatus.textContent = "Conferma pagamento in corso…";
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/confirm-owner-payment`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ session_id: sessionId }),
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "Errore conferma pagamento");
+  }
+
+  // pulisce URL
+  window.history.replaceState({}, document.title, "dashboard.html");
+}
+
 async function loadDashboard(ownerId) {
   elGrid.innerHTML = "";
   elStatus.textContent = "Caricamento…";
 
-  // 🔴 LOTTERIE IN CREAZIONE (A2)
-  const { data: pendings } = await sb
-    .from("pending_lotteries")
-    .select("id, created_at, fee_amount, currency")
-    .eq("owner_id", ownerId)
-    .is("lottery_id", null);
-
-  if (pendings?.length) {
-    pendings.forEach(p => {
-      const card = document.createElement("div");
-      card.className = "card pending";
-      card.innerHTML = `
-        <h3 class="title">⏳ Creazione lotteria in corso</h3>
-        <div class="desc">
-          Pagamento ricevuto (€ ${p.fee_amount} ${p.currency}).<br>
-          Stiamo completando la creazione…
-        </div>
-        <span class="pill">⏱ Attendi qualche secondo</span>
-      `;
-      elGrid.appendChild(card);
-    });
-
-    // 🔁 auto refresh
-    setTimeout(() => location.reload(), 7000);
-  }
-
-  // 🟢 LOTTERIE CREATE
   const { data: lotteries } = await sb
     .from("lotteries")
     .select("id,title,ticket_price,description,prize_images,created_at")
@@ -232,14 +231,15 @@ async function loadDashboard(ownerId) {
     card.className = "card";
     card.innerHTML = `
       <div class="card-top">
-        <div class="thumb">${img ? `<img src="${img}" />` : "Nessuna<br>foto"}</div>
+        <div class="thumb">
+          ${img ? `<img src="${img}" />` : "Nessuna<br>foto"}
+        </div>
         <div class="meta">
           <h3 class="title">${l.title}</h3>
           <div class="price">€ ${l.ticket_price}</div>
           <div class="desc">${l.description || ""}</div>
         </div>
       </div>
-
       <div class="actions">
         <button class="open">Apri</button>
         <button class="manage">Gestisci</button>
@@ -259,6 +259,13 @@ async function loadDashboard(ownerId) {
 (async () => {
   const user = await requireAuth();
   if (!user) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+
+  // 🔥 Prima confermiamo Stripe se necessario
+  await confirmStripeIfNeeded(session, user.id);
+
+  // 🔥 Poi carichiamo le lotterie aggiornate
   await loadDashboard(user.id);
 })();
 </script>
