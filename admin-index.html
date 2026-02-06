@@ -186,6 +186,32 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+async function checkAdminAccess() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    location.href = "login.html";
+    return false;
+  }
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/admin-list-promos`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+
+  if (res.status === 403) {
+    alert("Accesso riservato agli amministratori");
+    location.href = "dashboard.html";
+    return false;
+  }
+
+  return true;
+}
+
 /* AUTH */
 async function requireAuth() {
   const { data } = await sb.auth.getUser();
