@@ -1,287 +1,130 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Panel – Promo Codes</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Admin – Promo Codes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 16px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .primary {
-      background: #1e7e34;
-      color: #fff;
-    }
-
-    .secondary {
-      background: #6c757d;
-      color: #fff;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 8px;
-      border-bottom: 1px solid #eee;
-      vertical-align: middle;
-    }
-
-    th {
-      color: #555;
-      font-size: 13px;
-    }
-
-    .pill {
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      display: inline-block;
-    }
-
-    .ok {
-      background: #e6f4ea;
-      color: #1e7e34;
-    }
-
-    .off {
-      background: #f8d7da;
-      color: #842029;
-    }
-
-    .actions {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .actions button {
-      font-size: 12px;
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .edit {
-      background: #ffc107;
-    }
-
-    .toggle {
-      background: #6c757d;
-      color: #fff;
-    }
-
-    .danger {
-      background: #dc3545;
-      color: #fff;
-    }
-
-    @media (max-width: 640px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-
-      tr {
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 12px;
-      }
-
-      th {
-        display: none;
-      }
-
-      td {
-        display: flex;
-        justify-content: space-between;
-        padding: 6px 0;
-      }
-
-      td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #555;
-      }
-    }
-  </style>
+<style>
+body { font-family: Arial; background:#f4f4f4; margin:0; padding:20px; }
+.container { max-width:1000px; margin:auto; }
+.card { background:white; padding:16px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.06); margin-bottom:16px; }
+button { padding:8px 12px; border:none; border-radius:8px; cursor:pointer; }
+.primary { background:#1e7e34; color:white; }
+.danger { background:#dc3545; color:white; }
+.secondary { background:#6c757d; color:white; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:8px; border-bottom:1px solid #eee; font-size:14px; }
+.pill { padding:4px 8px; border-radius:999px; font-size:12px; }
+.ok { background:#e6f4ea; color:#1e7e34; }
+.off { background:#f8d7da; color:#842029; }
+.form-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+input, select { padding:8px; border-radius:8px; border:1px solid #ccc; }
+</style>
 </head>
 
 <body>
-
 <div class="container">
 
-  <h1>🛠️ Superpannello Admin</h1>
-  <div class="subtitle">Gestione codici promozionali</div>
+<h2>🛠 Superpannello Promo</h2>
 
-  <div class="top-actions">
-    <button class="btn primary" onclick="openCreatePromo()">➕ Crea promo</button>
-    <button class="btn secondary" onclick="logout()">Esci</button>
+<div class="card">
+  <h3>➕ Nuovo Codice Promo</h3>
+
+  <div class="form-row">
+    <input id="code" placeholder="CODICE">
+    <select id="discount_type">
+      <option value="percentage">Percentuale</option>
+      <option value="fixed">Importo fisso</option>
+    </select>
+    <input id="discount_value" type="number" placeholder="Valore">
+    <input id="max_uses" type="number" placeholder="Max utilizzi (opzionale)">
+    <input id="expires_at" type="datetime-local">
   </div>
 
-  <div class="card">
-    <h3>🎁 Codici Promo</h3>
-
-    <table id="promoTable">
-      <thead>
-        <tr>
-          <th>Codice</th>
-          <th>Stato</th>
-          <th>Usati</th>
-          <th>Max</th>
-          <th>Scadenza</th>
-          <th>Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- righe dinamiche -->
-      </tbody>
-    </table>
+  <div class="form-row">
+    <label>
+      <input type="checkbox" id="one_time_per_owner" checked>
+      Una volta per owner
+    </label>
   </div>
+
+  <button class="primary" onclick="createPromo()">Crea Promo</button>
+</div>
+
+<div class="card">
+  <h3>🎁 Lista Codici</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Codice</th>
+        <th>Sconto</th>
+        <th>Usati</th>
+        <th>Max</th>
+        <th>Scadenza</th>
+        <th>Stato</th>
+        <th>Azioni</th>
+      </tr>
+    </thead>
+    <tbody id="promoTable"></tbody>
+  </table>
+</div>
 
 </div>
 
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* =========================
-   🔐 AUTH
-==========================*/
-async function requireAuth() {
-  const { data } = await sb.auth.getUser();
-  if (!data?.user) {
-    location.href = "/login.html";
-    return null;
-  }
-  return data.user;
+async function getSession() {
+  const { data } = await sb.auth.getSession();
+  return data.session;
 }
 
-async function logout() {
-  await sb.auth.signOut();
-  location.href = "/login.html";
-}
-
-/* =========================
-   📥 LOAD PROMOS
-==========================*/
 async function loadPromos() {
-  const { data: { session } } = await sb.auth.getSession();
+  const session = await getSession();
   if (!session) return;
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/admin-list-promos`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-list-promos`, {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":`Bearer ${session.access_token}`
     }
-  );
+  });
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.error || "Errore caricamento promo");
-    return;
-  }
-
-  renderPromos(data);
+  const promos = await res.json();
+  render(promos);
 }
 
-/* =========================
-   🎨 RENDER
-==========================*/
-function renderPromos(promos) {
-  const tbody = document.querySelector("#promoTable tbody");
-  tbody.innerHTML = "";
+function render(promos){
+  const tbody = document.getElementById("promoTable");
+  tbody.innerHTML="";
 
-  promos.forEach(p => {
-    const tr = document.createElement("tr");
+  promos.forEach(p=>{
+    const tr=document.createElement("tr");
 
-    tr.innerHTML = `
-      <td data-label="Codice"><b>${p.code}</b></td>
-      <td data-label="Tipo">
-        ${p.discount_type === "percentage"
-          ? p.discount_value + "%"
-          : p.discount_value + "€"}
-      </td>
-      <td data-label="Stato">
-        <span class="pill ${p.active ? "ok" : "off"}">
-          ${p.active ? "Attivo" : "Disattivo"}
+    tr.innerHTML=`
+      <td><b>${p.code}</b></td>
+      <td>${p.discount_type==="percentage" ? p.discount_value+"%" : p.discount_value+"€"}</td>
+      <td>${p.used}</td>
+      <td>${p.max_uses ?? "∞"}</td>
+      <td>${p.expires_at ?? "—"}</td>
+      <td>
+        <span class="pill ${p.active ? "ok":"off"}">
+          ${p.active?"Attivo":"Disattivo"}
         </span>
       </td>
-      <td data-label="Usati">${p.used}</td>
-      <td data-label="Max">${p.max_uses ?? "∞"}</td>
-      <td data-label="Scadenza">
-        ${p.expires_at
-          ? new Date(p.expires_at).toLocaleDateString()
-          : "—"}
-      </td>
-      <td data-label="Azioni">
-        <div class="actions">
-          <button class="toggle"
-            onclick="togglePromo('${p.id}', ${p.active})">
-            ${p.active ? "Disattiva" : "Attiva"}
-          </button>
-          <button class="danger"
-            onclick="deletePromo('${p.id}')">
-            🗑️
-          </button>
-        </div>
+      <td>
+        <button class="secondary" onclick="togglePromo('${p.id}', ${!p.active})">
+          ${p.active?"Disattiva":"Attiva"}
+        </button>
+        <button class="danger" onclick="deletePromo('${p.id}')">
+          Elimina
+        </button>
       </td>
     `;
 
@@ -289,118 +132,70 @@ function renderPromos(promos) {
   });
 }
 
-/* =========================
-   🔁 TOGGLE
-==========================*/
-async function togglePromo(id, currentState) {
-  const { data: { session } } = await sb.auth.getSession();
+async function createPromo(){
+  const session = await getSession();
+  if(!session) return;
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/admin-toggle-promo`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        id,
-        active: !currentState
-      }),
-    }
-  );
+  const payload = {
+    code: document.getElementById("code").value.trim(),
+    discount_type: document.getElementById("discount_type").value,
+    discount_value: Number(document.getElementById("discount_value").value),
+    max_uses: document.getElementById("max_uses").value || null,
+    expires_at: document.getElementById("expires_at").value || null,
+    one_time_per_owner: document.getElementById("one_time_per_owner").checked
+  };
 
-  const data = await res.json();
-  if (!res.ok) {
-    alert(data.error || "Errore aggiornamento");
-    return;
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-create-promo`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":`Bearer ${session.access_token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if(res.ok){
+    alert("Promo creato");
+    loadPromos();
+  } else {
+    const err = await res.json();
+    alert(err.error || "Errore");
   }
-
-  await loadPromos();
 }
 
-/* =========================
-   🗑 DELETE
-==========================*/
-async function deletePromo(id) {
-  if (!confirm("Sei sicuro di voler eliminare questo promo?")) return;
+async function togglePromo(id, active){
+  const session = await getSession();
 
-  const { data: { session } } = await sb.auth.getSession();
+  await fetch(`${SUPABASE_URL}/functions/v1/admin-toggle-promo`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":`Bearer ${session.access_token}`
+    },
+    body: JSON.stringify({ promo_id:id, active })
+  });
 
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/admin-delete-promo`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ id }),
-    }
-  );
-
-  const data = await res.json();
-  if (!res.ok) {
-    alert(data.error || "Errore eliminazione");
-    return;
-  }
-
-  await loadPromos();
+  loadPromos();
 }
 
-/* =========================
-   ➕ CREATE PROMO
-==========================*/
-async function openCreatePromo() {
+async function deletePromo(id){
+  const session = await getSession();
 
-  const code = prompt("Codice promo:");
-  if (!code) return;
+  if(!confirm("Eliminare il promo?")) return;
 
-  const type = prompt("Tipo sconto (percentage / fixed):");
-  if (!type) return;
+  await fetch(`${SUPABASE_URL}/functions/v1/admin-delete-promo`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":`Bearer ${session.access_token}`
+    },
+    body: JSON.stringify({ promo_id:id })
+  });
 
-  const value = prompt("Valore sconto:");
-  if (!value) return;
-
-  const maxUses = prompt("Max utilizzi (lascia vuoto = illimitato):");
-
-  const { data: { session } } = await sb.auth.getSession();
-
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/admin-create-promo`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        code,
-        discount_type: type,
-        discount_value: Number(value),
-        max_uses: maxUses ? Number(maxUses) : null,
-      }),
-    }
-  );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.error || "Errore creazione");
-    return;
-  }
-
-  await loadPromos();
+  loadPromos();
 }
 
-/* =========================
-   🚀 INIT
-==========================*/
-(async () => {
-  const user = await requireAuth();
-  if (!user) return;
-  await loadPromos();
-})();
+loadPromos();
 </script>
 
 </body>
