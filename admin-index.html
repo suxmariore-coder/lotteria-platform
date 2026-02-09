@@ -47,9 +47,15 @@
       font-size: 14px;
     }
 
-    .primary { background: #1e7e34; color: #fff; }
-    .secondary { background: #6c757d; color: #fff; }
-    .danger { background: #dc3545; color: #fff; }
+    .primary {
+      background: #1e7e34;
+      color: #fff;
+    }
+
+    .secondary {
+      background: #6c757d;
+      color: #fff;
+    }
 
     .card {
       background: #fff;
@@ -69,6 +75,7 @@
       text-align: left;
       padding: 8px;
       border-bottom: 1px solid #eee;
+      vertical-align: middle;
     }
 
     th {
@@ -83,47 +90,69 @@
       display: inline-block;
     }
 
-    .ok { background: #e6f4ea; color: #1e7e34; }
-    .off { background: #f8d7da; color: #842029; }
-
-    /* MODAL */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
+    .ok {
+      background: #e6f4ea;
+      color: #1e7e34;
     }
 
-    .modal-box {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
-      width: 100%;
-      max-width: 420px;
+    .off {
+      background: #f8d7da;
+      color: #842029;
     }
 
-    .modal-box label {
-      font-weight: bold;
-      display: block;
-      margin-top: 12px;
-      font-size: 13px;
-    }
-
-    .modal-box input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 6px;
-      box-sizing: border-box; 
-      display: block;
-    }
-
-    .modal-actions {
+    .actions {
       display: flex;
-      gap: 10px;
-      margin-top: 16px;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .edit {
+      background: #ffc107;
+    }
+
+    .toggle {
+      background: #6c757d;
+      color: #fff;
+    }
+
+    .danger {
+      background: #dc3545;
+      color: #fff;
+    }
+
+    @media (max-width: 640px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      tr {
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 12px;
+      }
+
+      th {
+        display: none;
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #555;
+      }
     }
   </style>
 </head>
@@ -151,33 +180,15 @@
           <th>Usati</th>
           <th>Max</th>
           <th>Scadenza</th>
+          <th>Azioni</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <!-- righe dinamiche -->
+      </tbody>
     </table>
   </div>
 
-</div>
-
-<!-- MODAL CREA PROMO -->
-<div class="modal" id="promoModal">
-  <div class="modal-box">
-    <h3>Crea codice promo</h3>
-
-    <label>Codice</label>
-    <input id="promoCode" placeholder="ES. FREE100">
-
-    <label>Max utilizzi (opzionale)</label>
-    <input id="promoMax" type="number" min="1">
-
-    <label>Scadenza (opzionale)</label>
-    <input id="promoExpire" type="date">
-
-    <div class="modal-actions">
-      <button class="btn primary" onclick="createPromo()">Crea</button>
-      <button class="btn secondary" onclick="closeCreatePromo()">Annulla</button>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -186,37 +197,13 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-async function checkAdminAccess() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    location.href = "login.html";
-    return false;
-  }
-
-  const res = await fetch(
-    `${SUPABASE_URL}/functions/v1/admin-list-promos`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    }
-  );
-
-  if (res.status === 403) {
-    alert("Accesso riservato agli amministratori");
-    location.href = "dashboard.html";
-    return false;
-  }
-
-  return true;
-}
-
-/* AUTH */
+/* =========================
+   🔐 AUTH
+==========================*/
 async function requireAuth() {
   const { data } = await sb.auth.getUser();
   if (!data?.user) {
-    window.location.replace("login.html");
+    location.href = "/login.html";
     return null;
   }
   return data.user;
@@ -224,10 +211,12 @@ async function requireAuth() {
 
 async function logout() {
   await sb.auth.signOut();
-  window.location.replace("login.html");
+  location.href = "/login.html";
 }
 
-/* PROMO LIST */
+/* =========================
+   📥 LOAD PROMOS
+==========================*/
 async function loadPromos() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return;
@@ -250,53 +239,48 @@ async function loadPromos() {
     return;
   }
 
-  if (!Array.isArray(data)) {
-    console.error("Expected array, got:", data);
-    alert("Risposta non valida dal server");
-    return;
-  }
-
   renderPromos(data);
 }
 
-
+/* =========================
+   🎨 RENDER
+==========================*/
 function renderPromos(promos) {
   const tbody = document.querySelector("#promoTable tbody");
   tbody.innerHTML = "";
-
-  if (!Array.isArray(promos) || promos.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align:center;color:#666">
-          Nessun codice promo
-        </td>
-      </tr>
-    `;
-    return;
-  }
 
   promos.forEach(p => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
       <td data-label="Codice"><b>${p.code}</b></td>
-
+      <td data-label="Tipo">
+        ${p.discount_type === "percentage"
+          ? p.discount_value + "%"
+          : p.discount_value + "€"}
+      </td>
       <td data-label="Stato">
         <span class="pill ${p.active ? "ok" : "off"}">
           ${p.active ? "Attivo" : "Disattivo"}
         </span>
       </td>
-
-      <td data-label="Usati">${p.used ?? 0}</td>
+      <td data-label="Usati">${p.used}</td>
       <td data-label="Max">${p.max_uses ?? "∞"}</td>
-      <td data-label="Scadenza">${p.expires_at ?? "—"}</td>
-
+      <td data-label="Scadenza">
+        ${p.expires_at
+          ? new Date(p.expires_at).toLocaleDateString()
+          : "—"}
+      </td>
       <td data-label="Azioni">
         <div class="actions">
-          <button class="toggle" onclick="togglePromo('${p.id}', ${!p.active})">
+          <button class="toggle"
+            onclick="togglePromo('${p.id}', ${p.active})">
             ${p.active ? "Disattiva" : "Attiva"}
           </button>
-          <button class="danger" onclick="deletePromo('${p.id}')">🗑️</button>
+          <button class="danger"
+            onclick="deletePromo('${p.id}')">
+            🗑️
+          </button>
         </div>
       </td>
     `;
@@ -305,23 +289,82 @@ function renderPromos(promos) {
   });
 }
 
-
-/* MODAL */
-function openCreatePromo() {
-  document.getElementById("promoModal").style.display = "flex";
-}
-
-function closeCreatePromo() {
-  document.getElementById("promoModal").style.display = "none";
-}
-
-/* CREA PROMO */
-async function createPromo(payload) {
+/* =========================
+   🔁 TOGGLE
+==========================*/
+async function togglePromo(id, currentState) {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    alert("Sessione non valida");
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/admin-toggle-promo`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        id,
+        active: !currentState
+      }),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || "Errore aggiornamento");
     return;
   }
+
+  await loadPromos();
+}
+
+/* =========================
+   🗑 DELETE
+==========================*/
+async function deletePromo(id) {
+  if (!confirm("Sei sicuro di voler eliminare questo promo?")) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/admin-delete-promo`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ id }),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || "Errore eliminazione");
+    return;
+  }
+
+  await loadPromos();
+}
+
+/* =========================
+   ➕ CREATE PROMO
+==========================*/
+async function openCreatePromo() {
+
+  const code = prompt("Codice promo:");
+  if (!code) return;
+
+  const type = prompt("Tipo sconto (percentage / fixed):");
+  if (!type) return;
+
+  const value = prompt("Valore sconto:");
+  if (!value) return;
+
+  const maxUses = prompt("Max utilizzi (lascia vuoto = illimitato):");
+
+  const { data: { session } } = await sb.auth.getSession();
 
   const res = await fetch(
     `${SUPABASE_URL}/functions/v1/admin-create-promo`,
@@ -331,46 +374,33 @@ async function createPromo(payload) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        code,
+        discount_type: type,
+        discount_value: Number(value),
+        max_uses: maxUses ? Number(maxUses) : null,
+      }),
     }
   );
 
   const data = await res.json();
 
   if (!res.ok) {
-    alert(data.error || "Errore creazione promo");
+    alert(data.error || "Errore creazione");
     return;
   }
 
-  alert("✅ Codice promo creato");
-  loadPromos();
+  await loadPromos();
 }
 
-
-/* START */
+/* =========================
+   🚀 INIT
+==========================*/
 (async () => {
   const user = await requireAuth();
   if (!user) return;
   await loadPromos();
 })();
-
-function openCreatePromo() {
-  const code = prompt("Inserisci codice promo (es: FREE2026)");
-  if (!code) return;
-
-  const maxUsesRaw = prompt("Numero massimo utilizzi? (vuoto = infinito)");
-  const maxUses = maxUsesRaw ? Number(maxUsesRaw) : null;
-
-  const expiresAt = prompt("Data scadenza (YYYY-MM-DD) opzionale");
-
-  createPromo({
-    code: code.trim().toUpperCase(),
-    max_uses: maxUses,
-    expires_at: expiresAt || null,
-  });
-}
-
-
 </script>
 
 </body>
