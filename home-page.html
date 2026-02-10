@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LotteRiffa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #F2C300;
+      color: #0F1E4A;
+      text-align: center;
+    }
+
+    .container {
+      padding: 24px;
+      max-width: 480px;
+      margin: auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: flex-end;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .topbar a {
+      text-decoration: none;
+      color: #0F1E4A;
+      font-weight: 500;
+    }
+
+    h1.logo {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 40px;
+      margin: 10px 0 10px 0;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.5;
+      margin: 8px 0;
+    }
+
+    .cta {
+      margin: 24px 0 10px 0;
+      background: #1E3A8A;
+      color: white;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      display: block;
+    }
+
+    .micro {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .section {
+      margin: 60px 0;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 12px 0;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .footer {
+      font-size: 13px;
+      margin: 60px 0 30px 0;
+      opacity: 0.9;
+    }
+
+    /* Decorative balls */
+    .ball {
+      position: fixed;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #0F1E4A;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      opacity: 0.12;
+      font-size: 18px;
+      z-index: -1;
+    }
+
+    .ball1 { top: 80px; left: -20px; }
+    .ball2 { bottom: 120px; right: -20px; }
+
+  </style>
+</head>
+<body>
+
+  <div class="ball ball1">12</div>
+  <div class="ball ball2">37</div>
+
+  <div class="container">
+
+    <div class="topbar">
+      <a href="login.html">Accedi</a>
+    </div>
+
+    <h1 class="logo">LotteRiffa</h1>
+
+    <h2>Organizza la tua riffa privata online in modo semplice.</h2>
+
+    <p>Pagamenti diretti all’organizzatore.<br>
+    Esito basato su estrazioni ufficiali italiane.</p>
+
+    <a href="create.html" class="cta">Crea la tua Riffa</a>
+
+    <p class="micro">
+      Nessuna percentuale sui biglietti. Solo una piccola fee di attivazione.
+    </p>
+
+    <div class="section">
+      <h2>In 3 passaggi</h2>
+
+      <div class="card">
+        1️⃣ Configura la riffa
+      </div>
+
+      <div class="card">
+        2️⃣ Condividi il link
+      </div>
+
+      <div class="card">
+        3️⃣ Attendi l’estrazione ufficiale
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Paghi solo per attivare</h2>
+      <p>La fee è proporzionata al valore della riffa.<br>
+      Più è piccola la riffa, più è piccola la fee.</p>
+      <p>Nessuna percentuale sulle vendite.</p>
+    </div>
+
+    <div class="section">
+      <h2>LotteRiffa è uno strumento digitale</h2>
+      <p>L’organizzatore è responsabile della propria riffa e riceve direttamente i pagamenti.<br>
+      LotteRiffa non gestisce fondi e non effettua estrazioni.</p>
+    </div>
+
+    <div class="footer">
+      © 2026 LotteRiffa
+    </div>
+
+  </div>
+
+</body>
+</html>
