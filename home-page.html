@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LotteRiffa</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
   <style>
     body {
       margin: 0;
@@ -12,12 +14,15 @@
       background: #F2C300;
       color: #0F1E4A;
       text-align: center;
+      overflow-x: hidden;
     }
 
     .container {
       padding: 24px;
       max-width: 480px;
       margin: auto;
+      position: relative;
+      z-index: 2;
     }
 
     .topbar {
@@ -33,16 +38,39 @@
       font-weight: 500;
     }
 
+    /* LOGO */
     h1.logo {
       font-family: 'Playfair Display', serif;
       font-style: italic;
-      font-size: 40px;
-      margin: 10px 0 10px 0;
+      font-size: 64px;
+      margin: 20px 0 10px 0;
+      letter-spacing: 1px;
+    }
+
+    .ball-letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #0F1E4A;
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      position: relative;
+      top: -6px;
+    }
+
+    .styled-r {
+      font-size: 72px;
+      display: inline-block;
+      transform: rotate(-5deg);
     }
 
     h2 {
       font-size: 22px;
-      margin: 10px 0;
+      margin: 20px 0 10px 0;
       font-weight: 600;
     }
 
@@ -53,20 +81,27 @@
     }
 
     .cta {
-      margin: 24px 0 10px 0;
+      margin: 28px 0 10px 0;
       background: #1E3A8A;
       color: white;
       padding: 16px;
-      border-radius: 16px;
-      font-size: 16px;
+      border-radius: 18px;
+      font-size: 17px;
       font-weight: 600;
       text-decoration: none;
       display: block;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+      transition: transform 0.2s ease;
+    }
+
+    .cta:active {
+      transform: scale(0.98);
     }
 
     .micro {
       font-size: 13px;
       opacity: 0.9;
+      margin-bottom: 40px;
     }
 
     .section {
@@ -75,7 +110,7 @@
 
     .card {
       background: white;
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 18px;
       margin: 12px 0;
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
@@ -88,10 +123,11 @@
     }
 
     /* Decorative balls */
+
     .ball {
       position: fixed;
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: #0F1E4A;
       color: white;
@@ -99,20 +135,33 @@
       align-items: center;
       justify-content: center;
       font-weight: 600;
-      opacity: 0.12;
-      font-size: 18px;
-      z-index: -1;
+      opacity: 0.10;
+      font-size: 20px;
+      z-index: 1;
+      animation: float 10s ease-in-out infinite;
     }
 
-    .ball1 { top: 80px; left: -20px; }
-    .ball2 { bottom: 120px; right: -20px; }
+    .ball1 { top: 100px; left: -30px; }
+    .ball2 { top: 250px; right: -30px; }
+    .ball3 { top: 500px; left: -30px; }
+    .ball4 { bottom: 150px; right: -30px; }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
 
   </style>
 </head>
+
 <body>
 
+  <!-- Decorative background balls -->
   <div class="ball ball1">12</div>
   <div class="ball ball2">37</div>
+  <div class="ball ball3">08</div>
+  <div class="ball ball4">54</div>
 
   <div class="container">
 
@@ -120,12 +169,16 @@
       <a href="login.html">Accedi</a>
     </div>
 
-    <h1 class="logo">LotteRiffa</h1>
+    <h1 class="logo">
+      L<span class="ball-letter">7</span>tte<span class="styled-r">R</span>iffa
+    </h1>
 
     <h2>Organizza la tua riffa privata online in modo semplice.</h2>
 
-    <p>Pagamenti diretti all’organizzatore.<br>
-    Esito basato su estrazioni ufficiali italiane.</p>
+    <p>
+      Pagamenti diretti all’organizzatore.<br>
+      Esito basato su estrazioni ufficiali italiane.
+    </p>
 
     <a href="crea-lotteria.html" class="cta">Crea la tua Riffa</a>
 
@@ -151,15 +204,19 @@
 
     <div class="section">
       <h2>Paghi solo per attivare</h2>
-      <p>La fee è proporzionata al valore della riffa.<br>
-      Più è piccola la riffa, più è piccola la fee.</p>
+      <p>
+        La fee è proporzionata al valore della riffa.<br>
+        Più è piccola la riffa, più è piccola la fee.
+      </p>
       <p>Nessuna percentuale sulle vendite.</p>
     </div>
 
     <div class="section">
       <h2>LotteRiffa è uno strumento digitale</h2>
-      <p>L’organizzatore è responsabile della propria riffa e riceve direttamente i pagamenti.<br>
-      LotteRiffa non gestisce fondi e non effettua estrazioni.</p>
+      <p>
+        L’organizzatore è responsabile della propria riffa e riceve direttamente i pagamenti.<br>
+        LotteRiffa non gestisce fondi e non effettua estrazioni.
+      </p>
     </div>
 
     <div class="footer">
