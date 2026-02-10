@@ -5,48 +5,106 @@
   <title>Accedi o crea la tua Lotteriffa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Font ufficiali della Home -->
+  <link href="https://fonts.googleapis.com" rel="stylesheet">
+  
+  <!-- Collegamento al tuo file CSS esterno -->
+  <link rel="stylesheet" href="style.css">
+
   <!-- Supabase JS v2 -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-<!-- Inserisci questo in tutte le pagine HTML -->
-<link rel="stylesheet" href="style.css">  
+  <style>
+    /* Stili specifici per gli input e i bottoni di questa pagina */
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      font-size: 15px;
+      box-sizing: border-box; 
+      display: block;
+    }
 
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 16px;
+      border: none;
+      border-radius: 18px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .login {
+      background: #1E3A8A; /* Blu della CTA */
+      color: white;
+    }
+
+    .register {
+      background: transparent;
+      color: #0F1E4A;
+      border: 2px solid #0F1E4A;
+      margin-top: 10px;
+    }
+
+    .intro {
+      text-align: left;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <!-- Decorative background balls (opzionali, per richiamare la home) -->
+  <div class="ball ball1">12</div>
+  <div class="ball ball2">37</div>
 
-  <h1>🎟️ Lotteriffa</h1>
+  <div class="container">
 
-  <div class="intro">
-    <strong>Crea la tua lotteria online in pochi minuti</strong>
-    <ul>
-      <li>🎁 Imposta il premio e i numeri</li>
-      <li>💳 Vendi biglietti con Stripe, PayPal o Revolut</li>
-      <li>⚙️ Gestisci pagamenti e prenotazioni</li>
-    </ul>
-    <p>
-      👉 Paghi <strong>solo una fee di creazione</strong>.<br>
-      👉 <strong>Non serve</strong> avere account Stripe / PayPal.
-    </p>
+    <h1 class="logo" style="font-size: 48px;">LotteRiffa</h1>
+
+    <div class="intro">
+      <p><strong>Crea la tua lotteria online in pochi minuti</strong></p>
+      <ul>
+        <li>🎁 Imposta il premio e i numeri</li>
+        <li>💳 Ricevi pagamenti diretti</li>
+        <li>⚙️ Gestisci tutto in autonomia</li>
+      </ul>
+    </div>
+
+    <input id="email" type="email" placeholder="La tua Email" />
+    <input id="password" type="password" placeholder="Scegli una Password" />
+
+    <button class="login" onclick="login()">Accedi</button>
+    <button class="register" onclick="register()">Registrati e crea Riffa</button>
+
+    <div class="footer">
+      Dopo l’accesso potrai creare la tua prima lotteria
+    </div>
+
+    <p id="result"></p>
   </div>
-
-  <input id="email" type="email" placeholder="Email" />
-  <input id="password" type="password" placeholder="Password" />
-
-  <button class="login" onclick="login()">Accedi</button>
-  <button class="register" onclick="register()">Registrati qui - Crea la tua Lotteriffa</button>
-
-  <div class="note">
-    Dopo l’accesso potrai creare la tua prima lotteria
-  </div>
-
-  <p id="result"></p>
-</div>
 
 <script>
-/* 🔴 CONFIG SUPABASE */
+/* 🔴 CONFIG SUPABASE - I TUOI DATI RIMANGONO INVARIATI */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
@@ -55,51 +113,34 @@ const supabaseClient = supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
-/* 🔐 LOGIN */
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-
   if (!email || !password) {
     document.getElementById("result").innerText = "Inserisci email e password";
     return;
   }
-
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password,
-  });
-
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) {
     document.getElementById("result").innerText = "❌ Login fallito";
     return;
   }
-
   window.location.href = "dashboard.html";
 }
 
-/* 🆕 REGISTRAZIONE */
 async function register() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-
   if (!email || !password) {
     document.getElementById("result").innerText = "Inserisci email e password";
     return;
   }
-
-  const { error } = await supabaseClient.auth.signUp({
-    email,
-    password,
-  });
-
+  const { error } = await supabaseClient.auth.signUp({ email, password });
   if (error) {
     document.getElementById("result").innerText = "❌ Registrazione fallita";
     return;
   }
-
-  document.getElementById("result").innerText =
-    "✅ Registrazione completata. Ora puoi accedere.";
+  document.getElementById("result").innerText = "✅ Registrazione completata. Ora puoi accedere.";
 }
 </script>
 
