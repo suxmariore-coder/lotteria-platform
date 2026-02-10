@@ -42,30 +42,9 @@
     h1.logo {
       font-family: 'Playfair Display', serif;
       font-style: italic;
-      font-size: 64px;
-      margin: 20px 0 10px 0;
+      font-size: 68px;
+      margin: 30px 0 10px 0;
       letter-spacing: 1px;
-    }
-
-    .ball-letter {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: #0F1E4A;
-      color: white;
-      font-size: 20px;
-      font-weight: 600;
-      position: relative;
-      top: -6px;
-    }
-
-    .styled-r {
-      font-size: 72px;
-      display: inline-block;
-      transform: rotate(-5deg);
     }
 
     h2 {
@@ -126,8 +105,8 @@
 
     .ball {
       position: fixed;
-      width: 80px;
-      height: 80px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
       background: #0F1E4A;
       color: white;
@@ -135,20 +114,20 @@
       align-items: center;
       justify-content: center;
       font-weight: 600;
-      opacity: 0.10;
-      font-size: 20px;
+      opacity: 0.08;
+      font-size: 22px;
       z-index: 1;
-      animation: float 10s ease-in-out infinite;
+      animation: float 12s ease-in-out infinite;
     }
 
-    .ball1 { top: 100px; left: -30px; }
-    .ball2 { top: 250px; right: -30px; }
-    .ball3 { top: 500px; left: -30px; }
-    .ball4 { bottom: 150px; right: -30px; }
+    .ball1 { top: 120px; left: -40px; }
+    .ball2 { top: 300px; right: -40px; }
+    .ball3 { top: 600px; left: -40px; }
+    .ball4 { bottom: 200px; right: -40px; }
 
     @keyframes float {
       0% { transform: translateY(0px); }
-      50% { transform: translateY(-15px); }
+      50% { transform: translateY(-12px); }
       100% { transform: translateY(0px); }
     }
 
@@ -169,9 +148,7 @@
       <a href="login.html">Accedi</a>
     </div>
 
-    <h1 class="logo">
-      L<span class="ball-letter">7</span>tte<span class="styled-r">R</span>iffa
-    </h1>
+    <h1 class="logo">LotteRiffa</h1>
 
     <h2>Organizza la tua riffa privata online in modo semplice.</h2>
 
