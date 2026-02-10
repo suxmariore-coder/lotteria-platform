@@ -11,165 +11,53 @@
   <!-- Collegamento al tuo file CSS esterno -->
   <link rel="stylesheet" href="style.css">
 
+  <script src="https://unpkg.com"></script>
+
   <style>
-    /* INTEGRAZIONE STILI SPECIFICI SENZA STRAVOLGERE */
-    body {
-      padding: 16px;
-      text-align: center; /* Allineamento coerente con la home */
-    }
+    /* INTEGRAZIONE STILI SPECIFICI */
+    body { padding: 16px; text-align: center; }
+    h1 { font-family: 'Playfair Display', serif; font-style: italic; font-size: 38px; margin: 10px 0; }
+    h3 { font-family: 'Inter', sans-serif; font-weight: 600; color: #1E3A8A; margin: 5px 0; }
+    #lottery-meta { text-align: center; color: #0F1E4A; opacity: 0.8; font-size: 14px; margin-bottom: 20px; white-space: pre-line; }
 
-    h1 {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 38px;
-      margin: 10px 0;
-    }
-
-    h3 {
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      color: #1E3A8A;
-      margin: 5px 0;
-    }
-
-    #lottery-meta {
-      text-align: center;
-      color: #0F1E4A;
-      opacity: 0.8;
-      font-size: 14px;
-      margin-bottom: 20px;
-      white-space: pre-line;
-    }
-
-    /* Banners di Stato */
-    .status-banner {
-      max-width: 600px;
-      margin: 12px auto;
-      padding: 12px;
-      border-radius: 12px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 14px;
-    }
+    .status-banner { max-width: 600px; margin: 12px auto; padding: 12px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 14px; }
     .status-active { background: #DCFCE7; color: #166534; border: 1px solid #166534; }
     .status-closed { background: #FEF9C3; color: #854d0e; border: 1px solid #854d0e; }
     .status-finished { background: #FEE2E2; color: #991b1b; border: 1px solid #991b1b; }
 
-    /* Box Condivisione */
-    .share-box {
-      max-width: 600px;
-      margin: 20px auto;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    .btn {
-      padding: 12px 20px;
-      border-radius: 12px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform .12s ease;
-      font-family: 'Inter', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
+    .share-box { max-width: 600px; margin: 20px auto; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;}
+    .btn { padding: 12px 20px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform .12s ease; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn:active { transform: scale(0.96); }
-
     .whatsapp { background: #25D366; color: #fff; }
     .stripe { background: #6366F1; color: #fff; }
     .paypal { background: #003087; color: #fff; }
     .revolut { background: #000; color: #fff; border: 1px solid #333; }
 
-    /* Galleria */
-    .gallery {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding: 10px 0;
-      margin: 0 auto 20px;
-      max-width: 600px;
-      scrollbar-width: none;
-    }
-    .gallery img {
-      height: 200px;
-      border-radius: 18px;
-      object-fit: cover;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+    .gallery { display: flex; gap: 12px; overflow-x: auto; padding: 10px 0; margin: 0 auto 20px; max-width: 600px; }
+    .gallery img { height: 200px; border-radius: 18px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0; }
 
-    #lottery-description {
-      background: #fff;
-      padding: 20px;
-      border-radius: 18px;
-      margin: 20px auto;
-      max-width: 600px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
+    #lottery-description { background: #fff; padding: 20px; border-radius: 18px; margin: 20px auto; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
-    /* Griglia Numeri */
-    .grid {
-      display: grid;
-      gap: 8px;
-      grid-template-columns: repeat(10, 1fr);
-      max-width: 600px;
-      margin: auto;
-    }
+    .grid { display: grid; gap: 8px; grid-template-columns: repeat(10, 1fr); max-width: 600px; margin: auto; }
+    @media (max-width: 600px) { .grid { grid-template-columns: repeat(5, 1fr); } }
 
-    @media (max-width: 600px) {
-      .grid { grid-template-columns: repeat(5, 1fr); }
-      .share-box { flex-direction: column; }
-    }
-
-    .number {
-      border-radius: 10px;
-      padding: 8px 4px;
-      font-weight: 700;
-      color: #fff;
-      height: 60px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 16px;
-    }
-
-    .available { background: #1E3A8A; cursor: pointer; } /* Blu brand */
+    .number { border-radius: 10px; padding: 8px 4px; font-weight: 700; color: #fff; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; overflow: hidden; }
+    .available { background: #1E3A8A; cursor: pointer; } 
     .sold { background: #D1D5DB; color: #4B5563; cursor: not-allowed; opacity: 0.6; }
     .pending { background: #F59E0B; color: #fff; cursor: not-allowed; }
+    .buyer { font-size: 9px; font-weight: 400; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
-    .buyer { font-size: 9px; font-weight: 400; margin-top: 2px; }
-
-    /* Modali */
-    .modal-content {
-      background: #fff;
-      border-radius: 24px;
-      padding: 25px;
-      max-width: 360px;
-      width: 90%;
-      text-align: center;
-    }
-
-    .modal input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-    }
-
-    .owner-contact { margin-top: 30px; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center; z-index: 999; }
+    .modal.show { display: flex; }
+    .modal-content { background: #fff; border-radius: 24px; padding: 25px; max-width: 360px; width: 90%; text-align: center; box-sizing: border-box; }
+    .modal input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; }
+    .divider { height: 1px; background: #e5e5e5; margin: 16px 0; }
+    .pay-buttons { display: flex; flex-direction: column; gap: 10px; }
   </style>
 </head>
 
 <body>
 
-  <!-- Decorative background balls -->
   <div class="ball ball1">12</div>
   <div class="ball ball2">89</div>
 
@@ -181,17 +69,15 @@
 
     <div class="share-box">
       <button class="btn whatsapp" onclick="shareWhatsapp()">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:18px;">
+        <img src="https://upload.wikimedia.org" style="width:18px;">
         Condividi Riffa
       </button>
-
       <button class="btn" style="background:#0F1E4A; color:#fff" onclick="window.location.href='index.html'">
         ✨ Crea la tua Riffa
       </button>
     </div>
 
     <div id="lottery-status-banner" class="status-banner" style="display:none"></div>
-    
     <div id="prize-gallery" class="gallery"></div>
 
     <div id="lottery-description">
@@ -203,29 +89,116 @@
 
     <div id="owner-contact" class="owner-contact" style="display:none">
       <button class="btn whatsapp" id="contactOwnerBtn" style="width: 100%; max-width: 600px; margin: auto;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:20px;">
+        <img src="https://upload.wikimedia.org" style="width:20px;">
         Chiedi all’organizzatore
       </button>
     </div>
 
     <div class="footer">
-      LotteRiffa non gestisce transazioni. I pagamenti avvengono direttamente verso l'organizzatore.
+      © 2026 LotteRiffa
     </div>
-
   </div>
 
+  <!-- MODALE ACQUISTO -->
   <div id="modal" class="modal">
     <div class="modal-content">
-      <!-- Il contenuto viene generato dal tuo script JS -->
+        <h3 id="modalTitle">Acquista Numero</h3>
+        <label style="font-size: 13px; font-weight: bold;">Il tuo nome</label>
+        <input id="nameField" placeholder="Es. Mario Rossi" />
+        <div class="divider"></div>
+        <p style="font-size: 14px; font-weight: bold;">Scegli il pagamento</p>
+        <div class="pay-buttons">
+            <button id="btnStripe" class="btn stripe" onclick="payWithStripe()">💳 Stripe / Carta</button>
+            <button id="btnPaypal" class="btn paypal" onclick="payManual('paypal')">PayPal</button>
+            <button id="btnRevolut" class="btn revolut" onclick="payManual('revolut')">Revolut</button>
+            <button class="btn" style="background:#ddd" onclick="closeModal()">Annulla</button>
+        </div>
     </div>
   </div>
 
-  <script>
-    /* MANTIENI QUI TUTTA LA TUA LOGICA JS ORIGINALE (Supabase, fetch, ecc.) */
-    const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-    // ... resto del tuo script ...
-  </script>
+<script>
+/* --- TUA LOGICA ORIGINALE RIPRISTINATA --- */
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk"; 
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const LOTTERY_ID = new URLSearchParams(location.search).get("id");
+
+let currentRow = null;
+
+async function loadLottery() {
+    if(!LOTTERY_ID) return;
+    
+    const { data: lot, error } = await sb.from("lotteries").select("*").eq("id", LOTTERY_ID).single();
+    if(error || !lot) return;
+
+    document.getElementById("lottery-title").innerText = lot.title;
+    document.getElementById("lottery-price").innerText = `Biglietto: €${lot.ticket_price}`;
+    document.getElementById("lottery-description-text").innerText = lot.description;
+    
+    // Gestione Metadati (Data e Ruota)
+    let meta = "";
+    if(lot.draw_date) meta += `Estrazione: ${new Date(lot.draw_date).toLocaleDateString('it-IT')}\n`;
+    if(lot.wheel) meta += `Ruota: ${lot.wheel}`;
+    document.getElementById("lottery-meta").innerText = meta;
+
+    // Galleria Immagini
+    const gallery = document.getElementById("prize-gallery");
+    if(lot.prize_images) {
+        lot.prize_images.forEach(url => {
+            const img = document.createElement("img");
+            img.src = url;
+            gallery.appendChild(img);
+        });
+    }
+
+    // Carica Numeri
+    const { data: tickets } = await sb.from("tickets").select("*").eq("lottery_id", LOTTERY_ID);
+    renderGrid(tickets || []);
+}
+
+function renderGrid(tickets) {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    for(let i=1; i<=90; i++) {
+        const t = tickets.find(x => x.number === i);
+        const div = document.createElement("div");
+        div.className = "number " + (t ? t.status : "available");
+        div.innerHTML = `<div>${i}</div>`;
+        if(t && t.buyer_name) div.innerHTML += `<div class="buyer">${t.buyer_name}</div>`;
+        
+        if(!t || t.status === 'available') {
+            div.onclick = () => openModal(i);
+        }
+        grid.appendChild(div);
+    }
+}
+
+function openModal(n) {
+    currentRow = n;
+    document.getElementById("modalTitle").innerText = "Numero " + n;
+    document.getElementById("modal").classList.add("show");
+}
+
+function closeModal() {
+    document.getElementById("modal").classList.remove("show");
+}
+
+async function payManual(method) {
+    const name = document.getElementById("nameField").value.trim();
+    if(!name) return alert("Inserisci il tuo nome");
+    
+    // Qui aggiungerai la logica per salvare il ticket come 'pending' su Supabase
+    alert(`Contatta l'organizzatore per pagare con ${method}. Il numero ${currentRow} sarà riservato dopo il pagamento.`);
+    closeModal();
+}
+
+function shareWhatsapp() {
+    const text = `Partecipa alla mia Riffa su LotteRiffa! 🎟️\n${window.location.href}`;
+    window.open(`https://wa.me{encodeURIComponent(text)}`);
+}
+
+loadLottery();
+</script>
 
 </body>
 </html>
