@@ -1,208 +1,171 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LotteRiffa</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LotteRiffa</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: #F2C300;
-      color: #0F1E4A;
-      text-align: center;
-      overflow-x: hidden;
-    }
+<style>
 
-    .container {
-      padding: 24px;
-      max-width: 480px;
-      margin: auto;
-      position: relative;
-      z-index: 2;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: flex-end;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .topbar a {
-      text-decoration: none;
-      color: #0F1E4A;
-      font-weight: 500;
-    }
-
-    /* LOGO */
-    h1.logo {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-weight: 700;
-    font-size: 72px;
-    margin: 40px 0 20px 0;
-    letter-spacing: 2px;
-    line-height: 1.1;
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:#F2C300;
+  color:#0F1E4A;
+  text-align:center;
+  overflow-x:hidden;
 }
 
-    h2 {
-      font-size: 22px;
-      margin: 20px 0 10px 0;
-      font-weight: 600;
-    }
+/* CONTAINER */
+.container{
+  max-width:480px;
+  margin:auto;
+  padding:30px 20px;
+  position:relative;
+  z-index:2;
+}
 
-    p {
-      font-size: 15px;
-      line-height: 1.5;
-      margin: 8px 0;
-    }
+/* LOGO */
+.logo{
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  font-weight:700;
+  font-size:72px;
+  line-height:1.1;
+  margin:30px 0 20px 0;
+  color:#0F1E4A;
 
-    .cta {
-      margin: 28px 0 10px 0;
-      background: #1E3A8A;
-      color: white;
-      padding: 16px;
-      border-radius: 18px;
-      font-size: 17px;
-      font-weight: 600;
-      text-decoration: none;
-      display: block;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
-      transition: transform 0.2s ease;
-    }
+  /* Contorno bianco */
+  text-shadow:
+    -3px -3px 0 #fff,
+     3px -3px 0 #fff,
+    -3px  3px 0 #fff,
+     3px  3px 0 #fff,
+     0px  6px 12px rgba(0,0,0,0.15);
+}
 
-    .cta:active {
-      transform: scale(0.98);
-    }
+/* TESTI */
+h2{
+  font-size:24px;
+  font-weight:700;
+  margin:10px 0 15px;
+}
 
-    .micro {
-      font-size: 13px;
-      opacity: 0.9;
-      margin-bottom: 40px;
-    }
+p{
+  font-size:16px;
+  line-height:1.6;
+  margin:6px 0;
+}
 
-    .section {
-      margin: 60px 0;
-    }
+/* CTA */
+.cta{
+  display:block;
+  background:#1E3A8A;
+  color:#F2C300;
+  padding:18px;
+  border-radius:18px;
+  font-weight:700;
+  font-size:18px;
+  text-decoration:none;
+  margin:30px auto 15px auto;
+  max-width:320px;
+  box-shadow:0 10px 20px rgba(0,0,0,0.25);
+}
 
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 18px;
-      margin: 12px 0;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    }
+.cta:active{
+  transform:scale(0.98);
+}
 
-    .footer {
-      font-size: 13px;
-      margin: 60px 0 30px 0;
-      opacity: 0.9;
-    }
+.micro{
+  font-size:14px;
+  opacity:0.9;
+  margin-bottom:40px;
+}
 
-    /* Decorative balls */
+/* SEZIONI */
+.section{
+  margin:60px 0;
+}
 
-    .ball {
-      position: fixed;
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: #0F1E4A;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      opacity: 0.08;
-      font-size: 22px;
-      z-index: 1;
-      animation: float 12s ease-in-out infinite;
-    }
+.steps{
+  background:rgba(255,255,255,0.6);
+  padding:16px;
+  border-radius:18px;
+  margin:12px 0;
+  font-weight:600;
+  font-size:18px;
+}
 
-    .ball1 { top: 120px; left: -40px; }
-    .ball2 { top: 300px; right: -40px; }
-    .ball3 { top: 600px; left: -40px; }
-    .ball4 { bottom: 200px; right: -40px; }
+/* PALLE DECORATIVE */
+.ball{
+  position:fixed;
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:24px;
+  color:#111;
+  box-shadow:0 10px 20px rgba(0,0,0,0.2);
+  z-index:1;
+}
 
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
-      100% { transform: translateY(0px); }
-    }
+.red{ background:#E53935; color:#fff; top:80px; left:-30px; }
+.white{ background:#f5f5f5; top:120px; right:-30px; }
+.yellow{ background:#FFD54F; bottom:150px; left:-30px; }
+.blue{ background:#1976D2; color:#fff; bottom:100px; right:-30px; }
 
-  </style>
+</style>
 </head>
 
 <body>
 
-  <!-- Decorative background balls -->
-  <div class="ball ball1">12</div>
-  <div class="ball ball2">37</div>
-  <div class="ball ball3">08</div>
-  <div class="ball ball4">54</div>
+<!-- Palline -->
+<div class="ball red">27</div>
+<div class="ball white">15</div>
+<div class="ball yellow">23</div>
+<div class="ball blue">31</div>
 
-  <div class="container">
+<div class="container">
 
-    <div class="topbar">
-      <a href="login.html">Accedi</a>
-    </div>
+  <div class="logo">LotteRiffa</div>
 
-    <h1 class="logo">LotteRiffa</h1>
+  <h2>Organizza la tua riffa privata</h2>
+  <p>online in modo semplice.</p>
 
-    <h2>Organizza la tua riffa privata online in modo semplice.</h2>
+  <p style="margin-top:20px;">
+    Pagamenti diretti all’organizzatore.
+  </p>
+  <p>
+    Esito basato su estrazioni ufficiali italiane.
+  </p>
 
-    <p>
-      Pagamenti diretti all’organizzatore.<br>
-      Esito basato su estrazioni ufficiali italiane.
-    </p>
+  <a href="crea-lotteria.html" class="cta">
+    Crea la tua Riffa
+  </a>
 
-    <a href="crea-lotteria.html" class="cta">Crea la tua Riffa</a>
+  <p class="micro">
+    Nessuna percentuale sui biglietti. Solo una piccola fee di attivazione.
+  </p>
 
-    <p class="micro">
-      Nessuna percentuale sui biglietti. Solo una piccola fee di attivazione.
-    </p>
+  <div class="section">
+    <h2>In 3 passaggi</h2>
 
-    <div class="section">
-      <h2>In 3 passaggi</h2>
-
-      <div class="card">
-        1️⃣ Configura la riffa
-      </div>
-
-      <div class="card">
-        2️⃣ Condividi il link
-      </div>
-
-      <div class="card">
-        3️⃣ Attendi l’estrazione ufficiale
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>Paghi solo per attivare</h2>
-      <p>
-        La fee è proporzionata al valore della riffa.<br>
-        Più è piccola la riffa, più è piccola la fee.
-      </p>
-      <p>Nessuna percentuale sulle vendite.</p>
-    </div>
-
-    <div class="section">
-      <h2>LotteRiffa è uno strumento digitale</h2>
-      <p>
-        L’organizzatore è responsabile della propria riffa e riceve direttamente i pagamenti.<br>
-        LotteRiffa non gestisce fondi e non effettua estrazioni.
-      </p>
-    </div>
-
-    <div class="footer">
-      © 2026 LotteRiffa
-    </div>
-
+    <div class="steps">1&nbsp;&nbsp;Configura la riffa</div>
+    <div class="steps">2&nbsp;&nbsp;Condividi il link</div>
+    <div class="steps">3&nbsp;&nbsp;Attendi l’estrazione ufficiale</div>
   </div>
+
+  <div class="section">
+    <h2>Paghi <strong>solo per attivare</strong></h2>
+    <p>La fee è proporzionata al valore della riffa.</p>
+  </div>
+
+</div>
 
 </body>
 </html>
