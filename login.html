@@ -5,17 +5,24 @@
   <title>Accedi o crea la tua Lotteriffa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Font ufficiali della Home -->
   <link href="https://fonts.googleapis.com" rel="stylesheet">
-  
-  <!-- Collegamento al tuo file CSS esterno -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- Supabase JS v2 -->
+  <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
+  <!-- ✅ OneSignal SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "e3470c97-a9e9-4a27-b151-833457d130ed"
+      });
+    });
+  </script>
+
   <style>
-    /* Stili specifici per gli input e i bottoni di questa pagina */
     input {
       width: 100%;
       padding: 14px;
@@ -43,11 +50,7 @@
       transform: scale(0.98);
     }
 
-    .login {
-      background: #1E3A8A; /* Blu della CTA */
-      color: white;
-    }
-
+    .login { background: #1E3A8A; color: white; }
     .register {
       background: transparent;
       color: #0F1E4A;
@@ -64,16 +67,12 @@
       margin-bottom: 20px;
     }
 
-    #result {
-      margin-top: 20px;
-      font-size: 14px;
-    }
+    #result { margin-top: 20px; font-size: 14px; }
   </style>
 </head>
 
 <body>
 
-  <!-- Decorative background balls (opzionali, per richiamare la home) -->
   <div class="ball ball1">12</div>
   <div class="ball ball2">37</div>
 
@@ -104,7 +103,6 @@
   </div>
 
 <script>
-/* 🔴 CONFIG SUPABASE - I TUOI DATI RIMANGONO INVARIATI */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
@@ -116,31 +114,40 @@ const supabaseClient = supabase.createClient(
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+
   if (!email || !password) {
     document.getElementById("result").innerText = "Inserisci email e password";
     return;
   }
+
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
   if (error) {
     document.getElementById("result").innerText = "❌ Login fallito";
     return;
   }
+
   window.location.href = "dashboard.html";
 }
 
 async function register() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+
   if (!email || !password) {
     document.getElementById("result").innerText = "Inserisci email e password";
     return;
   }
+
   const { error } = await supabaseClient.auth.signUp({ email, password });
+
   if (error) {
     document.getElementById("result").innerText = "❌ Registrazione fallita";
     return;
   }
-  document.getElementById("result").innerText = "✅ Registrazione completata. Ora puoi accedere.";
+
+  document.getElementById("result").innerText =
+    "✅ Registrazione completata. Ora puoi accedere.";
 }
 </script>
 
