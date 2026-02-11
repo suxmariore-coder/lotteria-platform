@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "e3470c97-a9e9-4a27-b151-833457d130ed"
+    });
+  });
+</script>
+
   <meta charset="UTF-8">
   <title>Dashboard Owner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
