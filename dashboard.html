@@ -21,6 +21,7 @@ window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
     appId: "e3470c97-a9e9-4a27-b151-833457d130ed"
+    await OneSignal.Notifications.requestPermission();
   });
 });
 </script>
@@ -288,3 +289,4 @@ async function loadDashboard(ownerId) {
 
 </body>
 </html>
+
