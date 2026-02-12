@@ -21,7 +21,6 @@ window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
     appId: "e3470c97-a9e9-4a27-b151-833457d130ed"
-    await OneSignal.Notifications.requestPermission();
   });
 });
 </script>
@@ -213,6 +212,7 @@ button:active {
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const elGrid = document.getElementById("lotteries");
@@ -224,6 +224,12 @@ document.getElementById("btnCreate").onclick = () => {
 
 document.getElementById("btnLogout").onclick = async () => {
   await sb.auth.signOut();
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.logout();
+  });
+
   location.href = "login.html";
 };
 
@@ -283,10 +289,25 @@ async function loadDashboard(ownerId) {
 (async () => {
   const user = await getUserSafe();
   if (!user) return;
+
+  // 🔥 ORDINE CORRETTO PER PWA ANDROID
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+
+    const permission = await OneSignal.Notifications.permission;
+
+    if (permission !== "granted") {
+      await OneSignal.Notifications.requestPermission();
+    }
+
+    await OneSignal.login(user.id);
+
+  });
+
   await loadDashboard(user.id);
 })();
 </script>
 
 </body>
 </html>
-
