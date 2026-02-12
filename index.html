@@ -42,6 +42,30 @@
 .ball1 { top: 60px; left: -60px; }
 .ball2 { top: 180px; right: -60px; }
 
+/* 1. Regola per i contenuti sopra le palline (con esclusione modale) */
+body > *:not(.ball):not([id*="modal"]):not([class*="modal"]):not([class*="popup"]) {
+  position: relative;
+  z-index: 1;
+}
+
+/* 2. Assicurati che le palline restino sotto */
+.ball {
+  z-index: 0;
+}
+
+/* 3. Forza la modale a stare sopra a tutto */
+/* Nota: ho usato selettori generici per sicurezza, 
+   ma .modal-content è quello che hai indicato tu */
+.modal-content, 
+[class*="modal-overlay"], 
+[class*="modal-wrapper"] {
+  position: fixed !important; /* Mantiene la posizione fissa sullo schermo */
+  z-index: 9999 !important;    /* Valore altissimo per vincere su tutto */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); /* Centra la modale */
+}
+    
     h1, h3 { text-align: center; margin: 6px 0; }
 
     #lottery-meta {
@@ -801,3 +825,4 @@ loadNumbers();
 
 </body>
 </html>
+
