@@ -2,24 +2,24 @@
 <html lang="it">
 <head>
 <link rel="manifest" href="/manifest.json">
+
 <meta name="theme-color" content="#1E3A8A">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lotteriffa">
+
 <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta charset="UTF-8" />
+  <title>Lotteria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<meta charset="UTF-8" />
-<title>Lotteria</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<style>
-body {
-  font-family: Arial, sans-serif;
+  <style>
+    body {
+      font-family: Arial, sans-serif;
   padding: 16px;
   background: #FCD34D; /* 💛 GIALLO BRAND */
   margin: 0;
-  overflow-x: hidden;
 }
 
 /* 🎱 Palline decorative trasparenti */
@@ -48,56 +48,54 @@ body > *:not(.ball) {
   z-index: 1;
 }
 
-/* Titoli */
-h1, h3 {
-  text-align: center;
-  margin: 6px 0;
-  color: #1E3A8A;
-}
+    h1, h3 { text-align: center; margin: 6px 0; }
 
-#lottery-meta {
-  text-align: center;
-  color: #444;
-  margin-bottom: 12px;
-  white-space: pre-line;
-}
+    #lottery-meta {
+      text-align: center;
+      color: #555;
+      margin-bottom: 10px;
+      white-space: pre-line; /* mostra \n su righe diverse */
+    }
 
-/* Banner stato */
-.status-banner {
-  max-width: 600px;
-  margin: 12px auto;
-  padding: 14px;
-  border-radius: 18px;
-  text-align: center;
-  font-weight: bold;
-  background: rgba(255,255,255,0.7);
-}
+    .status-banner {
+      max-width: 600px;
+      margin: 12px auto;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
 
-.status-active { color: #1E3A8A; }
-.status-closed { color: #856404; }
-.status-finished { color: #842029; }
+    .status-active { background: #e6f4ea; color: #1e7e34; }
+    .status-closed { background: #fff3cd; color: #856404; }
+    .status-finished { background: #f8d7da; color: #842029; }
 
-/* Share */
-.share-box {
-  max-width: 600px;
-  margin: 10px auto 18px;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
+    .share-box {
+      max-width: 600px;
+      margin: 10px auto 16px;
+      text-align: center;
 
-.btn {
-  padding: 14px;
-  border-radius: 18px;
-  border: none;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform .15s ease;
-}
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-.btn {
+    /* 📱 MOBILE: affiancati */
+    @media (max-width: 600px) {
+      .share-box { flex-wrap: nowrap; }
+      .share-box .btn { flex: 1; max-width: 48%; }
+    }
+
+    .btn {
+      padding: 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .btn {
      transition: transform .12s ease, opacity .12s ease;
     }
 
@@ -109,51 +107,50 @@ h1, h3 {
      cursor: not-allowed;
     }
 
-.whatsapp { background: #25D366; color: #fff; }
-.stripe { background: #1E3A8A; color: #fff; }
-.paypal { background: #003087; color: #fff; }
-.revolut { background: #111; color: #fff; }
-.cancel { background: #fff; color:#333; }
+    .whatsapp { background: #25D366; color: #fff; }
+    .stripe { background: #6772e5; color: #fff; }
+    .paypal { background: #003087; color: #fff; }
+    .revolut { background: #111; color: #fff; }
+    .cancel { background: #ddd; }
 
-/* Galleria */
-.gallery {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding: 10px 0;
-  margin: 0 auto 16px;
-  max-width: 600px;
-}
+    .gallery {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      margin: 0 auto 16px;
+      max-width: 600px;
+    }
 
-.gallery img {
-  height: 220px;
-  border-radius: 18px;
-  object-fit: cover;
-  cursor: pointer;
-}
+    .gallery img {
+      height: 220px;
+      border-radius: 10px;
+      object-fit: cover;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
-/* Descrizione */
-#lottery-description {
-  background: rgba(255,255,255,0.7);
-  padding: 16px;
-  border-radius: 18px;
-  margin: 12px auto;
-  max-width: 600px;
-  text-align: center;
-}
+    #lottery-description {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px auto;
+      max-width: 600px;
+      text-align: center;
+    }
 
-/* Numeri */
-.grid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(10, 1fr);
-}
+    .grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(10, 1fr); /* desktop */
+    }
 
-@media (max-width: 600px) {
-  .grid { grid-template-columns: repeat(6, 1fr); }
-}
+    /* 📱 MOBILE */
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: repeat(6, 1fr); }
+    }
 
-.number {
+    .number {
       border-radius: 8px;
       padding: 6px 4px;
       text-align: center;
@@ -171,83 +168,196 @@ h1, h3 {
       overflow: hidden;      /* non cresce con nomi lunghi */
     }
 
-.number:active { transform: scale(0.95); }
+    .available { background: #1e7e34; cursor: pointer; }
+    .sold { background: #c82333; cursor: not-allowed; opacity: .85; }
+    .pending { background: #ffc107; color: #333; cursor: not-allowed; }
 
-.available { background: #1E3A8A; }
-.sold { background: #c82333; opacity: .85; }
-.pending { background: #ffc107; color: #333; }
+    .buyer {
+      font-size: 11px;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
 
-.buyer {
-  font-size: 11px;
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
 
-/* Modal */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
+    .modal.show { display: flex; }
 
-.modal.show { display: flex; }
-
-.modal-content {
-  background: white;
+    .modal-content {
+  background: #fff;
   width: 100%;
-  max-width: 360px;
-  border-radius: 20px;
+  max-width: 360px;   /* desktop */
+  border-radius: 12px;
   padding: 20px;
 }
 
-.modal input {
+    /* 📱 MOBILE */
+    @media (max-width: 600px) {
+    .modal-content {
+    max-width: 320px; /* 👈 più compatta su mobile */
+    padding: 16px;
+  }
+}
+
+    .modal input {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   margin-bottom: 14px;
-  border-radius: 14px;
-  border: 1px solid #ddd;
-  text-align: center;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  text-align: center;       /* 👈 simmetria */
   font-size: 15px;
 }
 
-.field-label {
-  font-size: 13px;
-  font-weight: bold;
-  color: #444;
-  margin-bottom: 4px;
-  display: block;
+    /* --- STILE MODALE PAGAMENTO --- */
+    .field-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e5e5e5;
+      margin: 16px 0;
+    }
+
+    .pay-title {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .pay-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.divider {
-  height: 1px;
-  background: #eee;
-  margin: 16px 0;
+.pay-buttons img {
+      width: 18px;
+      height: 18px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+.modal-content *,
+.modal-content *::before,
+.modal-content *::after {
+  box-sizing: border-box;
 }
-</style>
+
+.revolut {
+  background: #fff;
+  color: #111;
+  border: 1px solid #111;
+}
+
+.btn.outlined {
+  background: #fff;
+  color: #111;
+  border: 2px solid #111;
+}
+
+.revolut-icon {
+  font-weight: 800;
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+.btn.full {
+  width: 100%;
+}
+
+.pay-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pay-buttons .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pay-buttons img {
+  height: 18px;
+}
+
+
+/* Dimensione logo WhatsApp */
+.share-box img {
+  width: 20px;
+  height: auto;
+}
+
+/* 📱 MOBILE: logo più grande */
+@media (max-width: 600px) {
+  .share-box img {
+    width: 24px; /* prova 26px se lo vuoi ancora più evidente */
+  }
+
+.owner-contact {
+  max-width: 600px;          /* desktop = come griglia */
+  margin: 16px auto 0;
+}
+
+.owner-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.owner-btn img {
+  width: 22px;
+  height: 22px;
+}
+
+/* 📱 MOBILE */
+@media (max-width: 600px) {
+  .owner-contact {
+    max-width: calc(
+      (100vw - 32px)          /* padding body */
+    );
+  }
+}
+
+}
+
+  </style>
 </head>
 
 <body>
-
-<div class="ball ball1">12</div>
-<div class="ball ball2">37</div>
 
 <h1 id="lottery-title"></h1>
 <h3 id="lottery-price"></h3>
 <p id="lottery-meta"></p>
 
 <div class="share-box">
-  <button class="btn whatsapp" onclick="shareWhatsapp()">
+  <button class="btn whatsapp" onclick="shareWhatsapp()" style="display:flex;align-items:center;gap:8px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" style="width:18px;height:18px;">
     Condividi LotteRiffa
   </button>
 
-  <button class="btn stripe" onclick="goToCreateLottery()">
+  <button class="btn" style="background:#000;color:#fff" onclick="goToCreateLottery()">
     ✨ Crea la tua Lotteriffa
   </button>
 </div>
@@ -261,6 +371,13 @@ h1, h3 {
 </div>
 
 <div id="grid" class="grid"></div>
+
+<div id="owner-contact" class="owner-contact" style="display:none">
+  <button class="btn whatsapp owner-btn" id="contactOwnerBtn">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+    Chiedi all’organizzatore
+  </button>
+</div>
 
 <div id="modal" class="modal">
   <div class="modal-content"></div>
