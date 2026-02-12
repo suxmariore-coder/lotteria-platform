@@ -15,7 +15,6 @@
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-<!-- OneSignal -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
 window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -29,13 +28,13 @@ OneSignalDeferred.push(async function(OneSignal) {
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f4f4f4;
+  background: #FCD34D; /* 💛 GIALLO COME LOGIN */
   margin: 0;
   padding: 20px;
   overflow-x: hidden;
 }
 
-/* Palline IDENTICHE alla login */
+/* Palline identiche */
 .ball {
   position: absolute;
   width: 90px;
@@ -49,27 +48,25 @@ body {
   font-weight: bold;
   font-size: 22px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  opacity: 0.15;
 }
 
 .ball1 { top: 40px; left: -30px; }
 .ball2 { top: 140px; right: -30px; }
 
-/* Container come login */
 .container {
   max-width: 500px;
   margin: 60px auto;
 }
 
-/* Titolo stile login */
+/* Titolo stile brand */
 h1 {
   text-align: center;
-  font-size: 36px;
+  font-size: 42px;
   color: #1E3A8A;
   margin-bottom: 25px;
 }
 
-/* Top buttons stile login */
+/* Bottoni top */
 .top-actions {
   display: flex;
   flex-direction: column;
@@ -103,14 +100,13 @@ button:active {
   border: 2px solid #0F1E4A;
 }
 
-/* Status */
 #status {
   text-align: center;
   margin: 10px 0 20px;
   font-size: 14px;
 }
 
-/* Card stile coerente */
+/* Card */
 .grid {
   display: flex;
   flex-direction: column;
@@ -118,7 +114,8 @@ button:active {
 }
 
 .card {
-  background: white;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(4px);
   border-radius: 18px;
   padding: 16px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.06);
@@ -200,7 +197,7 @@ button:active {
 
 <div class="container">
 
-<h1>Le tue lotterie</h1>
+<h1>LotteRiffa</h1>
 
 <div class="top-actions">
   <button id="btnCreate" class="primary">➕ Crea nuova lotteria</button>
