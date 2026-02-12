@@ -29,17 +29,17 @@ OneSignalDeferred.push(async function(OneSignal) {
 <style>
 body {
   font-family: Arial, sans-serif;
+  background: #f4f4f4;
   margin: 0;
-  padding: 0;
-  background: linear-gradient(180deg, #1E3A8A 0%, #f4f6fb 300px);
+  padding: 20px;
   overflow-x: hidden;
 }
 
-/* Palline decorative */
+/* Palline IDENTICHE alla login */
 .ball {
   position: absolute;
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   background: white;
   color: #1E3A8A;
@@ -48,77 +48,80 @@ body {
   justify-content: center;
   font-weight: bold;
   font-size: 22px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
   opacity: 0.15;
 }
 
-.ball1 { top: 40px; left: -20px; }
-.ball2 { top: 120px; right: -20px; }
+.ball1 { top: 40px; left: -30px; }
+.ball2 { top: 140px; right: -30px; }
 
-.app-container {
+/* Container come login */
+.container {
   max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
-  padding-bottom: 40px;
+  margin: 60px auto;
 }
 
-.logo {
+/* Titolo stile login */
+h1 {
   text-align: center;
-  font-size: 26px;
-  color: white;
-  margin: 40px 0 25px;
+  font-size: 36px;
+  color: #1E3A8A;
+  margin-bottom: 25px;
 }
 
+/* Top buttons stile login */
 .top-actions {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-bottom: 20px;
 }
 
-.top-actions button {
-  flex: 1;
+button {
+  width: 100%;
   padding: 16px;
   border-radius: 18px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   border: none;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 
-.top-actions button:active {
-  transform: scale(0.97);
+button:active {
+  transform: scale(0.98);
 }
 
-#btnCreate {
-  background: white;
-  color: #1E3A8A;
+.primary {
+  background: #1E3A8A;
+  color: white;
 }
 
 .secondary {
   background: transparent;
-  border: 2px solid white;
-  color: white;
+  color: #0F1E4A;
+  border: 2px solid #0F1E4A;
 }
 
+/* Status */
 #status {
   text-align: center;
-  color: #444;
-  margin-bottom: 15px;
+  margin: 10px 0 20px;
   font-size: 14px;
 }
 
+/* Card stile coerente */
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .card {
   background: white;
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 16px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -132,8 +135,8 @@ body {
 .thumb {
   width: 80px;
   height: 80px;
-  border-radius: 14px;
-  background: #eef1f8;
+  border-radius: 12px;
+  background: #eee;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -172,16 +175,9 @@ body {
 .actions button {
   flex: 1;
   padding: 14px;
-  border-radius: 16px;
+  border-radius: 14px;
   font-size: 14px;
   font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.actions button:active {
-  transform: scale(0.97);
 }
 
 .open {
@@ -191,8 +187,8 @@ body {
 
 .manage {
   background: transparent;
-  border: 2px solid #1E3A8A;
-  color: #1E3A8A;
+  border: 2px solid #0F1E4A;
+  color: #0F1E4A;
 }
 </style>
 </head>
@@ -202,12 +198,12 @@ body {
 <div class="ball ball1">12</div>
 <div class="ball ball2">37</div>
 
-<div class="app-container">
+<div class="container">
 
-<h1 class="logo">📊 Le tue lotterie</h1>
+<h1>Le tue lotterie</h1>
 
 <div class="top-actions">
-  <button id="btnCreate">➕ Crea nuova</button>
+  <button id="btnCreate" class="primary">➕ Crea nuova lotteria</button>
   <button id="btnLogout" class="secondary">Esci</button>
 </div>
 
@@ -219,7 +215,6 @@ body {
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const elGrid = document.getElementById("lotteries");
@@ -231,12 +226,6 @@ document.getElementById("btnCreate").onclick = () => {
 
 document.getElementById("btnLogout").onclick = async () => {
   await sb.auth.signOut();
-
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.logout();
-  });
-
   location.href = "login.html";
 };
 
@@ -296,12 +285,6 @@ async function loadDashboard(ownerId) {
 (async () => {
   const user = await getUserSafe();
   if (!user) return;
-
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.login(user.id);
-  });
-
   await loadDashboard(user.id);
 })();
 </script>
