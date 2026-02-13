@@ -223,6 +223,13 @@
     <button class="btn warning" id="btnCloseLottery">⛔ Chiudi vendite </button>
   </div>
 
+  <!-- IMMAGINI -->
+  <div class="card">
+    <h2>Immagini premio</h2>
+    <div id="imagesBox" class="images"></div>
+    <button class="btn secondary disabled" disabled>➕ Gestisci immagini (step successivo)</button>
+  </div>
+
   <!-- NUMERI -->
   <div class="card">
     <h2>Numeri</h2>
@@ -458,7 +465,7 @@ if (HIGHLIGHT_ID) {
   setTimeout(() => {
     // scrolla un elemento certo, sempre presente
     elPendingList.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 2000);
+  }, 3000);
 }
   })();
 
