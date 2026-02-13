@@ -508,6 +508,20 @@ async function handlePayment(numberId, action) {
 
   // 🔄 refresh dati
   await loadNumbersAndPending();
+
+  // 🔥 Slide automatico verso i pagamenti se arrivo da notifica
+  if (HIGHLIGHT_ID) {
+    setTimeout(() => {
+      const paymentsSection = document.getElementById("pendingList")?.closest(".card");
+      if (paymentsSection) {
+        paymentsSection.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+    }, 2000); // 2 secondi dopo il lampeggio
+  }
+
 }
 
 async function askResetNumber(numberId, numberLabel) {
