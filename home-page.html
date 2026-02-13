@@ -35,31 +35,29 @@
     }
 
     .topbar {
-  /* Layout */
-  display: flex;
-  justify-content: flex-end;
+  /* Cambiato in inline-flex per adattarsi al contenuto */
+  display: inline-flex; 
   margin-bottom: 20px;
   
-  /* Stile ereditato da .cta */
+  /* Stile preso dal .cta */
   background: #1E3A8A;
-  padding: 12px 20px; /* Padding bilanciato per font piccolo */
+  padding: 10px 24px; /* Padding orizzontale generoso per l'effetto bottone */
   border-radius: 18px;
   box-shadow: 0 8px 18px rgba(0,0,0,0.15);
   transition: transform 0.2s ease;
+  text-decoration: none;
 }
 
 .topbar a {
   text-decoration: none;
-  /* Colore bianco per contrasto sul fondo blu */
-  color: #FFFFFF; 
-  /* Manteniamo la tua grandezza originale */
-  font-size: 14px; 
+  color: white; /* Bianco per contrasto sul blu */
+  font-size: 14px; /* Grandezza testo originale */
   font-weight: 500;
 }
 
-/* Effetto hover per coerenza con i bottoni */
+/* Hover per mantenere l'effetto interattivo */
 .topbar:hover {
-  transform: translateY(-2px);
+  transform: scale(1.02);
 }
 
 
