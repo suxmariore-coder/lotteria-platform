@@ -2,113 +2,187 @@
 <html lang="it">
 <head>
 <link rel="manifest" href="/manifest.json">
+
 <meta name="theme-color" content="#1E3A8A">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lotteriffa">
+
 <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta charset="UTF-8">
+  <title>Gestisci Lotteria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<title>Gestisci Lotteria</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 16px;
+    }
 
-<style>
-/* ---- IL TUO CSS ORIGINALE ---- */
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  margin: 0;
-  padding: 16px;
+    h1, h2 { text-align: center; margin: 6px 0; }
+
+    .container { max-width: 600px; margin: 0 auto; }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .back {
+      text-decoration: none;
+      font-size: 14px;
+      color: #333;
+    }
+
+    #statusMsg {
+      text-align: center;
+      color: #444;
+      margin: 10px 0 14px;
+      font-size: 14px;
+    }
+
+    /* STATUS */
+    .status-banner {
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .status-active { background: #e6f4ea; color: #1e7e34; }
+    .status-closed { background: #fff3cd; color: #856404; }
+    .status-finished { background: #f8d7da; color: #842029; }
+    .status-archived { background: #e2e3e5; color: #41464b; }
+
+    /* CARD */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .row span { color: #555; }
+    .row b { color: #111; }
+
+    /* BUTTONS */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .primary { background: #1e7e34; color: #fff; }
+    .secondary { background: #6c757d; color: #fff; }
+    .warning { background: #ffc107; color: #333; }
+    .disabled { opacity: .6; cursor: not-allowed; }
+
+    /* IMAGES */
+    .images {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .images img {
+      height: 90px;
+      width: 120px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #eee;
+      flex: 0 0 auto;
+    }
+
+    /* NUMBERS GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .number {
+      height: 52px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .available { background: #1e7e34; }
+    .pending { background: #ffc107; color: #333; }
+    .sold { background: #c82333; }
+
+    .buyer {
+      font-size: 11px;
+      margin-top: 2px;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 4px;
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 768px) {
+      .grid { grid-template-columns: repeat(10, 1fr); }
+    }
+
+    /* PAYMENTS LIST */
+    .payment {
+      font-size: 14px;
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .payment:last-child { border-bottom: none; }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #f0f2f5;
+      color: #333;
+      width: fit-content;
+    }
+    .number.sold {
+      cursor: pointer;
+    }
+
+    .number.sold:hover {
+     filter: brightness(1.1);
+     outline: 2px solid rgba(255,255,255,0.6);
 }
-
-h1, h2 { text-align: center; margin: 6px 0; }
-.container { max-width: 600px; margin: 0 auto; }
-
-.header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.back { text-decoration: none; font-size: 14px; color: #333; }
-
-#statusMsg { text-align: center; color: #444; margin: 10px 0 14px; font-size: 14px; }
-
-.status-banner {
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-.status-active { background: #e6f4ea; color: #1e7e34; }
-.status-closed { background: #fff3cd; color: #856404; }
-.status-finished { background: #f8d7da; color: #842029; }
-.status-archived { background: #e2e3e5; color: #41464b; }
-
-.card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 12px;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.row span { color: #555; }
-.row b { color: #111; }
-
-.btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
-  margin-top: 8px;
-}
-.primary { background: #1e7e34; color: #fff; }
-.secondary { background: #6c757d; color: #fff; }
-.warning { background: #ffc107; color: #333; }
-
-.images { display: flex; gap: 8px; overflow-x: auto; }
-.images img {
-  height: 90px;
-  width: 120px;
-  border-radius: 8px;
-  object-fit: cover;
-  background: #eee;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.number {
-  height: 52px;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-}
-
-.available { background: #1e7e34; }
-.pending { background: #ffc107; color: #333; }
-.sold { background: #c82333; }
 
 .number.highlighted {
-  animation: pulseHighlight 1.2s ease-in-out infinite;
+  animation: pulseHighlight 1.2s ease-in-out 3;
+  box-shadow: 0 0 0 3px #1E3A8A;
 }
 
 @keyframes pulseHighlight {
@@ -116,124 +190,427 @@ h1, h2 { text-align: center; margin: 6px 0; }
   50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
-</style>
+
+  </style>
 </head>
 
 <body>
 <div class="container">
 
-<div class="header">
-  <a class="back" href="dashboard.html">← Dashboard</a>
-</div>
+  <div class="header">
+    <a class="back" href="dashboard.html">← Dashboard</a>
+  </div>
 
-<h1 id="pageTitle">Gestisci Lotteria</h1>
-<div id="statusMsg"></div>
-<div id="statusBanner" class="status-banner" style="display:none;"></div>
+  <h1 id="pageTitle">Gestisci Lotteria</h1>
+  <div id="statusMsg"></div>
 
-<!-- PANORAMICA -->
-<div class="card">
-  <h2>Panoramica</h2>
-  <div class="row"><span>Prezzo biglietto</span><b id="pTicket">—</b></div>
-  <div class="row"><span>Data estrazione</span><b id="pDraw">—</b></div>
-  <div class="row"><span>Ruota</span><b id="pWheel">—</b></div>
-  <div class="row"><span>Venduti</span><b id="pSold">—</b></div>
-  <div class="row"><span>In attesa</span><b id="pPending">—</b></div>
-</div>
+  <div id="statusBanner" class="status-banner" style="display:none;"></div>
 
-<!-- NUMERI -->
-<div class="card">
-  <h2>Numeri</h2>
-  <div id="numbersGrid" class="grid"></div>
-</div>
+  <!-- PANORAMICA -->
+  <div class="card">
+    <h2>Panoramica</h2>
+    <div class="row"><span>Prezzo biglietto</span><b id="pTicket">—</b></div>
+    <div class="row"><span>Data estrazione</span><b id="pDraw">—</b></div>
+    <div class="row"><span>Ruota</span><b id="pWheel">—</b></div>
+    <div class="row"><span>Venduti</span><b id="pSold">—</b></div>
+    <div class="row"><span>In attesa</span><b id="pPending">—</b></div>
+  </div>
 
-<!-- PAGAMENTI -->
-<div class="card" id="pendingSection">
-  <h2>Pagamenti in attesa</h2>
-  <div id="pendingList"></div>
-</div>
+  <!-- MODIFICA (solo UI, agganceremo dopo) -->
+  <div class="card">
+    <h2>Azioni</h2>
+    <button class="btn secondary" id="btnEdit">✏️ Modifica dati</button>
+    <button class="btn warning" id="btnCloseLottery">⛔ Chiudi vendite </button>
+  </div>
+
+  <!-- IMMAGINI -->
+  <div class="card">
+    <h2>Immagini premio</h2>
+    <div id="imagesBox" class="images"></div>
+    <button class="btn secondary disabled" disabled>➕ Gestisci immagini (step successivo)</button>
+  </div>
+
+  <!-- NUMERI -->
+  <div class="card">
+    <h2>Numeri</h2>
+    <div id="numbersGrid" class="grid"></div>
+  </div>
+
+  <!-- PAGAMENTI PENDING -->
+  <div class="card">
+    <h2>Pagamenti in attesa</h2>
+    <div id="pendingList"></div>
+    <button class="btn primary disabled" disabled>✅ Conferma pagamento (step successivo)</button>
+  </div>
 
 </div>
 
 <script>
-const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // ✅ CONFIG
+  const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const params = new URLSearchParams(location.search);
-const LOTTERY_ID = params.get("id");
-const HIGHLIGHT_ID = params.get("highlight");
+  const LOTTERY_ID = new URLSearchParams(location.search).get("id");
+const urlParams = new URLSearchParams(location.search);
+const HIGHLIGHT_ID = urlParams.get("highlight");
+const FOCUS_SECTION = urlParams.get("focus");
 
-const elNumbersGrid = document.getElementById("numbersGrid");
-const elPendingList = document.getElementById("pendingList");
+document.getElementById("btnEdit").onclick = () => {
+  location.href = `edit-lottery.html?id=${LOTTERY_ID}`;
+};
 
-async function loadNumbers() {
+  const elStatusMsg = document.getElementById("statusMsg");
+  const elStatusBanner = document.getElementById("statusBanner");
 
-const { data } = await sb
-  .from("lottery_numbers")
-  .select("id,number,status,payment_status,pending_buyer_name")
-  .eq("lottery_id", LOTTERY_ID)
-  .order("number", { ascending: true });
+  const elTicket = document.getElementById("pTicket");
+  const elDraw = document.getElementById("pDraw");
+  const elWheel = document.getElementById("pWheel");
+  const elSold = document.getElementById("pSold");
+  const elPending = document.getElementById("pPending");
 
-data.forEach(row => {
+  const elImagesBox = document.getElementById("imagesBox");
+  const elNumbersGrid = document.getElementById("numbersGrid");
+  const elPendingList = document.getElementById("pendingList");
 
-  const cls =
-    row.status === "sold" ? "sold" :
-    row.payment_status === "pending" ? "pending" :
-    "available";
+  function fmtDateIT(dateStr) {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return "—";
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  }
+
+  function setBanner(status) {
+    elStatusBanner.style.display = "block";
+
+    const cls =
+      status === "active" ? "status-active" :
+      status === "closed" ? "status-closed" :
+      status === "archived" ? "status-archived" :
+      "status-finished";
+
+    elStatusBanner.className = `status-banner ${cls}`;
+
+    elStatusBanner.textContent =
+      status === "active" ? "✅ Lotteria attiva" :
+      status === "closed" ? "⛔ Vendite chiuse" :
+      status === "archived" ? "🗂️ Lotteria archiviata" :
+      "🏁 Lotteria conclusa";
+  }
+
+  async function requireAuth() {
+    const { data, error } = await sb.auth.getUser();
+    if (error || !data?.user) {
+      location.href = "login.html";
+      return null;
+    }
+    return data.user;
+  }
+
+  async function loadLottery(ownerId) {
+    elStatusMsg.textContent = "Caricamento lotteria…";
+
+    // Nota: selezioniamo solo ciò che serve (aggiungerai campi dopo)
+    const { data, error } = await sb
+      .from("lotteries")
+      .select("id,title,description,ticket_price,draw_date,wheel,status,prize_images,owner_id")
+      .eq("id", LOTTERY_ID)
+      .maybeSingle();
+
+    if (error || !data) {
+      elStatusMsg.textContent = "Lotteria non trovata.";
+      return null;
+    }
+
+    if (data.owner_id !== ownerId) {
+      elStatusMsg.textContent = "Non hai accesso a questa lotteria.";
+      return null;
+    }
+
+    document.getElementById("pageTitle").textContent = `Gestisci: ${data.title || "Lotteria"}`;
+    elTicket.textContent = data.ticket_price != null ? `€ ${data.ticket_price}` : "—";
+    elDraw.textContent = fmtDateIT(data.draw_date);
+    elWheel.textContent = data.wheel || "—";
+    setBanner(data.status || "active");
+
+    // immagini
+    elImagesBox.innerHTML = "";
+    const imgs = Array.isArray(data.prize_images) ? data.prize_images : [];
+    if (!imgs.length) {
+      elImagesBox.innerHTML = `<div style="color:#666;font-size:14px;">Nessuna immagine</div>`;
+    } else {
+      imgs.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "premio";
+        img.onclick = () => window.open(url, "_blank");
+        elImagesBox.appendChild(img);
+      });
+    }
+
+    elStatusMsg.textContent = "";
+    return data;
+  }
+
+  async function loadNumbersAndPending() {
+    elNumbersGrid.innerHTML = "";
+    elPendingList.innerHTML = `<div style="color:#666;font-size:14px;">Caricamento…</div>`;
+
+    const { data, error } = await sb
+      .from("lottery_numbers")
+      .select("id,number,status,payment_status,pending_buyer_name,buyer_name,payment_method")
+      .eq("lottery_id", LOTTERY_ID)
+      .order("number", { ascending: true });
+
+    if (error || !Array.isArray(data)) {
+      elPendingList.innerHTML = `<div style="color:#c00;font-size:14px;">Errore caricamento numeri.</div>`;
+      return;
+    }
+
+    let soldCount = 0;
+    let pendingCount = 0;
+
+    // render griglia
+    data.forEach(row => {
+  const cls = row.status === "sold"
+    ? "sold"
+    : row.payment_status === "pending"
+    ? "pending"
+    : "available";
+
+  if (cls === "sold") soldCount++;
+  if (cls === "pending") pendingCount++;
 
   const d = document.createElement("div");
   d.className = `number ${cls}`;
-  d.dataset.id = row.id;
-  d.innerHTML = `<div>${row.number}</div>`;
 
-  // 🔥 highlight da notifica
-  if (HIGHLIGHT_ID && row.id === HIGHLIGHT_ID) {
-    d.classList.add("highlighted");
+  d.innerHTML = `
+    <div>${row.number}</div>
+    ${
+      cls === "pending"
+        ? `<div class="buyer">⏳ ${row.pending_buyer_name || ""}</div>`
+        : cls === "sold"
+        ? `<div class="buyer">${row.buyer_name || ""}</div>`
+        : ``
+    }
+  `;
 
-    setTimeout(() => {
-      document.getElementById("pendingSection")
-        .scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 2000);
+  // ✅ CLICK SOLO SU SOLD (RESET)
+  if (cls === "sold") {
+    d.style.cursor = "pointer";
+    d.onclick = () => askResetNumber(row.id, row.number);
   }
 
-  elNumbersGrid.appendChild(d);
+  // 🔥 Highlight se arriva da notifica
+if (HIGHLIGHT_ID && row.id === HIGHLIGHT_ID) {
+  d.classList.add("highlighted");
+  setTimeout(() => {
+    d.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 400);
+}
+
+elNumbersGrid.appendChild(d);
 });
 
-// lista pending
-const pendings = data.filter(r => r.payment_status === "pending");
 
-pendings.forEach(p => {
+    elSold.textContent = `${soldCount} / 90`;
+    elPending.textContent = `${pendingCount}`;
+
+    // lista pending
+    const pendings = data.filter(r => r.payment_status === "pending");
+    if (!pendings.length) {
+      elPendingList.innerHTML = `<div style="color:#666;font-size:14px;">Nessun pagamento in attesa.</div>`;
+      return;
+    }
+
+    elPendingList.innerHTML = "";
+    pendings.forEach(p => {
   const div = document.createElement("div");
+  div.className = "payment";
   div.innerHTML = `
     <div><b>${p.pending_buyer_name || "—"}</b> – Numero <b>${p.number}</b></div>
-    <button onclick="handlePayment('${p.id}','confirm')">Conferma</button>
-    <button onclick="handlePayment('${p.id}','reject')">Rifiuta</button>
+    <div class="pill">Metodo: ${(p.payment_method || "manuale").toUpperCase()}</div>
+
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn primary" style="flex:1" onclick="handlePayment('${p.id}','confirm')">
+        ✅ Conferma
+      </button>
+      <button class="btn secondary" style="flex:1" onclick="handlePayment('${p.id}','reject')">
+        ❌ Rifiuta
+      </button>
+    </div>
   `;
   elPendingList.appendChild(div);
 });
+
+  }
+
+  (async () => {
+    if (!LOTTERY_ID) {
+      elStatusMsg.textContent = "ID lotteria mancante nell’URL.";
+      return;
+    }
+
+    const user = await requireAuth();
+    if (!user) return;
+
+    const lot = await loadLottery(user.id);
+    if (!lot) return;
+
+    await loadNumbersAndPending();
+  })();
+
+// 🚀 Scroll automatico alla sezione pagamenti
+if (FOCUS_SECTION === "pending") {
+  setTimeout(() => {
+    elPendingList.closest(".card")
+      .scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 500);
 }
 
-async function handlePayment(id, action) {
+async function handlePayment(numberId, action) {
+  if (!confirm(action === "confirm"
+      ? "Confermare questo pagamento?"
+      : "Rifiutare e liberare il numero?"
+  )) return;
 
-const { data: { session } } = await sb.auth.getSession();
+  showToast("Operazione in corso…", "warning");
 
-await fetch(`${SUPABASE_URL}/functions/v1/confirm-payment`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${session.access_token}`
-  },
-  body: JSON.stringify({
-    number_id: id,
-    action
-  })
-});
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    alert("Sessione scaduta");
+    return;
+  }
 
-location.reload();
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/confirm-payment`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        number_id: numberId,
+        action,
+      }),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    showToast(data.error || "Errore operazione", "error");
+    return;
+  }
+
+  // 🔄 refresh dati
+  await loadNumbersAndPending();
 }
 
-loadNumbers();
+async function askResetNumber(numberId, numberLabel) {
+  const pwd = prompt(
+    `Inserisci la password admin per resettare il numero ${numberLabel}:`
+  );
+  if (!pwd) return;
+  showToast("Reset in corso…", "warning");
+
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    alert("Sessione scaduta");
+    return;
+  }
+
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/reset-number`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        number_id: numberId,
+        admin_password: pwd,
+      }),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    showToast(data.error || "Errore operazione", "error");
+    return;
+  }
+
+  showToast("Numero resettato correttamente", "success");
+
+  loadNumbersAndPending();
+}
+
+function showToast(msg, type = "info") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+
+  t.style.background =
+    type === "success" ? "#1e7e34" :
+    type === "error"   ? "#c82333" :
+    type === "warning" ? "#ffc107" :
+    "#333";
+
+  t.style.color = type === "warning" ? "#111" : "#fff";
+
+  t.style.display = "block";
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.display = "none";
+  }, 2500);
+}
+
+document.getElementById("btnCloseLottery").onclick = async () => {
+  if (!confirm("Sei sicuro di voler chiudere le vendite?")) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    alert("Sessione scaduta");
+    return;
+  }
+
+  const { error } = await sb
+    .from("lotteries")
+    .update({ status: "closed" })
+    .eq("id", LOTTERY_ID);
+
+  if (error) {
+    alert("Errore chiusura vendite");
+    return;
+  }
+
+  showToast("Vendite chiuse correttamente", "success");
+
+  // refresh stato
+  await loadLottery(session.user.id);
+};
+
 </script>
+
+<div id="toast" style="
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: none;
+  z-index: 9999;
+  max-width: 90%;
+  text-align: center;
+"></div>
 
 </body>
 </html>
