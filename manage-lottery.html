@@ -3,6 +3,7 @@
 <head>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1E3A8A">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lotteriffa">
@@ -11,56 +12,100 @@
 <meta charset="UTF-8">
 <title>Gestisci Lotteria</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 16px; }
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  margin: 0;
+  padding: 16px;
+}
+
 h1, h2 { text-align: center; margin: 6px 0; }
 .container { max-width: 600px; margin: 0 auto; }
+
 .header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .back { text-decoration: none; font-size: 14px; color: #333; }
 
-.status-banner { padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 12px; }
+#statusMsg { text-align: center; margin: 10px 0 14px; font-size: 14px; }
+
+.status-banner {
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
 .status-active { background: #e6f4ea; color: #1e7e34; }
 .status-closed { background: #fff3cd; color: #856404; }
 .status-finished { background: #f8d7da; color: #842029; }
-.status-archived { background: #e2e3e5; color: #41464b; }
 
-.card { background: #fff; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
-.row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
-.row span { color: #555; }
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
 
-.btn { width: 100%; padding: 12px; border-radius: 6px; border: none; font-size: 15px; cursor: pointer; margin-top: 8px; }
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 8px;
+}
 .primary { background: #1e7e34; color: #fff; }
 .secondary { background: #6c757d; color: #fff; }
 .warning { background: #ffc107; color: #333; }
 
-.images { display: flex; gap: 8px; overflow-x: auto; }
-.images img { height: 90px; width: 120px; border-radius: 8px; object-fit: cover; }
-
-.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; }
-@media (min-width: 768px) { .grid { grid-template-columns: repeat(10, 1fr); } }
-
-.number { height: 52px; border-radius: 8px; font-weight: bold; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; }
-.available { background: #1e7e34; }
-.pending { background: #ffc107; color: #333; }
-.sold { background: #c82333; cursor:pointer; }
-
-.buyer { font-size: 11px; margin-top: 2px; }
-
-.payment { border-bottom: 1px solid #eee; padding: 10px 0; }
-.pill { display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; background:#f0f2f5; }
-
-/* 🔥 Highlight */
-@keyframes pulseHighlight {
-  0%   { transform: scale(1); box-shadow: 0 0 0 rgba(30,58,138,0); }
-  50%  { transform: scale(1.2); box-shadow: 0 0 18px rgba(30,58,138,0.9); }
-  100% { transform: scale(1); box-shadow: 0 0 0 rgba(30,58,138,0); }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 10px;
 }
 
+.number {
+  height: 52px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.available { background: #1e7e34; }
+.pending { background: #ffc107; color: #333; }
+.sold { background: #c82333; }
+
 .number.highlight {
-  animation: pulseHighlight 1s ease-in-out infinite;
+  animation: pulse 1s ease-in-out infinite;
   z-index: 2;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.payment {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
 }
 </style>
 </head>
@@ -69,29 +114,31 @@ h1, h2 { text-align: center; margin: 6px 0; }
 <div class="container">
 
 <div class="header">
-<a class="back" href="dashboard.html">← Dashboard</a>
+  <a class="back" href="dashboard.html">← Dashboard</a>
 </div>
 
 <h1 id="pageTitle">Gestisci Lotteria</h1>
+<div id="statusMsg"></div>
 <div id="statusBanner" class="status-banner" style="display:none;"></div>
 
+<!-- PANORAMICA -->
 <div class="card">
-<h2>Panoramica</h2>
-<div class="row"><span>Prezzo biglietto</span><b id="pTicket">—</b></div>
-<div class="row"><span>Data estrazione</span><b id="pDraw">—</b></div>
-<div class="row"><span>Ruota</span><b id="pWheel">—</b></div>
-<div class="row"><span>Venduti</span><b id="pSold">—</b></div>
-<div class="row"><span>In attesa</span><b id="pPending">—</b></div>
+  <h2>Panoramica</h2>
+  <div class="row"><span>Prezzo biglietto</span><b id="pTicket">—</b></div>
+  <div class="row"><span>Venduti</span><b id="pSold">—</b></div>
+  <div class="row"><span>In attesa</span><b id="pPending">—</b></div>
 </div>
 
+<!-- NUMERI -->
 <div class="card">
-<h2>Numeri</h2>
-<div id="numbersGrid" class="grid"></div>
+  <h2>Numeri</h2>
+  <div id="numbersGrid" class="grid"></div>
 </div>
 
+<!-- PAGAMENTI -->
 <div class="card" id="pendingSection">
-<h2>Pagamenti in attesa</h2>
-<div id="pendingList"></div>
+  <h2>Pagamenti in attesa</h2>
+  <div id="pendingList"></div>
 </div>
 
 </div>
@@ -104,56 +151,87 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const LOTTERY_ID = new URLSearchParams(location.search).get("id");
 const HIGHLIGHT_ID = new URLSearchParams(location.search).get("highlight");
 
-async function requireAuth() {
-  const { data } = await sb.auth.getUser();
-  if (!data?.user) location.href="login.html";
-  return data.user;
-}
+const elNumbersGrid = document.getElementById("numbersGrid");
+const elPendingList = document.getElementById("pendingList");
+const elSold = document.getElementById("pSold");
+const elPending = document.getElementById("pPending");
 
-async function loadNumbersAndPending() {
-  const { data } = await sb
+async function loadData() {
+
+const { data } = await sb
   .from("lottery_numbers")
-  .select("id,number,status,payment_status,pending_buyer_name,buyer_name")
+  .select("id,number,status,payment_status,pending_buyer_name")
   .eq("lottery_id", LOTTERY_ID)
-  .order("number",{ascending:true});
+  .order("number", { ascending: true });
 
-  const grid = document.getElementById("numbersGrid");
-  const pendingList = document.getElementById("pendingList");
+let soldCount = 0;
+let pendingCount = 0;
 
-  grid.innerHTML="";
-  pendingList.innerHTML="";
+data.forEach(row => {
 
-  data.forEach(row=>{
-    const cls = row.status==="sold"?"sold":row.payment_status==="pending"?"pending":"available";
+  const cls =
+    row.status === "sold" ? "sold" :
+    row.payment_status === "pending" ? "pending" :
+    "available";
 
-    const d=document.createElement("div");
-    d.className=`number ${cls}`;
-    d.dataset.id=row.id;
-    d.innerHTML=`<div>${row.number}</div>`;
+  if (cls === "sold") soldCount++;
+  if (cls === "pending") pendingCount++;
 
-    if(HIGHLIGHT_ID && row.id===HIGHLIGHT_ID){
-      d.classList.add("highlight");
-      setTimeout(()=>{
-        document.getElementById("pendingSection")
-        .scrollIntoView({behavior:"smooth",block:"start"});
-      },2000);
-    }
+  const div = document.createElement("div");
+  div.className = `number ${cls}`;
+  div.dataset.id = row.id;
+  div.innerHTML = `<div>${row.number}</div>`;
 
-    grid.appendChild(d);
+  if (HIGHLIGHT_ID && row.id === HIGHLIGHT_ID) {
+    div.classList.add("highlight");
 
-    if(row.payment_status==="pending"){
-      const div=document.createElement("div");
-      div.className="payment";
-      div.innerHTML=`<b>${row.pending_buyer_name||"—"}</b> – Numero <b>${row.number}</b>`;
-      pendingList.appendChild(div);
-    }
-  });
+    setTimeout(() => {
+      document.getElementById("pendingSection")
+        .scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 2000);
+  }
+
+  elNumbersGrid.appendChild(div);
+});
+
+elSold.textContent = soldCount;
+elPending.textContent = pendingCount;
+
+// pending list
+const pendings = data.filter(r => r.payment_status === "pending");
+
+pendings.forEach(p => {
+  const div = document.createElement("div");
+  div.className = "payment";
+  div.innerHTML = `
+    <div><b>${p.pending_buyer_name || "—"}</b> – Numero <b>${p.number}</b></div>
+    <button class="btn primary" onclick="handlePayment('${p.id}','confirm')">Conferma</button>
+    <button class="btn secondary" onclick="handlePayment('${p.id}','reject')">Rifiuta</button>
+  `;
+  elPendingList.appendChild(div);
+});
 }
 
-(async()=>{
-  await requireAuth();
-  await loadNumbersAndPending();
-})();
+async function handlePayment(id, action) {
+
+const { data: { session } } = await sb.auth.getSession();
+
+await fetch(`${SUPABASE_URL}/functions/v1/confirm-payment`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${session.access_token}`
+  },
+  body: JSON.stringify({
+    number_id: id,
+    action
+  })
+});
+
+location.reload();
+}
+
+loadData();
 </script>
 
 </body>
