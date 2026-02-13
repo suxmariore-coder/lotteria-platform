@@ -240,6 +240,31 @@ function formatDate(dateStr) {
   return `${dd}/${mm}/${yy}`;
 }
 
+
+document.getElementById("btnCreate").onclick = () => {
+  location.href = "crea-lotteria.html";
+};
+
+document.getElementById("btnLogout").onclick = async () => {
+  await sb.auth.signOut();
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.logout();
+  });
+
+  location.href = "login.html";
+};
+
+async function getUserSafe() {
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) {
+    location.href = "login.html";
+    return null;
+  }
+  return data.user;
+}
+
 async function loadDashboard(ownerId) {
   elGrid.innerHTML = "";
   elStatus.textContent = "Caricamento…";
@@ -292,25 +317,13 @@ async function loadDashboard(ownerId) {
 }
 
 (async () => {
-  const user = await getUserSafe();
-  if (!user) return;
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) {
+    location.href = "login.html";
+    return;
+  }
 
-  // 🔥 ORDINE CORRETTO PER PWA ANDROID
-
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-
-    const permission = await OneSignal.Notifications.permission;
-
-    if (permission !== "granted") {
-      await OneSignal.Notifications.requestPermission();
-    }
-
-    await OneSignal.login(user.id);
-
-  });
-
-  await loadDashboard(user.id);
+  await loadDashboard(data.user.id);
 })();
 </script>
 
