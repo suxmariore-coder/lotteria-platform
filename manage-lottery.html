@@ -252,6 +252,7 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const LOTTERY_ID = new URLSearchParams(location.search).get("id");
+console.log("LOTTERY_ID:", LOTTERY_ID);
 const urlParams = new URLSearchParams(location.search);
 const AUTO_PAY_ID = urlParams.get("autopay");
 const FOCUS_SECTION = urlParams.get("focus");
