@@ -292,13 +292,25 @@ async function loadDashboard(ownerId) {
 }
 
 (async () => {
-  const { data } = await sb.auth.getUser();
-  if (!data?.user) {
-    location.href = "login.html";
-    return;
-  }
+  const user = await getUserSafe();
+  if (!user) return;
 
-  await loadDashboard(data.user.id);
+  // 🔥 ORDINE CORRETTO PER PWA ANDROID
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+
+    const permission = await OneSignal.Notifications.permission;
+
+    if (permission !== "granted") {
+      await OneSignal.Notifications.requestPermission();
+    }
+
+    await OneSignal.login(user.id);
+
+  });
+
+  await loadDashboard(user.id);
 })();
 </script>
 
