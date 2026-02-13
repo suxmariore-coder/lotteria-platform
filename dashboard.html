@@ -28,12 +28,13 @@ OneSignalDeferred.push(async function(OneSignal) {
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #FCD34D;
+  background: #FCD34D; /* 💛 GIALLO COME LOGIN */
   margin: 0;
   padding: 20px;
   overflow-x: hidden;
 }
 
+/* Palline identiche */
 .ball {
   position: absolute;
   width: 90px;
@@ -47,16 +48,30 @@ body {
   font-weight: bold;
   font-size: 22px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  pointer-events: none; /* ✅ non blocca click */
+  z-index: 0;           /* ✅ dietro */
 }
 
 .ball1 { top: 40px; left: -30px; }
-.ball2 { top: 140px; right: -30px; }
+/* ✅ sposto la 37 più in alto e più a destra così non copre i bottoni */
+.ball2 { top: 10px; right: -40px; }
 
 .container {
   max-width: 500px;
   margin: 60px auto;
+  position: relative;
+  z-index: 1; /* ✅ sopra le palline */
 }
 
+/* ✅ Miglior centratura su mobile */
+@media (max-width: 520px) {
+  body { padding: 16px; }
+  .container { margin: 40px auto; max-width: 100%; }
+  .ball1 { top: 18px; left: -45px; }
+  .ball2 { top: -10px; right: -55px; }
+}
+
+/* Titolo stile brand */
 h1 {
   text-align: center;
   font-size: 42px;
@@ -64,6 +79,7 @@ h1 {
   margin-bottom: 25px;
 }
 
+/* Bottoni top */
 .top-actions {
   display: flex;
   flex-direction: column;
@@ -82,7 +98,9 @@ button {
   transition: transform 0.2s ease;
 }
 
-button:active { transform: scale(0.98); }
+button:active {
+  transform: scale(0.98);
+}
 
 .primary {
   background: #1E3A8A;
@@ -101,6 +119,7 @@ button:active { transform: scale(0.98); }
   font-size: 14px;
 }
 
+/* Card */
 .grid {
   display: flex;
   flex-direction: column;
@@ -158,10 +177,10 @@ button:active { transform: scale(0.98); }
   margin-top: 6px;
 }
 
-/* 🔥 NUOVO BADGE BIANCO */
+/* ✅ BADGE DAVVERO BIANCO */
 .lottery-badge {
   margin-top: 8px;
-  background: white;
+  background: #FFFFFF; /* ✅ bianco pieno */
   border-radius: 12px;
   padding: 8px 10px;
   font-size: 12px;
@@ -170,11 +189,11 @@ button:active { transform: scale(0.98); }
   flex-direction: column;
   gap: 2px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: 1px solid rgba(30,58,138,0.15);
+  border: 1px solid rgba(30,58,138,0.18);
 }
 
 .lottery-badge span {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .actions {
@@ -231,16 +250,6 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const elGrid = document.getElementById("lotteries");
 const elStatus = document.getElementById("status");
 
-function formatDate(dateStr) {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yy = d.getFullYear();
-  return `${dd}/${mm}/${yy}`;
-}
-
-
 document.getElementById("btnCreate").onclick = () => {
   location.href = "crea-lotteria.html";
 };
@@ -255,6 +264,16 @@ document.getElementById("btnLogout").onclick = async () => {
 
   location.href = "login.html";
 };
+
+function formatDate(dateStr) {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return "—";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = d.getFullYear();
+  return `${dd}/${mm}/${yy}`;
+}
 
 async function getUserSafe() {
   const { data } = await sb.auth.getUser();
@@ -271,7 +290,7 @@ async function loadDashboard(ownerId) {
 
   const { data: lotteries } = await sb
     .from("lotteries")
-    .select("id,title,ticket_price,description,prize_images,wheel,draw_date")
+    .select("id,title,ticket_price,description,prize_images,created_at,wheel,draw_date")
     .eq("owner_id", ownerId)
     .order("created_at", { ascending: false });
 
@@ -296,10 +315,8 @@ async function loadDashboard(ownerId) {
             <div>🎯 Ruota: <span>${l.wheel || "—"}</span></div>
             <div>📅 Estrazione: <span>${formatDate(l.draw_date)}</span></div>
           </div>
-
         </div>
       </div>
-
       <div class="actions">
         <button class="open">Apri</button>
         <button class="manage">Gestisci</button>
@@ -317,13 +334,19 @@ async function loadDashboard(ownerId) {
 }
 
 (async () => {
-  const { data } = await sb.auth.getUser();
-  if (!data?.user) {
-    location.href = "login.html";
-    return;
-  }
+  const user = await getUserSafe();
+  if (!user) return;
 
-  await loadDashboard(data.user.id);
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    const permission = await OneSignal.Notifications.permission;
+    if (permission !== "granted") {
+      await OneSignal.Notifications.requestPermission();
+    }
+    await OneSignal.login(user.id);
+  });
+
+  await loadDashboard(user.id);
 })();
 </script>
 
