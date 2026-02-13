@@ -463,20 +463,37 @@ elPendingList.appendChild(div);
 
   }
 
-  (async () => {
-    if (!LOTTERY_ID) {
-      elStatusMsg.textContent = "ID lotteria mancante nell’URL.";
-      return;
-    }
+  async function initPage() {
+  if (!LOTTERY_ID) {
+    elStatusMsg.textContent = "ID lotteria mancante nell’URL.";
+    return;
+  }
 
-    const user = await requireAuth();
-    if (!user) return;
+  // 🔥 aspetta che Supabase ripristini la sessione
+  const { data: { session } } = await sb.auth.getSession();
 
-    const lot = await loadLottery(user.id);
-    if (!lot) return;
+  if (!session) {
+    location.href = "login.html";
+    return;
+  }
 
-    await loadNumbersAndPending();
-  })();
+  const user = session.user;
+
+  const lot = await loadLottery(user.id);
+  if (!lot) return;
+
+  await loadNumbersAndPending();
+}
+
+// 👇 aspetta che l'auth sia pronta
+sb.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    initPage();
+  }
+});
+
+// fallback iniziale
+initPage();
 
 // 🚀 Scroll automatico alla sezione pagamenti
 if (FOCUS_SECTION === "pending") {
