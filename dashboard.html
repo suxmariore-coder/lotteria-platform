@@ -28,13 +28,12 @@ OneSignalDeferred.push(async function(OneSignal) {
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #FCD34D; /* 💛 GIALLO COME LOGIN */
+  background: #FCD34D;
   margin: 0;
   padding: 20px;
   overflow-x: hidden;
 }
 
-/* Palline identiche */
 .ball {
   position: absolute;
   width: 90px;
@@ -58,7 +57,6 @@ body {
   margin: 60px auto;
 }
 
-/* Titolo stile brand */
 h1 {
   text-align: center;
   font-size: 42px;
@@ -66,7 +64,6 @@ h1 {
   margin-bottom: 25px;
 }
 
-/* Bottoni top */
 .top-actions {
   display: flex;
   flex-direction: column;
@@ -85,9 +82,7 @@ button {
   transition: transform 0.2s ease;
 }
 
-button:active {
-  transform: scale(0.98);
-}
+button:active { transform: scale(0.98); }
 
 .primary {
   background: #1E3A8A;
@@ -106,7 +101,6 @@ button:active {
   font-size: 14px;
 }
 
-/* Card */
 .grid {
   display: flex;
   flex-direction: column;
@@ -164,6 +158,25 @@ button:active {
   margin-top: 6px;
 }
 
+/* 🔥 NUOVO BADGE BIANCO */
+.lottery-badge {
+  margin-top: 8px;
+  background: white;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #1E3A8A;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid rgba(30,58,138,0.15);
+}
+
+.lottery-badge span {
+  font-weight: 600;
+}
+
 .actions {
   display: flex;
   gap: 10px;
@@ -218,28 +231,13 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const elGrid = document.getElementById("lotteries");
 const elStatus = document.getElementById("status");
 
-document.getElementById("btnCreate").onclick = () => {
-  location.href = "crea-lotteria.html";
-};
-
-document.getElementById("btnLogout").onclick = async () => {
-  await sb.auth.signOut();
-
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.logout();
-  });
-
-  location.href = "login.html";
-};
-
-async function getUserSafe() {
-  const { data } = await sb.auth.getUser();
-  if (!data?.user) {
-    location.href = "login.html";
-    return null;
-  }
-  return data.user;
+function formatDate(dateStr) {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = d.getFullYear();
+  return `${dd}/${mm}/${yy}`;
 }
 
 async function loadDashboard(ownerId) {
@@ -248,7 +246,7 @@ async function loadDashboard(ownerId) {
 
   const { data: lotteries } = await sb
     .from("lotteries")
-    .select("id,title,ticket_price,description,prize_images,created_at")
+    .select("id,title,ticket_price,description,prize_images,wheel,draw_date")
     .eq("owner_id", ownerId)
     .order("created_at", { ascending: false });
 
@@ -268,8 +266,15 @@ async function loadDashboard(ownerId) {
           <h3 class="title">${l.title}</h3>
           <div class="price">€ ${l.ticket_price}</div>
           <div class="desc">${l.description || ""}</div>
+
+          <div class="lottery-badge">
+            <div>🎯 Ruota: <span>${l.wheel || "—"}</span></div>
+            <div>📅 Estrazione: <span>${formatDate(l.draw_date)}</span></div>
+          </div>
+
         </div>
       </div>
+
       <div class="actions">
         <button class="open">Apri</button>
         <button class="manage">Gestisci</button>
@@ -287,25 +292,13 @@ async function loadDashboard(ownerId) {
 }
 
 (async () => {
-  const user = await getUserSafe();
-  if (!user) return;
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) {
+    location.href = "login.html";
+    return;
+  }
 
-  // 🔥 ORDINE CORRETTO PER PWA ANDROID
-
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-
-    const permission = await OneSignal.Notifications.permission;
-
-    if (permission !== "granted") {
-      await OneSignal.Notifications.requestPermission();
-    }
-
-    await OneSignal.login(user.id);
-
-  });
-
-  await loadDashboard(user.id);
+  await loadDashboard(data.user.id);
 })();
 </script>
 
