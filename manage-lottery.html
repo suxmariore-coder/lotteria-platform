@@ -191,6 +191,17 @@
   100% { transform: scale(1); }
 }
 
+@keyframes pulseHighlight {
+  0%   { transform: scale(1); box-shadow: 0 0 0 rgba(255,193,7,0); }
+  50%  { transform: scale(1.15); box-shadow: 0 0 18px rgba(255,193,7,0.9); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,193,7,0); }
+}
+
+.number.highlight {
+  animation: pulseHighlight 1s ease-in-out infinite;
+  z-index: 2;
+}
+
   </style>
 </head>
 
@@ -207,8 +218,8 @@
   <div id="statusBanner" class="status-banner" style="display:none;"></div>
 
   <!-- PANORAMICA -->
-  <div class="card">
-    <h2>Panoramica</h2>
+  <div class="card" id="pendingSection">
+  <h2>Pagamenti in attesa</h2>
     <div class="row"><span>Prezzo biglietto</span><b id="pTicket">—</b></div>
     <div class="row"><span>Data estrazione</span><b id="pDraw">—</b></div>
     <div class="row"><span>Ruota</span><b id="pWheel">—</b></div>
@@ -385,6 +396,9 @@ document.getElementById("btnEdit").onclick = () => {
   if (cls === "pending") pendingCount++;
 
   const d = document.createElement("div");
+d.dataset.id = row.id;
+
+
   d.className = `number ${cls}`;
 
   d.innerHTML = `
@@ -461,6 +475,20 @@ elNumbersGrid.appendChild(d);
     if (!lot) return;
 
     await loadNumbersAndPending();
+handleHighlightAndScroll(); // 👈 aggiungi questa riga
+
+// 🔥 Highlight + scroll automatico
+const highlightId = new URLSearchParams(location.search).get("highlight");
+
+if (highlightId) {
+  setTimeout(() => {
+    const numberEl = [...document.querySelectorAll(".number")]
+      .find(el => el.onclick?.toString().includes(highlightId) || false);
+
+    // alternativa più sicura: match per data-id se vuoi possiamo migliorarla
+  }, 500);
+}
+
   })();
 
 // 🚀 Scroll automatico alla sezione pagamenti
@@ -588,6 +616,25 @@ document.getElementById("btnCloseLottery").onclick = async () => {
     return;
   }
 
+function handleHighlightAndScroll() {
+  const highlightId = new URLSearchParams(location.search).get("highlight");
+  if (!highlightId) return;
+
+  const target = document.querySelector(`.number[data-id="${highlightId}"]`);
+  if (!target) return;
+
+  // 🔥 lampeggio
+  target.classList.add("highlight");
+
+  // ⏳ scroll dopo 2 secondi
+  setTimeout(() => {
+    const section = document.getElementById("pendingSection");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, 2000);
+}
+
   showToast("Vendite chiuse correttamente", "success");
 
   // refresh stato
@@ -608,10 +655,9 @@ document.getElementById("btnCloseLottery").onclick = async () => {
   font-size: 14px;
   display: none;
   z-index: 9999;
-  max-width: 90%; 
+  max-width: 90%;
   text-align: center;
 "></div>
 
 </body>
 </html>
-
