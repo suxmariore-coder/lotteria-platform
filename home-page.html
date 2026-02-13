@@ -34,28 +34,24 @@
       z-index: 2;
     }
 
-    /* 1. Il contenitore padre gestisce il posizionamento a destra */
-.topbar-wrapper {
-  text-align: right; 
-  width: 100%;
-  margin-bottom: 20px;
-}
+    .topbar {
+  display: flex;
+  /* Queste due proprietà insieme lo spingono a destra e lo stringono */
+  margin-left: auto; 
+  width: fit-content; 
 
-/* 2. La topbar diventa il tuo bottone compatto */
-.topbar {
-  display: inline-flex; /* Si stringe attorno alla parola */
+  margin-bottom: 20px;
   background: #1E3A8A;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-radius: 18px;
   box-shadow: 0 8px 18px rgba(0,0,0,0.15);
   transition: transform 0.2s ease;
-  text-decoration: none;
 }
 
 .topbar a {
   text-decoration: none;
-  color: white;
-  font-size: 14px; /* Grandezza testo originale preservata */
+  color: white; /* Bianco per contrasto */
+  font-size: 14px; /* La tua grandezza originale */
   font-weight: 500;
 }
 
