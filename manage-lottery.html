@@ -252,9 +252,8 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const LOTTERY_ID = new URLSearchParams(location.search).get("id");
-console.log("LOTTERY_ID:", LOTTERY_ID);
 const urlParams = new URLSearchParams(location.search);
-const AUTO_PAY_ID = urlParams.get("autopay");
+const HIGHLIGHT_ID = urlParams.get("highlight");
 const FOCUS_SECTION = urlParams.get("focus");
 
 document.getElementById("btnEdit").onclick = () => {
@@ -444,57 +443,25 @@ elNumbersGrid.appendChild(d);
       </button>
     </div>
   `;
-  // 🚀 Evidenzia e scroll se viene da notifica
-if (AUTO_PAY_ID && p.id === AUTO_PAY_ID) {
-  div.style.border = "2px solid #1E3A8A";
-  div.style.borderRadius = "8px";
-
-  setTimeout(() => {
-    div.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, 400);
-
-  // apertura automatica del prompt
-  setTimeout(() => {
-    handlePayment(p.id, "confirm");
-  }, 800);
-}
-
-elPendingList.appendChild(div);
+  elPendingList.appendChild(div);
 });
 
   }
 
-  async function initPage() {
-  if (!LOTTERY_ID) {
-    elStatusMsg.textContent = "ID lotteria mancante nell’URL.";
-    return;
-  }
+  (async () => {
+    if (!LOTTERY_ID) {
+      elStatusMsg.textContent = "ID lotteria mancante nell’URL.";
+      return;
+    }
 
-  // 🔥 aspetta che Supabase ripristini la sessione
-  const { data: { session } } = await sb.auth.getSession();
+    const user = await requireAuth();
+    if (!user) return;
 
-  if (!session) {
-    location.href = "login.html";
-    return;
-  }
+    const lot = await loadLottery(user.id);
+    if (!lot) return;
 
-  const user = session.user;
-
-  const lot = await loadLottery(user.id);
-  if (!lot) return;
-
-  await loadNumbersAndPending();
-}
-
-// 👇 aspetta che l'auth sia pronta
-sb.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    initPage();
-  }
-});
-
-// fallback iniziale
-initPage();
+    await loadNumbersAndPending();
+  })();
 
 // 🚀 Scroll automatico alla sezione pagamenti
 if (FOCUS_SECTION === "pending") {
