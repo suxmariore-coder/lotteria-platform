@@ -34,18 +34,25 @@
       z-index: 2;
     }
 
-    .topbar {
-      display: flex;
-      justify-content: flex-end;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
+    .topbar-container {
+  /* Copia lo stile estetico di .cta */
+  background: #1E3A8A;
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  margin-bottom: 20px;
+  padding: 12px 20px; /* Padding leggermente ridotto per testi piccoli */
+  
+  /* Layout interno */
+  display: flex;
+  justify-content: flex-end;
+}
 
-    .topbar a {
-      text-decoration: none;
-      color: #0F1E4A;
-      font-weight: 500;
-    }
+.topbar-container a {
+  text-decoration: none;
+  color: white; /* Cambiato in bianco per leggibilità su fondo blu */
+  font-size: 14px; /* Mantiene la grandezza che desideravi */
+  font-weight: 500;
+}
 
     /* LOGO */
     h1.logo {
@@ -214,5 +221,3 @@
 
 </body>
 </html>
-
-
