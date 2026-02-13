@@ -34,14 +34,18 @@
       z-index: 2;
     }
 
-    .topbar {
-  /* Cambiato in inline-flex per adattarsi al contenuto */
-  display: inline-flex; 
+    /* 1. Il contenitore padre gestisce il posizionamento a destra */
+.topbar-wrapper {
+  text-align: right; 
+  width: 100%;
   margin-bottom: 20px;
-  
-  /* Stile preso dal .cta */
+}
+
+/* 2. La topbar diventa il tuo bottone compatto */
+.topbar {
+  display: inline-flex; /* Si stringe attorno alla parola */
   background: #1E3A8A;
-  padding: 10px 24px; /* Padding orizzontale generoso per l'effetto bottone */
+  padding: 12px 24px;
   border-radius: 18px;
   box-shadow: 0 8px 18px rgba(0,0,0,0.15);
   transition: transform 0.2s ease;
@@ -50,14 +54,13 @@
 
 .topbar a {
   text-decoration: none;
-  color: white; /* Bianco per contrasto sul blu */
-  font-size: 14px; /* Grandezza testo originale */
+  color: white;
+  font-size: 14px; /* Grandezza testo originale preservata */
   font-weight: 500;
 }
 
-/* Hover per mantenere l'effetto interattivo */
 .topbar:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
 }
 
 
