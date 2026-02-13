@@ -461,6 +461,13 @@ elNumbersGrid.appendChild(d);
     if (!lot) return;
 
     await loadNumbersAndPending();
+// 🔥 Slide automatico verso i pagamenti se arrivo da notifica
+if (HIGHLIGHT_ID) {
+  setTimeout(() => {
+    // scrolla un elemento certo, sempre presente
+    elPendingList.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 2000);
+}
   })();
 
 // 🚀 Scroll automatico alla sezione pagamenti
