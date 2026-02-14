@@ -10,174 +10,165 @@
 <meta name="apple-mobile-web-app-title" content="Lotteriffa">
 
 <link rel="apple-touch-icon" href="/icon-192.png">
-  <meta charset="UTF-8">
-  <title>Gestisci Lotteria</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Gestisci Lotteria</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 16px;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #FCD34D; /* 💛 stesso giallo dashboard */
+  margin: 0;
+  padding: 20px;
+}
 
-    h1, h2 { text-align: center; margin: 6px 0; }
+h1, h2 {
+  text-align: center;
+  margin: 6px 0;
+  color: #1E3A8A;
+}
 
-    .container { max-width: 600px; margin: 0 auto; }
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
 
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
 
-    .back {
-      text-decoration: none;
-      font-size: 14px;
-      color: #333;
-    }
+.back {
+  text-decoration: none;
+  font-size: 14px;
+  color: #0F1E4A;
+  font-weight: 600;
+}
 
-    #statusMsg {
-      text-align: center;
-      color: #444;
-      margin: 10px 0 14px;
-      font-size: 14px;
-    }
+#statusMsg {
+  text-align: center;
+  color: #0F1E4A;
+  margin: 10px 0 14px;
+  font-size: 14px;
+}
 
-    /* STATUS */
-    .status-banner {
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 12px;
-    }
-    .status-active { background: #e6f4ea; color: #1e7e34; }
-    .status-closed { background: #fff3cd; color: #856404; }
-    .status-finished { background: #f8d7da; color: #842029; }
-    .status-archived { background: #e2e3e5; color: #41464b; }
+/* STATUS */
+.status-banner {
+  padding: 12px;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 14px;
+}
 
-    /* CARD */
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
-    }
+.status-active { background: #E0F2FE; color: #1E3A8A; }
+.status-closed { background: #FEF3C7; color: #92400E; }
+.status-finished { background: #FECACA; color: #7F1D1D; }
+.status-archived { background: #E5E7EB; color: #374151; }
 
-    .row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(6px);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
 
-    .row span { color: #555; }
-    .row b { color: #111; }
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
 
-    /* BUTTONS */
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 6px;
-      border: none;
-      font-size: 15px;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-    .primary { background: #1e7e34; color: #fff; }
-    .secondary { background: #6c757d; color: #fff; }
-    .warning { background: #ffc107; color: #333; }
-    .disabled { opacity: .6; cursor: not-allowed; }
+.row span { color: #555; }
+.row b { color: #0F1E4A; }
 
-    /* IMAGES */
-    .images {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-    .images img {
-      height: 90px;
-      width: 120px;
-      border-radius: 8px;
-      object-fit: cover;
-      background: #eee;
-      flex: 0 0 auto;
-    }
+/* BUTTONS */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
 
-    /* NUMBERS GRID */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-      margin-top: 10px;
-    }
+.primary { background: #1E3A8A; color: #fff; }
+.secondary { background: transparent; border: 2px solid #1E3A8A; color: #1E3A8A; }
+.warning { background: #F59E0B; color: #111; }
+.disabled { opacity: .6; cursor: not-allowed; }
 
-    .number {
-      height: 52px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-    .available { background: #1e7e34; }
-    .pending { background: #ffc107; color: #333; }
-    .sold { background: #c82333; }
+/* NUMBERS GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
 
-    .buyer {
-      font-size: 11px;
-      margin-top: 2px;
-      max-width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: 0 4px;
-      box-sizing: border-box;
-    }
+.number {
+  height: 52px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
 
-    @media (min-width: 768px) {
-      .grid { grid-template-columns: repeat(10, 1fr); }
-    }
+.available { background: #1E3A8A; }
+.pending { background: #F59E0B; color: #111; }
+.sold { background: #DC2626; }
 
-    /* PAYMENTS LIST */
-    .payment {
-      font-size: 14px;
-      border-bottom: 1px solid #eee;
-      padding: 10px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .payment:last-child { border-bottom: none; }
+.buyer {
+  font-size: 11px;
+  margin-top: 2px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-    .pill {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      background: #f0f2f5;
-      color: #333;
-      width: fit-content;
-    }
-    .number.sold {
-      cursor: pointer;
-    }
+@media (min-width: 768px) {
+  .grid { grid-template-columns: repeat(10, 1fr); }
+}
 
-    .number.sold:hover {
-     filter: brightness(1.1);
-     outline: 2px solid rgba(255,255,255,0.6);
+/* PAYMENTS LIST */
+.payment {
+  font-size: 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment:last-child { border-bottom: none; }
+
+.pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #E0F2FE;
+  color: #1E3A8A;
+  width: fit-content;
+}
+
+.number.sold {
+  cursor: pointer;
 }
 
 .number.highlighted {
@@ -190,60 +181,53 @@
   50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
-
-  </style>
+</style>
 </head>
 
 <body>
 <div class="container">
 
-  <div class="header">
-    <a class="back" href="dashboard.html">← Dashboard</a>
-  </div>
+<div class="header">
+  <a class="back" href="dashboard.html">← Dashboard</a>
+</div>
 
-  <h1 id="pageTitle">Gestisci Lotteria</h1>
-  <div id="statusMsg"></div>
+<h1 id="pageTitle">Gestisci Lotteria</h1>
+<div id="statusMsg"></div>
 
-  <div id="statusBanner" class="status-banner" style="display:none;"></div>
+<div id="statusBanner" class="status-banner" style="display:none;"></div>
 
-  <!-- PANORAMICA -->
-  <div class="card">
-    <h2>Panoramica</h2>
-    <div class="row"><span>Prezzo biglietto</span><b id="pTicket">—</b></div>
-    <div class="row"><span>Data estrazione</span><b id="pDraw">—</b></div>
-    <div class="row"><span>Ruota</span><b id="pWheel">—</b></div>
-    <div class="row"><span>Venduti</span><b id="pSold">—</b></div>
-    <div class="row"><span>In attesa</span><b id="pPending">—</b></div>
-  </div>
+<!-- PANORAMICA -->
+<div class="card">
+  <h2>Panoramica</h2>
+  <div class="row"><span>Prezzo biglietto</span><b id="pTicket">—</b></div>
+  <div class="row"><span>Data estrazione</span><b id="pDraw">—</b></div>
+  <div class="row"><span>Ruota</span><b id="pWheel">—</b></div>
+  <div class="row"><span>Venduti</span><b id="pSold">—</b></div>
+  <div class="row"><span>In attesa</span><b id="pPending">—</b></div>
+</div>
 
-  <!-- MODIFICA (solo UI, agganceremo dopo) -->
-  <div class="card">
-    <h2>Azioni</h2>
-    <button class="btn secondary" id="btnEdit">✏️ Modifica dati</button>
-    <button class="btn warning" id="btnCloseLottery">⛔ Chiudi vendite </button>
-  </div>
+<!-- AZIONI -->
+<div class="card">
+  <h2>Azioni</h2>
+  <button class="btn secondary" id="btnEdit">✏️ Modifica dati</button>
+  <button class="btn warning" id="btnCloseLottery">⛔ Chiudi vendite</button>
+</div>
 
-  <!-- IMMAGINI -->
-  <div class="card">
-    <h2>Immagini premio</h2>
-    <div id="imagesBox" class="images"></div>
-    <button class="btn secondary disabled" disabled>➕ Gestisci immagini (step successivo)</button>
-  </div>
+<!-- NUMERI -->
+<div class="card">
+  <h2>Numeri</h2>
+  <div id="numbersGrid" class="grid"></div>
+</div>
 
-  <!-- NUMERI -->
-  <div class="card">
-    <h2>Numeri</h2>
-    <div id="numbersGrid" class="grid"></div>
-  </div>
-
-  <!-- PAGAMENTI PENDING -->
-  <div class="card">
-    <h2>Pagamenti in attesa</h2>
-    <div id="pendingList"></div>
-    </div>
+<!-- PAGAMENTI -->
+<div class="card">
+  <h2>Pagamenti in attesa</h2>
+  <div id="pendingList"></div>
+</div>
 
 </div>
 
+<!-- 🔥 SCRIPT INVARIATO (non modificato come richiesto) -->
 <script>
   // ✅ CONFIG
   const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
@@ -613,23 +597,22 @@ document.getElementById("btnCloseLottery").onclick = async () => {
   // refresh stato
   await loadLottery(session.user.id);
 };
-
 </script>
 
 <div id="toast" style="
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: #fff;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  display: none;
-  z-index: 9999;
-  max-width: 90%;
-  text-align: center;
+position: fixed;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+background: #1E3A8A;
+color: #fff;
+padding: 12px 16px;
+border-radius: 14px;
+font-size: 14px;
+display: none;
+z-index: 9999;
+max-width: 90%;
+text-align: center;
 "></div>
 
 </body>
