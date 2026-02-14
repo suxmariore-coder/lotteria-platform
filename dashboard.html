@@ -48,27 +48,14 @@ body {
   font-weight: bold;
   font-size: 22px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  pointer-events: none; /* ✅ non blocca click */
-  z-index: 0;           /* ✅ dietro */
 }
 
 .ball1 { top: 40px; left: -30px; }
-/* ✅ sposto la 37 più in alto e più a destra così non copre i bottoni */
-.ball2 { top: 10px; right: -40px; }
+.ball2 { top: 140px; right: -30px; }
 
 .container {
   max-width: 500px;
   margin: 60px auto;
-  position: relative;
-  z-index: 1; /* ✅ sopra le palline */
-}
-
-/* ✅ Miglior centratura su mobile */
-@media (max-width: 520px) {
-  body { padding: 16px; }
-  .container { margin: 40px auto; max-width: 100%; }
-  .ball1 { top: 18px; left: -45px; }
-  .ball2 { top: -10px; right: -55px; }
 }
 
 /* Titolo stile brand */
@@ -177,25 +164,6 @@ button:active {
   margin-top: 6px;
 }
 
-/* ✅ BADGE DAVVERO BIANCO */
-.lottery-badge {
-  margin-top: 8px;
-  background: #FFFFFF; /* ✅ bianco pieno */
-  border-radius: 12px;
-  padding: 8px 10px;
-  font-size: 12px;
-  color: #1E3A8A;
-  display: inline-flex;
-  flex-direction: column;
-  gap: 2px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: 1px solid rgba(30,58,138,0.18);
-}
-
-.lottery-badge span {
-  font-weight: 700;
-}
-
 .actions {
   display: flex;
   gap: 10px;
@@ -265,16 +233,6 @@ document.getElementById("btnLogout").onclick = async () => {
   location.href = "login.html";
 };
 
-function formatDate(dateStr) {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "—";
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yy = d.getFullYear();
-  return `${dd}/${mm}/${yy}`;
-}
-
 async function getUserSafe() {
   const { data } = await sb.auth.getUser();
   if (!data?.user) {
@@ -290,7 +248,7 @@ async function loadDashboard(ownerId) {
 
   const { data: lotteries } = await sb
     .from("lotteries")
-    .select("id,title,ticket_price,description,prize_images,created_at,wheel,draw_date")
+    .select("id,title,ticket_price,description,prize_images,created_at")
     .eq("owner_id", ownerId)
     .order("created_at", { ascending: false });
 
@@ -310,11 +268,6 @@ async function loadDashboard(ownerId) {
           <h3 class="title">${l.title}</h3>
           <div class="price">€ ${l.ticket_price}</div>
           <div class="desc">${l.description || ""}</div>
-
-          <div class="lottery-badge">
-            <div>🎯 Ruota: <span>${l.wheel || "—"}</span></div>
-            <div>📅 Estrazione: <span>${formatDate(l.draw_date)}</span></div>
-          </div>
         </div>
       </div>
       <div class="actions">
@@ -337,13 +290,19 @@ async function loadDashboard(ownerId) {
   const user = await getUserSafe();
   if (!user) return;
 
+  // 🔥 ORDINE CORRETTO PER PWA ANDROID
+
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
+
     const permission = await OneSignal.Notifications.permission;
+
     if (permission !== "granted") {
       await OneSignal.Notifications.requestPermission();
     }
+
     await OneSignal.login(user.id);
+
   });
 
   await loadDashboard(user.id);
