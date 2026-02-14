@@ -233,7 +233,6 @@ document.getElementById("btnEdit").onclick = () => {
   const elSold = document.getElementById("pSold");
   const elPending = document.getElementById("pPending");
 
-  const elImagesBox = document.getElementById("imagesBox");
   const elNumbersGrid = document.getElementById("numbersGrid");
   const elPendingList = document.getElementById("pendingList");
 
@@ -299,21 +298,6 @@ document.getElementById("btnEdit").onclick = () => {
     elDraw.textContent = fmtDateIT(data.draw_date);
     elWheel.textContent = data.wheel || "—";
     setBanner(data.status || "active");
-
-    // immagini
-    elImagesBox.innerHTML = "";
-    const imgs = Array.isArray(data.prize_images) ? data.prize_images : [];
-    if (!imgs.length) {
-      elImagesBox.innerHTML = `<div style="color:#666;font-size:14px;">Nessuna immagine</div>`;
-    } else {
-      imgs.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = "premio";
-        img.onclick = () => window.open(url, "_blank");
-        elImagesBox.appendChild(img);
-      });
-    }
 
     elStatusMsg.textContent = "";
     return data;
