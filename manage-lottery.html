@@ -2,187 +2,140 @@
 <html lang="it">
 <head>
 <link rel="manifest" href="/manifest.json">
-
 <meta name="theme-color" content="#1E3A8A">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lotteriffa">
-
 <link rel="apple-touch-icon" href="/icon-192.png">
-  <meta charset="UTF-8">
-  <title>Gestisci Lotteria</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+<title>Gestisci Lotteria</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 16px;
-    }
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-    h1, h2 { text-align: center; margin: 6px 0; }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #FCD34D;
+  margin: 0;
+  padding: 20px;
+}
 
-    .container { max-width: 600px; margin: 0 auto; }
+h1, h2 {
+  text-align: center;
+  margin: 8px 0;
+  color: #1E3A8A;
+}
 
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
 
-    .back {
-      text-decoration: none;
-      font-size: 14px;
-      color: #333;
-    }
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
 
-    #statusMsg {
-      text-align: center;
-      color: #444;
-      margin: 10px 0 14px;
-      font-size: 14px;
-    }
+.back {
+  text-decoration: none;
+  font-size: 14px;
+  color: #1E3A8A;
+  font-weight: 600;
+}
 
-    /* STATUS */
-    .status-banner {
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 12px;
-    }
-    .status-active { background: #e6f4ea; color: #1e7e34; }
-    .status-closed { background: #fff3cd; color: #856404; }
-    .status-finished { background: #f8d7da; color: #842029; }
-    .status-archived { background: #e2e3e5; color: #41464b; }
+#statusMsg {
+  text-align: center;
+  margin: 10px 0 14px;
+  font-size: 14px;
+  color: #1E3A8A;
+}
 
-    /* CARD */
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
-    }
+/* STATUS */
+.status-banner {
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 16px;
+  background: white;
+  color: #1E3A8A;
+}
 
-    .row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
+/* CARD */
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
 
-    .row span { color: #555; }
-    .row b { color: #111; }
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
 
-    /* BUTTONS */
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 6px;
-      border: none;
-      font-size: 15px;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-    .primary { background: #1e7e34; color: #fff; }
-    .secondary { background: #6c757d; color: #fff; }
-    .warning { background: #ffc107; color: #333; }
-    .disabled { opacity: .6; cursor: not-allowed; }
+.row span { color: #555; }
+.row b { color: #1E3A8A; }
 
-    /* IMAGES */
-    .images {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-    .images img {
-      height: 90px;
-      width: 120px;
-      border-radius: 8px;
-      object-fit: cover;
-      background: #eee;
-      flex: 0 0 auto;
-    }
+/* BUTTONS */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 8px;
+  font-weight: 600;
+}
 
-    /* NUMBERS GRID */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-      margin-top: 10px;
-    }
+.primary { background: #1E3A8A; color: white; }
+.secondary { background: transparent; border: 2px solid #1E3A8A; color: #1E3A8A; }
+.warning { background: #ffc107; color: #333; }
 
-    .number {
-      height: 52px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-    .available { background: #1e7e34; }
-    .pending { background: #ffc107; color: #333; }
-    .sold { background: #c82333; }
+/* NUMBERS GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
 
-    .buyer {
-      font-size: 11px;
-      margin-top: 2px;
-      max-width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: 0 4px;
-      box-sizing: border-box;
-    }
+.number {
+  height: 52px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
 
-    @media (min-width: 768px) {
-      .grid { grid-template-columns: repeat(10, 1fr); }
-    }
+.available { background: #1e7e34; }
+.pending { background: #ffc107; color: #333; }
+.sold { background: #c82333; }
 
-    /* PAYMENTS LIST */
-    .payment {
-      font-size: 14px;
-      border-bottom: 1px solid #eee;
-      padding: 10px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .payment:last-child { border-bottom: none; }
-
-    .pill {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      background: #f0f2f5;
-      color: #333;
-      width: fit-content;
-    }
-    .number.sold {
-      cursor: pointer;
-    }
-
-    .number.sold:hover {
-     filter: brightness(1.1);
-     outline: 2px solid rgba(255,255,255,0.6);
+.buyer {
+  font-size: 11px;
+  margin-top: 2px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .number.highlighted {
   animation: pulseHighlight 1.2s ease-in-out 3;
-  box-shadow: 0 0 0 3px #1E3A8A;
+  box-shadow: 0 0 0 4px #1E3A8A;
 }
 
 @keyframes pulseHighlight {
@@ -191,7 +144,27 @@
   100% { transform: scale(1); }
 }
 
-  </style>
+@media (min-width: 768px) {
+  .grid { grid-template-columns: repeat(10, 1fr); }
+}
+
+/* PAYMENTS */
+.payment {
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #f0f2f5;
+  color: #333;
+  margin-top: 4px;
+}
+</style>
 </head>
 
 <body>
@@ -203,7 +176,6 @@
 
   <h1 id="pageTitle">Gestisci Lotteria</h1>
   <div id="statusMsg"></div>
-
   <div id="statusBanner" class="status-banner" style="display:none;"></div>
 
   <!-- PANORAMICA -->
@@ -216,18 +188,11 @@
     <div class="row"><span>In attesa</span><b id="pPending">—</b></div>
   </div>
 
-  <!-- MODIFICA (solo UI, agganceremo dopo) -->
+  <!-- AZIONI -->
   <div class="card">
     <h2>Azioni</h2>
     <button class="btn secondary" id="btnEdit">✏️ Modifica dati</button>
-    <button class="btn warning" id="btnCloseLottery">⛔ Chiudi vendite </button>
-  </div>
-
-  <!-- IMMAGINI -->
-  <div class="card">
-    <h2>Immagini premio</h2>
-    <div id="imagesBox" class="images"></div>
-    <button class="btn secondary disabled" disabled>➕ Gestisci immagini (step successivo)</button>
+    <button class="btn warning" id="btnCloseLottery">⛔ Chiudi vendite</button>
   </div>
 
   <!-- NUMERI -->
@@ -236,17 +201,16 @@
     <div id="numbersGrid" class="grid"></div>
   </div>
 
-  <!-- PAGAMENTI PENDING -->
+  <!-- PAGAMENTI -->
   <div class="card">
     <h2>Pagamenti in attesa</h2>
     <div id="pendingList"></div>
-    <button class="btn primary disabled" disabled>✅ Conferma pagamento (step successivo)</button>
   </div>
 
 </div>
 
 <script>
-  // ✅ CONFIG
+// ✅ CONFIG
   const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -269,7 +233,6 @@ document.getElementById("btnEdit").onclick = () => {
   const elSold = document.getElementById("pSold");
   const elPending = document.getElementById("pPending");
 
-  const elImagesBox = document.getElementById("imagesBox");
   const elNumbersGrid = document.getElementById("numbersGrid");
   const elPendingList = document.getElementById("pendingList");
 
@@ -335,21 +298,6 @@ document.getElementById("btnEdit").onclick = () => {
     elDraw.textContent = fmtDateIT(data.draw_date);
     elWheel.textContent = data.wheel || "—";
     setBanner(data.status || "active");
-
-    // immagini
-    elImagesBox.innerHTML = "";
-    const imgs = Array.isArray(data.prize_images) ? data.prize_images : [];
-    if (!imgs.length) {
-      elImagesBox.innerHTML = `<div style="color:#666;font-size:14px;">Nessuna immagine</div>`;
-    } else {
-      imgs.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = "premio";
-        img.onclick = () => window.open(url, "_blank");
-        elImagesBox.appendChild(img);
-      });
-    }
 
     elStatusMsg.textContent = "";
     return data;
@@ -466,7 +414,7 @@ if (HIGHLIGHT_ID) {
   setTimeout(() => {
     // scrolla un elemento certo, sempre presente
     elPendingList.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 2000);
+  }, 3000);
 }
   })();
 
