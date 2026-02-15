@@ -189,6 +189,30 @@ async function createLottery() {
   const files = document.getElementById("prize_images").files;
   if(files.length>5){ alert("Max 5 immagini"); return; }
 
+  // 🔥 1️⃣ Upload immagini PRIMA
+  const uploadedUrls=[];
+  for(let i=0;i<files.length;i++){
+    const file=files[i];
+    const ext=file.name.split(".").pop();
+    const path=`temp/${session.user.id}/${Date.now()}_${i}.${ext}`;
+
+    const { error } = await sb.storage
+      .from("lottery-images")
+      .upload(path,file);
+
+    if(error){
+      alert("Errore upload immagini");
+      return;
+    }
+
+    const { data:pub } = sb.storage
+      .from("lottery-images")
+      .getPublicUrl(path);
+
+    uploadedUrls.push(pub.publicUrl);
+  }
+
+  // 🔥 2️⃣ Metti immagini dentro payload
   const lottery_payload = {
     title: document.getElementById("title").value.trim(),
     description: document.getElementById("description").value.trim(),
@@ -199,6 +223,7 @@ async function createLottery() {
     paypal_user: document.getElementById("paypal_user").value || null,
     revolut_link: document.getElementById("revolut_link").value || null,
     whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
+    prize_images: uploadedUrls, // 🔥 QUI
   };
 
   const promo_code = document.getElementById("promo_code").value.trim() || null;
@@ -213,26 +238,13 @@ async function createLottery() {
   });
 
   const data = await res.json();
+
   if(!res.ok){
     resultBox.innerText = data.error || "Errore creazione";
     return;
   }
 
   if(data.success){
-    const lotteryId = data.lottery_id;
-    const uploadedUrls=[];
-    for(let i=0;i<files.length;i++){
-      const file=files[i];
-      const ext=file.name.split(".").pop();
-      const path=`lotteries/${lotteryId}/${Date.now()}_${i}.${ext}`;
-      const { error } = await sb.storage.from("lottery-images").upload(path,file);
-      if(error){ alert("Errore upload"); return; }
-      const { data:pub } = sb.storage.from("lottery-images").getPublicUrl(path);
-      uploadedUrls.push(pub.publicUrl);
-    }
-    if(uploadedUrls.length){
-      await sb.from("lotteries").update({ prize_images: uploadedUrls }).eq("id", lotteryId);
-    }
     location.href = "dashboard.html?created=1";
     return;
   }
