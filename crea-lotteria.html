@@ -164,7 +164,9 @@
       <input id="promo_code" placeholder="ES: FREE2026">
     </div>
 
-    <button onclick="createLottery()">🚀 Attiva e Crea Lotteria</button>
+    <button id="createBtn" onclick="createLottery()">
+  🚀 Crea Lotteria
+</button>
 
     <div id="result" class="error"></div>
 
@@ -178,6 +180,48 @@
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk"; // Incolla qui la tua chiave
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ticketInput = document.getElementById("ticket_price");
+const createBtn = document.getElementById("createBtn");
+
+async function fetchFeeFromPricing(price) {
+  if (!price || price <= 0) return null;
+
+  const { data, error } = await sb
+    .from("pricing_rules")
+    .select("fee_amount")
+    .eq("active", true)
+    .lte("min_ticket_price", price)
+    .gte("max_ticket_price", price)
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("Pricing rule error:", error);
+    return null;
+  }
+
+  return data.fee_amount;
+}
+
+async function updateButtonText() {
+  const price = Number(ticketInput.value);
+
+  if (!price || price <= 0) {
+    createBtn.innerText = "🚀 Crea Lotteria";
+    return;
+  }
+
+  const fee = await fetchFeeFromPricing(price);
+
+  if (!fee) {
+    createBtn.innerText = "🚀 Crea Lotteria";
+    return;
+  }
+
+  createBtn.innerText = `🚀 Crea Lotteria al costo di ${Number(fee).toFixed(2)} €`;
+}
+
+ticketInput.addEventListener("input", updateButtonText);
 
 async function createLottery() {
   const { data:{session} } = await sb.auth.getSession();
