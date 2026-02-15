@@ -10,173 +10,161 @@
 <meta name="apple-mobile-web-app-title" content="Lotteriffa">
 
 <link rel="apple-touch-icon" href="/icon-192.png">
-  <meta charset="UTF-8">
-  <title>Crea la tua lotteria - LotteRiffa</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Crea la tua lotteria - LotteRiffa</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Font ufficiali della Home -->
-  <link href="https://fonts.googleapis.com" rel="stylesheet">
-  
-  <!-- Collegamento al tuo file CSS esterno -->
-  <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <style>
-    /* Adattamenti specifici per i moduli */
-    .container {
-      text-align: left; /* Allinea il form a sinistra per leggibilità */
-    }
+<style>
+.container { text-align: left; }
 
-    h2 {
-      text-align: center;
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 32px;
-      color: #0F1E4A;
-    }
+h2 {
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 32px;
+  color: #0F1E4A;
+}
 
-    label {
-      font-weight: 600;
-      margin-top: 18px;
-      display: block;
-      font-size: 14px;
-      color: #0F1E4A;
-    }
+label {
+  font-weight: 600;
+  margin-top: 18px;
+  display: block;
+  font-size: 14px;
+  color: #0F1E4A;
+}
 
-    input, textarea, select {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-      font-size: 15px;
-      font-family: 'Inter', sans-serif;
-      box-sizing: border-box;
-    }
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
 
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
 
-    button {
-      width: 100%;
-      margin-top: 25px;
-      padding: 16px;
-      background: #1E3A8A; /* Blu della Home */
-      color: white;
-      border: none;
-      border-radius: 18px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
-      transition: transform 0.2s ease;
-    }
+button {
+  width: 100%;
+  margin-top: 25px;
+  padding: 16px;
+  background: #1E3A8A;
+  color: white;
+  border: none;
+  border-radius: 18px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
+}
 
-    button:active {
-      transform: scale(0.98);
-    }
+button:active { transform: scale(0.98); }
 
-    .error {
-      color: #D32F2F;
-      margin-top: 15px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 600;
-    }
+.error {
+  color: #D32F2F;
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
 
-    .promo-box {
-      margin-top: 25px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.6);
-      border-radius: 15px;
-      border: 2px dashed #0F1E4A;
-    }
+.promo-box {
+  margin-top: 25px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 15px;
+  border: 2px dashed #0F1E4A;
+}
 
-    /* Stile per l'upload file */
-    input[type="file"] {
-      background: white;
-      padding: 10px;
-    }
-  </style>
+input[type="file"] {
+  background: white;
+  padding: 10px;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- Decorative background balls -->
-  <div class="ball ball1">12</div>
-  <div class="ball ball2">37</div>
+<div class="ball ball1">12</div>
+<div class="ball ball2">37</div>
 
-  <div class="container">
-    <h1 class="logo" style="font-size: 40px; margin-bottom: 5px;">LotteRiffa</h1>
-    <h2>🎟️ Crea la tua riffa</h2>
+<div class="container">
+  <h1 class="logo" style="font-size: 40px; margin-bottom: 5px;">LotteRiffa</h1>
+  <h2>🎟️ Crea la tua riffa</h2>
 
-    <label>Titolo della Riffa</label>
-    <input id="title" placeholder="Es: Riffa di Natale 2026">
+  <label>Titolo della Riffa</label>
+  <input id="title" placeholder="Es: Riffa di Natale 2026">
 
-    <label>Descrizione del premio</label>
-    <textarea id="description" placeholder="Descrivi cosa si vince..."></textarea>
+  <label>Descrizione del premio</label>
+  <textarea id="description" placeholder="Descrivi cosa si vince..."></textarea>
 
-    <label>Prezzo singolo biglietto (€)</label>
-    <input id="ticket_price" type="number" min="1" placeholder="1€, 2€, 3€...decidi il prezzo">
+  <label>Prezzo singolo biglietto (€)</label>
+  <input id="ticket_price" type="number" min="1">
 
-    <label>Password Amministratore (per gestire i numeri)</label>
-    <input id="admin_password" type="password" placeholder="Scegli una password sicura">
+  <label>Password Amministratore</label>
+  <input id="admin_password" type="password">
 
-    <label>Data prevista estrazione</label>
-    <input id="draw_date" type="date">
+  <label>Data prevista estrazione</label>
+  <input id="draw_date" type="date">
 
-    <label>Ruota di riferimento (Lotto Italiano)</label>
-    <select id="wheel">
-      <option value="">Seleziona ruota</option>
-      <option>Bari</option>
-      <option>Cagliari</option>
-      <option>Firenze</option>
-      <option>Genova</option>
-      <option>Milano</option>
-      <option>Napoli</option>
-      <option>Palermo</option>
-      <option>Roma</option>
-      <option>Torino</option>
-      <option>Venezia</option>
-      <option>Nazionale</option>
-    </select>
+  <label>Ruota di riferimento</label>
+  <select id="wheel">
+    <option value="">Seleziona ruota</option>
+    <option>Bari</option>
+    <option>Cagliari</option>
+    <option>Firenze</option>
+    <option>Genova</option>
+    <option>Milano</option>
+    <option>Napoli</option>
+    <option>Palermo</option>
+    <option>Roma</option>
+    <option>Torino</option>
+    <option>Venezia</option>
+    <option>Nazionale</option>
+  </select>
 
-    <label>Immagini del premio (max 5)</label>
-    <input id="prize_images" type="file" accept="image/*" multiple>
+  <label>Immagini del premio (max 5)</label>
+  <input id="prize_images" type="file" accept="image/*" multiple>
 
-    <h2 style="margin-top: 40px; font-size: 24px;">Metodi di pagamento</h2>
-    <p style="font-size: 13px; opacity: 0.8; text-align: center;">Inserisci dove i partecipanti invieranno i soldi</p>
+  <h2 style="margin-top:40px;font-size:24px;">Metodi di pagamento</h2>
 
-    <label>Username PayPal</label>
-    <input id="paypal_user" placeholder="esempio@email.it">
+  <label>Username PayPal</label>
+  <input id="paypal_user">
 
-    <label>Link Revolut (revolut.me)</label>
-    <input id="revolut_link" placeholder="https://revolut.me/nome.cognome">
+  <label>Link Revolut</label>
+  <input id="revolut_link">
 
-    <label>Contatto WhatsApp (per conferme)</label>
-    <input id="whatsapp_contact" placeholder="+39 il tuo numero">
+  <label>Contatto WhatsApp</label>
+  <input id="whatsapp_contact">
 
-    <div class="promo-box">
-      <label>Hai un codice promo?</label>
-      <input id="promo_code" placeholder="ES: FREE2026">
-    </div>
-
-    <button onclick="createLottery()">🚀 Attiva e Crea Lotteria</button>
-
-    <div id="result" class="error"></div>
-
-    <div class="footer">
-      © 2026 LotteRiffa - Creando la lotteria accetti i termini di servizio.
-    </div>
+  <div class="promo-box">
+    <label>Hai un codice promo?</label>
+    <input id="promo_code">
   </div>
 
+  <button onclick="createLottery()">🚀 Attiva e Crea Lotteria</button>
+
+  <div id="result" class="error"></div>
+
+  <div class="footer">
+    © 2026 LotteRiffa
+  </div>
+</div>
+
 <script>
-/* 🔴 LOGICA JS ORIGINALE INVARIATA */
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk"; // Incolla qui la tua chiave
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6GkY";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function createLottery() {
@@ -187,7 +175,30 @@ async function createLottery() {
   resultBox.innerText = "";
 
   const files = document.getElementById("prize_images").files;
-  if(files.length>5){ alert("Max 5 immagini"); return; }
+  if(files.length > 5){ alert("Max 5 immagini"); return; }
+
+  // 🔥 UPLOAD IMMAGINI PRIMA
+  const uploadedUrls = [];
+
+  for(let i=0;i<files.length;i++){
+    const file = files[i];
+    const ext = file.name.split(".").pop();
+    const path = `lotteries/temp/${Date.now()}_${i}.${ext}`;
+
+    const { error } = await sb.storage
+      .from("lottery-images")
+      .upload(path, file);
+
+    if(error){
+      alert("Errore upload immagini");
+      return;
+    }
+
+    const { data: pub } =
+      sb.storage.from("lottery-images").getPublicUrl(path);
+
+    uploadedUrls.push(pub.publicUrl);
+  }
 
   const lottery_payload = {
     title: document.getElementById("title").value.trim(),
@@ -199,6 +210,7 @@ async function createLottery() {
     paypal_user: document.getElementById("paypal_user").value || null,
     revolut_link: document.getElementById("revolut_link").value || null,
     whatsapp_contact: document.getElementById("whatsapp_contact").value || null,
+    prize_images: uploadedUrls
   };
 
   const promo_code = document.getElementById("promo_code").value.trim() || null;
@@ -213,26 +225,13 @@ async function createLottery() {
   });
 
   const data = await res.json();
+
   if(!res.ok){
     resultBox.innerText = data.error || "Errore creazione";
     return;
   }
 
   if(data.success){
-    const lotteryId = data.lottery_id;
-    const uploadedUrls=[];
-    for(let i=0;i<files.length;i++){
-      const file=files[i];
-      const ext=file.name.split(".").pop();
-      const path=`lotteries/${lotteryId}/${Date.now()}_${i}.${ext}`;
-      const { error } = await sb.storage.from("lottery-images").upload(path,file);
-      if(error){ alert("Errore upload"); return; }
-      const { data:pub } = sb.storage.from("lottery-images").getPublicUrl(path);
-      uploadedUrls.push(pub.publicUrl);
-    }
-    if(uploadedUrls.length){
-      await sb.from("lotteries").update({ prize_images: uploadedUrls }).eq("id", lotteryId);
-    }
     location.href = "dashboard.html?created=1";
     return;
   }
