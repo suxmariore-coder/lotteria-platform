@@ -195,7 +195,7 @@ h1, h2 {
     <div style="font-size:12px;color:#666;margin-top:4px;">
     Aggiungi ulteriori dettagli del premio, aggiorna foto e user payment
     </div>
-    <button class="btn warning" id="btnCloseLottery">⛔ Chiudi vendite</button>
+    <button class="btn warning" id="btnCloseLottery">⛔ Chiudi vendite - azione irreversibile</button>
   </div>
 
   <!-- NUMERI -->
@@ -542,7 +542,7 @@ function showToast(msg, type = "info") {
 }
 
 document.getElementById("btnCloseLottery").onclick = async () => {
-  if (!confirm("Sei sicuro di voler chiudere le vendite?")) return;
+  if (!confirm("Attenzione - Azione irreversibile!Sei sicuro di voler chiudere le vendite?")) return;
 
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
