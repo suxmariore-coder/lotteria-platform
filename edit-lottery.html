@@ -112,6 +112,14 @@
       color: #333;
       font-size: 14px;
     }
+
+.readonly-field {
+  background: #f3f4f6;
+  color: #555;
+  border: 1px solid #ddd;
+  cursor: not-allowed;
+}
+
   </style>
 </head>
 
@@ -133,8 +141,8 @@
     <textarea id="description"></textarea>
 
     <label>Prezzo biglietto (€)</label>
-    <input id="ticket_price" type="number" min="1">
-
+    <input id="ticket_price" type="number" min="1" readonly class="readonly-field">
+    
     <label>Data estrazione</label>
     <input id="draw_date" type="date">
 
@@ -347,7 +355,6 @@ async function saveChanges() {
   const payload = {
     title: document.getElementById("title").value.trim(),
     description: document.getElementById("description").value.trim(),
-    ticket_price: Number(document.getElementById("ticket_price").value),
     draw_date: document.getElementById("draw_date").value || null,
     wheel: document.getElementById("wheel").value || null,
     whatsapp_contact: document.getElementById("whatsapp_contact").value.trim() || null,
