@@ -114,10 +114,10 @@
     }
 
 .readonly-field {
-  background: rgba(255,255,255,0.6);
-  color: #1E3A8A;
-  font-weight: 600;
-  border: 1px solid rgba(30,58,138,0.2);
+  background: #f3f4f6;
+  color: #555;
+  border: 1px solid #ddd;
+  cursor: not-allowed;
 }
   </style>
 </head>
@@ -141,7 +141,10 @@
 
     <label>Prezzo biglietto (€)</label>
     <input id="ticket_price" type="number" min="1" readonly class="readonly-field">
-    
+    <div style="font-size:12px;color:#666;margin-top:4px;">
+    Il prezzo non può essere modificato dopo la creazione.
+    </div>
+
     <label>Data estrazione</label>
     <input id="draw_date" type="date">
 
