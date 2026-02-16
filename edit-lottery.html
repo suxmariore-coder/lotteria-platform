@@ -17,166 +17,109 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #FCD34D;
-  margin: 0;
-  padding: 20px;
-  overflow-x: hidden;
-}
+    body {
+      font-family: Arial, sans-serif;
+      background: #FCD34D; /* 💛 GIALLO COME LOGIN */
+      margin: 0;
+      padding: 16px;
+    }
 
-/* 🎱 Palline decorative */
-.ball {
-  position: absolute;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: white;
-  color: #1E3A8A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 22px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  pointer-events: none;
-  z-index: 0;
-}
+    h1, h2 {
+      text-align: center;
+      margin: 8px 0;
+    }
 
-.ball1 { top: 40px; left: -30px; }
-.ball2 { top: 10px; right: -40px; }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
 
-.container {
-  max-width: 500px;
-  margin: 60px auto;
-  position: relative;
-  z-index: 1;
-}
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
 
-/* 📱 Mobile centrato meglio */
-@media (max-width: 520px) {
-  body { padding: 16px; }
-  .container { margin: 40px auto; max-width: 100%; }
-  .ball1 { top: 18px; left: -45px; }
-  .ball2 { top: -10px; right: -55px; }
-}
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      font-size: 14px;
+    }
 
-h1, h2 {
-  text-align: center;
-  margin: 8px 0;
-  color: #1E3A8A;
-}
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      box-sizing: border-box;
+    }
 
-/* 🧊 Card stile glass */
-.card {
-  background: rgba(255,255,255,0.75);
-  backdrop-filter: blur(4px);
-  border-radius: 18px;
-  padding: 18px;
-  margin-bottom: 18px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
 
-/* Form */
-label {
-  font-weight: 600;
-  margin-top: 12px;
-  font-size: 14px;
-  color: #0F1E4A;
-}
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
 
-input, textarea, select {
-  width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  border-radius: 14px;
-  border: 1px solid #ddd;
-  font-size: 15px;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
+    .primary { background:#1e7e34; color:#fff; }
+    .secondary { background:#6c757d; color:#fff; }
 
-textarea {
-  resize: vertical;
-  min-height: 90px;
-}
+    .images {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-top: 8px;
+    }
 
-/* 🔵 Bottoni brand */
-.btn,
-button {
-  width: 100%;
-  padding: 16px;
-  border-radius: 18px;
-  font-size: 15px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
+    .img-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
 
-button:active,
-.btn:active {
-  transform: scale(0.98);
-}
+    .img-wrap img {
+      height: 90px;
+      width: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #eee;
+    }
 
-.primary {
-  background: #1E3A8A;
-  color: white;
-}
+    .img-wrap button {
+      padding: 6px 10px;
+      font-size: 13px;
+      border: none;
+      border-radius: 6px;
+      background: #dc3545;
+      color: #fff;
+      cursor: pointer;
+    }
 
-.secondary {
-  background: transparent;
-  border: 2px solid #0F1E4A;
-  color: #0F1E4A;
-}
+    .back {
+      display: inline-block;
+      margin-bottom: 10px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+    }
 
-/* 📸 Immagini */
-.images {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-top: 10px;
-}
-
-.img-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.img-wrap img {
-  height: 90px;
-  width: 120px;
-  object-fit: cover;
-  border-radius: 14px;
-  background: #eee;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-.img-wrap button {
-  padding: 8px 12px;
-  font-size: 13px;
-  border-radius: 12px;
-  background: #dc3545;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-
-/* 🔙 Link back */
-.back {
-  display: inline-block;
-  margin-bottom: 16px;
-  text-decoration: none;
+.readonly-field {
+  background: rgba(255,255,255,0.6);
   color: #1E3A8A;
   font-weight: 600;
-  font-size: 14px;
+  border: 1px solid rgba(30,58,138,0.2);
 }
-</style>
+  </style>
 </head>
 
 <body>
@@ -197,7 +140,10 @@ button:active,
     <textarea id="description"></textarea>
 
     <label>Prezzo biglietto (€)</label>
-    <input id="ticket_price" type="number" min="1">
+    <input id="ticket_price" type="number" min="1" readonly class="readonly-field">
+    <div style="font-size:12px;color:#666;margin-top:4px;">
+    Il prezzo non può essere modificato dopo la creazione.
+    </div>
 
     <label>Data estrazione</label>
     <input id="draw_date" type="date">
@@ -411,7 +357,6 @@ async function saveChanges() {
   const payload = {
     title: document.getElementById("title").value.trim(),
     description: document.getElementById("description").value.trim(),
-    ticket_price: Number(document.getElementById("ticket_price").value),
     draw_date: document.getElementById("draw_date").value || null,
     wheel: document.getElementById("wheel").value || null,
     whatsapp_contact: document.getElementById("whatsapp_contact").value.trim() || null,
@@ -454,5 +399,3 @@ payload.prize_images = finalImages;
 
 </body>
 </html>
-
-
