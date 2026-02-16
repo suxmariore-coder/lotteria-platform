@@ -17,131 +17,167 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #FCD34D; /* 💛 GIALLO COME LOGIN */
-      margin: 0;
-      padding: 16px;
-    }
+body {
+  font-family: Arial, sans-serif;
+  background: #FCD34D;
+  margin: 0;
+  padding: 20px;
+  overflow-x: hidden;
+}
 
-    h1, h2 {
-      text-align: center;
-      margin: 8px 0;
-    }
+/* 🎱 Palline decorative */
+.ball {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: white;
+  color: #1E3A8A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 22px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  pointer-events: none;
+  z-index: 0;
+}
 
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
+.ball1 { top: 40px; left: -30px; }
+.ball2 { top: 10px; right: -40px; }
 
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 14px;
-    }
+.container {
+  max-width: 500px;
+  margin: 60px auto;
+  position: relative;
+  z-index: 1;
+}
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 12px;
-      font-size: 14px;
-    }
+/* 📱 Mobile centrato meglio */
+@media (max-width: 520px) {
+  body { padding: 16px; }
+  .container { margin: 40px auto; max-width: 100%; }
+  .ball1 { top: 18px; left: -45px; }
+  .ball2 { top: -10px; right: -55px; }
+}
 
-    input, textarea, select {
+h1, h2 {
+  text-align: center;
+  margin: 8px 0;
+  color: #1E3A8A;
+}
+
+/* 🧊 Card stile glass */
+.card {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Form */
+label {
+  font-weight: 600;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #0F1E4A;
+}
+
+input, textarea, select {
   width: 100%;
   padding: 12px;
   margin-top: 6px;
   border-radius: 14px;
-  border: 1px solid rgba(30,58,138,0.15);
+  border: 1px solid #ddd;
   font-size: 15px;
   box-sizing: border-box;
-  background: rgba(255,255,255,0.8);
+  font-family: Arial, sans-serif;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* 🔵 Bottoni brand */
+.btn,
+button {
+  width: 100%;
+  padding: 16px;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+button:active,
+.btn:active {
+  transform: scale(0.98);
+}
+
+.primary {
+  background: #1E3A8A;
+  color: white;
+}
+
+.secondary {
+  background: transparent;
+  border: 2px solid #0F1E4A;
   color: #0F1E4A;
 }
 
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border: 1px solid #1E3A8A;
-  box-shadow: 0 0 0 3px rgba(30,58,138,0.1);
+/* 📸 Immagini */
+.images {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-top: 10px;
 }
 
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
+.img-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
 
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 6px;
-      border: none;
-      font-size: 15px;
-      cursor: pointer;
-      margin-top: 12px;
-    }
+.img-wrap img {
+  height: 90px;
+  width: 120px;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #eee;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
 
-    .primary { background:#1e7e34; color:#fff; }
-    .secondary { background:#6c757d; color:#fff; }
+.img-wrap button {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 12px;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
 
-    .images {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding-top: 8px;
-    }
-
-    .img-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .img-wrap img {
-      height: 90px;
-      width: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-      background: #eee;
-    }
-
-    .img-wrap button {
-      padding: 6px 10px;
-      font-size: 13px;
-      border: none;
-      border-radius: 6px;
-      background: #dc3545;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    .back {
-      display: inline-block;
-      margin-bottom: 10px;
-      text-decoration: none;
-      color: #333;
-      font-size: 14px;
-    }
-
-/* Prezzo readonly stile brand */
-.readonly-field {
-  background: rgba(30,58,138,0.08);
-  border: 1px solid rgba(30,58,138,0.25);
+/* 🔙 Link back */
+.back {
+  display: inline-block;
+  margin-bottom: 16px;
+  text-decoration: none;
   color: #1E3A8A;
   font-weight: 600;
-  cursor: default;
+  font-size: 14px;
 }
+</style>
 
-/* Nota sotto campo */
-.field-note {
-  font-size: 12px;
-  color: #1E3A8A;
-  opacity: 0.7;
-  margin-top: 6px;
-}
-
-  </style>
 </head>
 
 <body>
