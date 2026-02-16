@@ -542,7 +542,7 @@ function showToast(msg, type = "info") {
 }
 
 document.getElementById("btnCloseLottery").onclick = async () => {
-  if (!confirm("Attenzione - Azione irreversibile!Sei sicuro di voler chiudere le vendite?")) return;
+  if (!confirm("Attenzione - Azione irreversibile! Sei sicuro di voler chiudere le vendite?")) return;
 
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
@@ -586,3 +586,4 @@ document.getElementById("btnCloseLottery").onclick = async () => {
 
 </body>
 </html>
+
