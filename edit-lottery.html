@@ -113,11 +113,21 @@
       font-size: 14px;
     }
 
+/* Prezzo readonly stile brand */
 .readonly-field {
-  background: #f3f4f6;
-  color: #555;
-  border: 1px solid #ddd;
-  cursor: not-allowed;
+  background: rgba(30,58,138,0.08);
+  border: 1px solid rgba(30,58,138,0.25);
+  color: #1E3A8A;
+  font-weight: 600;
+  cursor: default;
+}
+
+/* Nota sotto campo */
+.field-note {
+  font-size: 12px;
+  color: #1E3A8A;
+  opacity: 0.7;
+  margin-top: 6px;
 }
 
   </style>
@@ -142,6 +152,9 @@
 
     <label>Prezzo biglietto (€)</label>
     <input id="ticket_price" type="number" min="1" readonly class="readonly-field">
+    <div class="field-note">
+    Il prezzo non può essere modificato dopo la creazione.
+    </div>
     
     <label>Data estrazione</label>
     <input id="draw_date" type="date">
