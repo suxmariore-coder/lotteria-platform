@@ -49,11 +49,22 @@
     }
 
     input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      box-sizing: border-box;
-    }
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(30,58,138,0.15);
+  font-size: 15px;
+  box-sizing: border-box;
+  background: rgba(255,255,255,0.8);
+  color: #0F1E4A;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border: 1px solid #1E3A8A;
+  box-shadow: 0 0 0 3px rgba(30,58,138,0.1);
+}
 
     textarea {
       resize: vertical;
