@@ -9,13 +9,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lotteriffa">
 
-<meta property="og:title" content="Partecipa alla mia LotteRiffa 🎟️">
-<meta property="og:description" content="Un premio. Un numero. Un’estrazione ufficiale.">
-<meta property="og:image" content="https://www.lotteriffa.it/share-image.png">
-<meta property="og:url" content="https://www.lotteriffa.it/">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-
 <link rel="apple-touch-icon" href="/icon-192.png">
   <meta charset="UTF-8" />
   <title>Lotteria</title>
@@ -438,11 +431,8 @@ function buildPurchaseModalHTML() {
 /* WHATSAPP */
 function shareWhatsapp() {
   const text = encodeURIComponent(
-    "🎟️ Partecipa alla mia LotteRiffa!\n" +
-    "Un premio. Un numero. Un’estrazione ufficiale.\n\n" +
-    location.href
+    "🎟️ Partecipa a questa lotteria!\nProva a vincere un premio 🎁\n\n" + location.href
   );
-
   window.open(`https://wa.me/?text=${text}`, "_blank");
 }
 
