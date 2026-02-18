@@ -88,6 +88,20 @@
 .footer-buttons {
   margin: 20px 0;
 }
+
+.forgot-link {
+  display: block;
+  text-align: right;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #1E3A8A;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
   </style>
 </head>
 
@@ -112,6 +126,10 @@
 
     <input id="email" type="email" placeholder="La tua Email" />
     <input id="password" type="password" placeholder="Scegli una Password" />
+
+<a href="#" class="forgot-link" onclick="resetPassword(event)">
+  Password dimenticata?
+</a>
 
     <button class="login" onclick="login()">Accedi</button>
     <button class="register" onclick="register()">Registrati e crea LotteRiffa</button>
@@ -170,6 +188,31 @@ async function register() {
   document.getElementById("result").innerText =
     "✅ Registrazione completata. Ora puoi accedere.";
 }
+
+async function resetPassword(e) {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+
+  if (!email) {
+    document.getElementById("result").innerText =
+      "Inserisci prima la tua email per recuperare la password";
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://www.lotteriffa.it/login.html"
+  });
+
+  if (error) {
+    document.getElementById("result").innerText =
+      "❌ Errore nell'invio email";
+    return;
+  }
+
+  document.getElementById("result").innerText =
+    "✅ Email di recupero inviata. Controlla la tua casella.";
+}
 </script>
 
 <!-- FOOTER -->
@@ -179,4 +222,3 @@ async function register() {
 
 </body>
 </html>
-
