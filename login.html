@@ -201,7 +201,7 @@ async function resetPassword(e) {
   }
 
   const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-    redirectTo: "https://www.lotteriffa.it/login.html"
+    redirectTo: "https://www.lotteriffa.it/update-password.html"
   });
 
   if (error) {
@@ -222,3 +222,4 @@ async function resetPassword(e) {
 
 </body>
 </html>
+
