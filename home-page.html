@@ -25,7 +25,7 @@ body {
 }
 
 .container {
-  padding: 20px;
+  padding: 22px;
   max-width: 480px;
   margin: auto;
 }
@@ -53,7 +53,7 @@ body {
 h1.logo {
   font-family: 'Playfair Display', serif;
   font-style: italic;
-  font-size: 54px;
+  font-size: 56px;
   margin: 20px 0 10px 0;
   line-height: 1.1;
 }
@@ -100,6 +100,7 @@ p {
   padding: 22px 20px;
   margin: 14px 0;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  text-align: left;
 }
 
 /* STEP STYLE */
@@ -107,9 +108,8 @@ p {
   display: flex;
   align-items: center;
   position: relative;
-  padding-left: 70px; /* spazio per il numero */
+  padding-left: 70px;
   min-height: 72px;
-  text-align: left;
 }
 
 .step-number {
@@ -179,19 +179,10 @@ p {
   100% { transform: translateY(0px); }
 }
 
-/* EXTRA SMALL DEVICES */
 @media (max-width: 360px) {
-  h1.logo {
-    font-size: 42px;
-  }
-
-  .step-number {
-    font-size: 36px;
-  }
-
-  .step {
-    padding-left: 60px;
-  }
+  h1.logo { font-size: 44px; }
+  .step-number { font-size: 36px; }
+  .step { padding-left: 60px; }
 }
 </style>
 </head>
@@ -219,48 +210,56 @@ p {
 
 <a href="crea-lotteria.html" class="cta">Crea la tua LotteRiffa</a>
 
+<!-- COS'È -->
+<div class="section">
+  <h2>🎟 Cos’è LotteRiffa</h2>
+  <div class="card">
+    <p>LotteRiffa è uno strumento digitale che ti permette di creare la tua lotteria privata e condividerla con i tuoi amici in modo semplice, trasparente e veloce.</p>
+    <p>Il numero vincente corrisponde al primo numero estratto sulla ruota del Lotto selezionata, risultato pubblico e verificabile.</p>
+    <p><strong>Semplice. Sicuro. Trasparente.</strong></p>
+  </div>
+</div>
+
+<!-- PAGAMENTI -->
+<div class="section">
+  <h2>💳 Pagamenti Veloci e Sicuri</h2>
+  <div class="card">
+    <p>Puoi ricevere pagamenti in modo immediato tramite:</p>
+    <p><strong>PayPal</strong> e <strong>Revolut</strong></p>
+    <p>Transazioni rapide, tracciabili e protette.</p>
+  </div>
+</div>
+
+<!-- COME FUNZIONA -->
 <div class="section">
   <h2>🚀 Come funziona</h2>
 
-  <div class="card step">
-    <div class="step-number">1</div>
-    <div class="step-text">Registrati con email e password</div>
-  </div>
+  <div class="card step"><div class="step-number">1</div><div class="step-text">Registrati con email e password</div></div>
+  <div class="card step"><div class="step-number">2</div><div class="step-text">Crea la tua lotteria inserendo i dettagli del premio</div></div>
+  <div class="card step"><div class="step-number">3</div><div class="step-text">Decidi il prezzo di un singolo biglietto</div></div>
+  <div class="card step"><div class="step-number">4</div><div class="step-text">Scegli la data e la ruota del Lotto di riferimento</div></div>
+  <div class="card step"><div class="step-number">5</div><div class="step-text">Inserisci i tuoi canali di pagamento (PayPal e Revolut)</div></div>
+  <div class="card step"><div class="step-number">6</div><div class="step-text">Paga una piccola fee di creazione</div></div>
+  <div class="card step"><div class="step-number">7</div><div class="step-text">Condividi la lotteria con i tuoi amici</div></div>
+  <div class="card step"><div class="step-number">8</div><div class="step-text">Attendi l’estrazione ufficiale</div></div>
+</div>
 
-  <div class="card step">
-    <div class="step-number">2</div>
-    <div class="step-text">Crea la tua lotteria inserendo i dettagli del premio</div>
-  </div>
+<!-- FOOTER -->
+<div class="footer">
 
-  <div class="card step">
-    <div class="step-number">3</div>
-    <div class="step-text">Decidi il prezzo di un singolo biglietto</div>
-  </div>
+© 2026 LotteRiffa
 
-  <div class="card step">
-    <div class="step-number">4</div>
-    <div class="step-text">Scegli la data e la ruota del Lotto di riferimento</div>
-  </div>
+<div class="footer-buttons">
+  <a href="faq.html">FAQ</a>
+  <a href="termini.html">Termini e Condizioni</a>
+  <a href="privacy.html">Privacy Policy</a>
+</div>
 
-  <div class="card step">
-    <div class="step-number">5</div>
-    <div class="step-text">Inserisci i tuoi canali di pagamento (PayPal e Revolut)</div>
-  </div>
-
-  <div class="card step">
-    <div class="step-number">6</div>
-    <div class="step-text">Paga una piccola fee di creazione</div>
-  </div>
-
-  <div class="card step">
-    <div class="step-number">7</div>
-    <div class="step-text">Condividi la lotteria con i tuoi amici</div>
-  </div>
-
-  <div class="card step">
-    <div class="step-number">8</div>
-    <div class="step-text">Attendi l’estrazione ufficiale</div>
-  </div>
+<p style="max-width: 400px; margin: 20px auto;">
+LotteRiffa è una piattaforma digitale indipendente che fornisce esclusivamente un servizio tecnico per la creazione di iniziative private tra utenti.
+Non è affiliata, collegata o autorizzata dal gioco ufficiale del Lotto né da enti statali.
+I risultati del Lotto sono utilizzati unicamente come riferimento pubblico e verificabile.
+</p>
 
 </div>
 
