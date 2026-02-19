@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+
 <link rel="manifest" href="/manifest.json">
 
 <meta name="theme-color" content="#1E3A8A">
@@ -10,11 +11,15 @@
 <meta name="apple-mobile-web-app-title" content="Lotteriffa">
 
 <link rel="apple-touch-icon" href="/icon-192.png">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LotteRiffa</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/lotteriffa-real.svg" as="image">
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LotteRiffa</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
 
 <style>
 body {
@@ -186,10 +191,30 @@ p {
   .step-number { font-size: 36px; }
   .step { padding-left: 60px; }
 }
+
+.navbar{
+  height:70px;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+}
+
+.logo{
+  height:48px;
+  width:auto;
+  display:block;
+}
+
+@media (max-width:768px){
+  .logo{ height:38px; }
+}
 </style>
 </head>
 
 <body>
+<header class="navbar">
+  <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
+</header>
 
 <div class="ball ball1">12</div>
 <div class="ball ball2">37</div>
@@ -201,8 +226,6 @@ p {
 <div class="topbar">
   <a href="login.html">Accedi</a>
 </div>
-
-<h1 class="logo">LotteRiffa</h1>
 
 <h2>Un premio. Un numero. Un’estrazione ufficiale.</h2>
 
@@ -268,7 +291,6 @@ I risultati del Lotto sono utilizzati unicamente come riferimento pubblico e ver
 </div>
 </body>
 </html>
-
 
 
 
