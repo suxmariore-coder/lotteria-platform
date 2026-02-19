@@ -196,22 +196,28 @@ p {
   height:70px;
   display:flex;
   align-items:center;
-  padding:0 20px;
+  justify-content:center;
+  backdrop-filter: blur(10px);
+  position:sticky;
+  top:0;
 }
 
 .logo{
-  height:48px;
+  height:52px;              /* ⭐ aumenta dimensione */
   width:auto;
   display:block;
 }
 
 @media (max-width:768px){
-  .logo{ height:38px; }
+  .logo{
+    height:44px;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <header class="navbar">
   <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
 </header>
