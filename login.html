@@ -102,6 +102,23 @@
 .forgot-link:hover {
   text-decoration: underline;
 }
+
+.navbar{
+  height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:center;   /* ⭐ centra il logo */
+  padding:0 16px;
+}
+
+.logo{
+  height:250px;              /* ⭐ aumenta dimensione */
+  width:auto;
+  display:block;
+  padding-top:70px;
+  margin-right:35px;
+}
+
   </style>
 </head>
 
@@ -112,7 +129,9 @@
 
   <div class="container">
 
-    <h1 class="logo" style="font-size: 48px;">LotteRiffa</h1>
+    <header class="navbar">
+  <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
+</header>
 
     <div class="intro">
       <p><strong>Crea la tua lotteria online in pochi minuti</strong></p>
@@ -222,4 +241,3 @@ async function resetPassword(e) {
 
 </body>
 </html>
-
