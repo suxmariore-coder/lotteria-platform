@@ -230,7 +230,22 @@ button:active {
 .footer-buttons {
   margin: 20px 0;
 }
-  
+
+.navbar{
+  height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:center;   /* ⭐ centra il logo */
+  padding:0 16px;
+}
+
+.logo{
+  height:250px;              /* ⭐ aumenta dimensione */
+  width:auto;
+  display:block;
+  padding-top:70px;
+  margin-right:35px;
+}  
 </style>
 </head>
 
@@ -241,7 +256,9 @@ button:active {
 
 <div class="container">
 
-<h1>LotteRiffa</h1>
+<header class="navbar">
+  <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
+</header>
 
 <div class="top-actions">
   <button id="btnCreate" class="primary">➕ Crea nuova lotteria</button>
