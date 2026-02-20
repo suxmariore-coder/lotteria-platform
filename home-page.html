@@ -216,6 +216,44 @@ p {
   font-weight:600;
   text-decoration:none;
 }
+
+.social-proof {
+  margin: 18px 0 28px;
+  text-align: center;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stat {
+  flex: 1;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(4px);
+  border-radius: 14px;
+  padding: 12px 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+.stat-number {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1E3A8A;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #1E3A8A;
+  opacity: 0.8;
+}
+
+/* mobile */
+@media (max-width: 520px) {
+  .stat-number { font-size: 20px; }
+  .stat-label { font-size: 11px; }
+}
 </style>
 </head>
 
@@ -241,6 +279,35 @@ p {
 <br>
   
 <h2>La lotteria creata da te.</h2>
+
+<br>
+
+<h1 class="logo">LotteRiffa</h1>
+
+<div id="socialProof" class="social-proof">
+
+  <div class="stats">
+
+    <div class="stat">
+      <div class="stat-number">+<span id="ownersCount">0</span></div>
+      <div class="stat-label">organizzatori</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-number">+<span id="lotteriesCount">0</span></div>
+      <div class="stat-label">lotterie create</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-number">+<span id="soldCount">0</span></div>
+      <div class="stat-label">numeri venduti</div>
+    </div>
+
+  </div>
+
+</div>
+
+<br>
 
 <p>
   Crea la tua lotteria privata in modo semplice, trasparente e verificabile.
@@ -303,6 +370,62 @@ I risultati del Lotto sono utilizzati unicamente come riferimento pubblico e ver
 </button>
 
 </div>
+
+<script>
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+
+async function loadStats() {
+  try {
+    /* LOTTERIE */
+    const lotRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/lotteries?select=owner_id`,
+      { headers: { apikey: SUPABASE_ANON_KEY } }
+    );
+    const lotteries = await lotRes.json();
+
+    /* NUMERI */
+    const numRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/lottery_numbers?select=status`,
+      { headers: { apikey: SUPABASE_ANON_KEY } }
+    );
+    const numbers = await numRes.json();
+
+    const uniqueOwners = new Set(
+      lotteries.map(x => x.owner_id).filter(Boolean)
+    );
+
+    const soldNumbers = numbers.filter(n => n.status === "sold").length;
+
+    animate("ownersCount", uniqueOwners.size);
+    animate("lotteriesCount", lotteries.length);
+    animate("soldCount", soldNumbers);
+
+  } catch (e) {
+    console.error("stats error", e);
+  }
+}
+
+function animate(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  let current = 0;
+  const step = Math.max(1, Math.floor(target / 30));
+
+  const interval = setInterval(() => {
+    current += step;
+    if (current >= target) {
+      current = target;
+      clearInterval(interval);
+    }
+    el.textContent = current;
+  }, 35);
+}
+
+loadStats();
+</script>
+
 </body>
 </html>
 
