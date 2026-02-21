@@ -818,6 +818,16 @@ modalContent.innerHTML = `
 
 loadLottery();
 loadNumbers();
+
+function showBuyer(row){
+  modalContent.innerHTML = `
+    <h3>Numero ${row.number}</h3>
+    <p><b>Acquistato da:</b></p>
+    <p style="font-size:18px">${row.buyer_name || "—"}</p>
+    <button class="btn cancel" onclick="closeModal()">Chiudi</button>
+  `;
+  modal.classList.add("show");
+}
 </script>
 
 <!-- FOOTER -->
