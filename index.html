@@ -641,6 +641,10 @@ async function loadNumbers() {
       d.style.opacity = "0.85";
     }
 
+    if(cls === "sold"){
+    d.onclick = () => showBuyer(row);
+    }
+
     grid.appendChild(d);
   });
 }
