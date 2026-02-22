@@ -260,7 +260,7 @@ button:active {
   <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
 </header>
 
-<br><br><br>
+</div>
 
 <div class="top-actions">
   <button id="btnCreate" class="primary">➕ Crea nuova lotteria</button>
@@ -270,7 +270,7 @@ button:active {
 <div id="status"></div>
 <div id="lotteries" class="grid"></div>
 
-</div>
+<br><br><br>
 
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
@@ -293,7 +293,7 @@ document.getElementById("btnLogout").onclick = async () => {
     await OneSignal.logout();
   });
 
-  location.href = "login.html";
+  location.href = "home-page.html";
 };
 
 function formatDate(dateStr) {
@@ -309,7 +309,7 @@ function formatDate(dateStr) {
 async function getUserSafe() {
   const { data } = await sb.auth.getUser();
   if (!data?.user) {
-    location.href = "login.html";
+    location.href = "home-page.html";
     return null;
   }
   return data.user;
@@ -388,6 +388,4 @@ async function loadDashboard(ownerId) {
   
 </body>
 </html>
-
-
 
