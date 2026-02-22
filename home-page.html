@@ -47,25 +47,6 @@ body {
   margin: auto;
 }
 
-/* TOPBAR */
-.topbar {
-  display: flex;
-  margin-left: auto; 
-  width: fit-content; 
-  margin-bottom: 24px;
-  background: #1E3A8A;
-  padding: 12px 22px;
-  border-radius: 18px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-
-.topbar a {
-  text-decoration: none;
-  color: white;
-  font-size: 14px;
-  font-weight: 500;
-}
-
 /* LOGO */
 h1.logo {
   font-family: 'Playfair Display', serif;
@@ -167,6 +148,20 @@ p {
   box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
+.forgot-link {
+  display: block;
+  text-align: right;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #1E3A8A;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
 /* Decorative balls */
 .ball {
   position: fixed;
@@ -264,6 +259,50 @@ p {
   .stat-number { font-size: 20px; }
   .stat-label { font-size: 11px; }
 }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      font-size: 15px;
+      box-sizing: border-box; 
+      display: block;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 16px;
+      border: none;
+      border-radius: 18px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .login { background: #1E3A8A; color: white; }
+    .register {
+      background: transparent;
+      color: #0F1E4A;
+      border: 2px solid #0F1E4A;
+      margin-top: 10px;
+    }
+
+    .intro {
+      text-align: left;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
 </style>
 </head>
 
@@ -276,11 +315,7 @@ p {
 
 <div class="container">
 
-<div class="topbar">
-  <a href="login.html">Accedi</a>
-</div>
-
-<br><br><br>
+<br><br>
 
 <header class="navbar">
   <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
@@ -291,7 +326,10 @@ p {
 <h2>La lotteria che crei tu</h2>
 
 <br>
-
+<p>
+  Crea la tua lotteria privata in modo semplice, trasparente e verificabile.
+</p>
+<br>
 <div id="socialProof" class="social-proof">
 
   <div class="stats">
@@ -315,13 +353,23 @@ p {
 
 </div>
 
-<br>
+<input id="email" type="email" placeholder="La tua Email" />
+    <input id="password" type="password" placeholder="Scegli una Password" />
 
-<p>
-  Crea la tua lotteria privata in modo semplice, trasparente e verificabile.
-</p>
+<a href="#" class="forgot-link" onclick="resetPassword(event)">
+  Password dimenticata?
+</a>
+    <button class="login" onclick="login()">Accedi</button>
+    <button class="register" onclick="register()">Registrati e crea LotteRiffa</button>
 
-<a href="crea-lotteria.html" class="cta">Crea la tua LotteRiffa</a>
+    <div class="footer">
+      Dopo l’accesso potrai creare la tua prima lotteria
+    </div>
+
+    <p id="result"></p>
+  </div>
+
+<div class="container">
 
 <!-- COS'È -->
 <div class="section">
@@ -432,6 +480,70 @@ function animate(id, target) {
 }
 
 loadStats();
+
+async function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    document.getElementById("result").innerText = "Inserisci email e password";
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    document.getElementById("result").innerText = "❌ Login fallito";
+    return;
+  }
+
+  window.location.href = "dashboard.html";
+}
+
+async function register() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    document.getElementById("result").innerText = "Inserisci email e password";
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.signUp({ email, password });
+
+  if (error) {
+    document.getElementById("result").innerText = "❌ Registrazione fallita";
+    return;
+  }
+
+  document.getElementById("result").innerText =
+    "✅ Registrazione completata. Ora puoi accedere.";
+}
+
+async function resetPassword(e) {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+
+  if (!email) {
+    document.getElementById("result").innerText =
+      "Inserisci prima la tua email per recuperare la password";
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://www.lotteriffa.it/update-password.html"
+  });
+
+  if (error) {
+    document.getElementById("result").innerText =
+      "❌ Errore nell'invio email";
+    return;
+  }
+
+  document.getElementById("result").innerText =
+    "✅ Email di recupero inviata. Controlla la tua casella.";
+}
 </script>
 
 </body>
