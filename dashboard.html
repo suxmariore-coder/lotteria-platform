@@ -252,7 +252,17 @@ button:active {
   display:block;
   padding-top:70px;
   margin-right:35px;
-}  
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  color: #0F1E4A;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 </style>
 </head>
 
@@ -262,13 +272,6 @@ button:active {
 <div class="ball ball2">37</div>
 
 <div class="container">
-
-<div class="thumb">
-  ${img
-    ? `<img src="${img}" />`
-    : `<img src="/icon-192.png" style="opacity:.5;object-fit:contain;padding:12px">`
-  }
-</div>
 
 <header class="navbar">
   <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
