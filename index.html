@@ -450,6 +450,11 @@
   <div class="modal-content"></div>
 </div>
 
+<div id="galleryModal" class="gallery-modal">
+  <span class="gallery-close">✕</span>
+  <img id="galleryImage">
+</div>
+
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
@@ -938,9 +943,12 @@ function openGallery(i) {
 
 /* chiusura */
 window.addEventListener("DOMContentLoaded", () => {
-  document.querySelector(".gallery-close").onclick = () => {
-    galleryModal.classList.remove("show");
-  };
+  window.addEventListener("DOMContentLoaded", () => {
+  const closeBtn = document.querySelector(".gallery-close");
+  if (closeBtn) {
+    closeBtn.onclick = () => galleryModal.classList.remove("show");
+  }
+});
 });
 
 /* tap sfondo chiude */
@@ -1000,11 +1008,6 @@ function prev() {
 <div class="footer">
 
 © 2026 LotteRiffa
-
-<div id="galleryModal" class="gallery-modal">
-  <span class="gallery-close">✕</span>
-  <img id="galleryImage">
-</div>
 
 </body>
 </html>
