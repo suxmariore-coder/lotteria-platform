@@ -354,6 +354,31 @@
 .footer-buttons {
   margin: 20px 0;
 }
+
+.ios-tooltip {
+  position: fixed;
+  background: rgba(30, 58, 138, 0.95);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -120%) scale(0.9);
+  opacity: 0;
+  transition: all 0.18s ease;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  max-width: 220px;
+  text-align: center;
+}
+
+.ios-tooltip.show {
+  opacity: 1;
+  transform: translate(-50%, -140%) scale(1);
+}
+
   </style>
 </head>
 <body>
@@ -641,8 +666,8 @@ async function loadNumbers() {
       d.style.opacity = "0.85";
     }
 
-    if(cls === "sold"){
-    d.onclick = () => showBuyer(row);
+    if (cls === "sold") {
+    d.onclick = () => showBuyerTooltip(row, d);
     }
 
     grid.appendChild(d);
@@ -828,6 +853,34 @@ function showBuyer(row){
   `;
   modal.classList.add("show");
 }
+
+let tooltipEl = null;
+
+function showBuyerTooltip(row, element) {
+  if (!row.buyer_name) return;
+
+  if (!tooltipEl) {
+    tooltipEl = document.createElement("div");
+    tooltipEl.className = "ios-tooltip";
+    document.body.appendChild(tooltipEl);
+  }
+
+  tooltipEl.textContent = `${row.buyer_name}`;
+
+  const rect = element.getBoundingClientRect();
+
+  tooltipEl.style.left = rect.left + rect.width / 2 + "px";
+  tooltipEl.style.top = rect.top + "px";
+
+  requestAnimationFrame(() => {
+    tooltipEl.classList.add("show");
+  });
+
+  setTimeout(() => {
+    tooltipEl.classList.remove("show");
+  }, 1800);
+}
+
 </script>
 
 <!-- FOOTER -->
