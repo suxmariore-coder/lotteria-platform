@@ -313,7 +313,7 @@
   .share-box img {
     width: 24px; /* prova 26px se lo vuoi ancora più evidente */
   }
-
+}
 .owner-contact {
   max-width: 600px;          /* desktop = come griglia */
   margin: 16px auto 0;
@@ -657,6 +657,8 @@ function renderGallery(images) {
     img.onclick = () => openGallery(i);
     gallery.appendChild(img);
   });
+  
+  gallery.style.display = "flex";
 }
 
 /* LOAD NUMBERS */
