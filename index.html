@@ -871,7 +871,7 @@ function showBuyerTooltip(row, element) {
 
   tooltipEl.style.left = rect.left + rect.width / 2 + "px";
   tooltipEl.style.top = rect.top + "px";
-
+  if (navigator.vibrate) navigator.vibrate(10);
   requestAnimationFrame(() => {
     tooltipEl.classList.add("show");
   });
