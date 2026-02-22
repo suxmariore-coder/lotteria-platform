@@ -282,6 +282,15 @@ button:active {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+body {
+  overscroll-behavior-x: none;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 </style>
 </head>
 
@@ -384,7 +393,7 @@ else if (typeof l.prize_images === "string") {
         <div class="thumb">
           ${img ? `<img src="${img}" />` : "Nessuna foto"}
         </div>
-        <div>
+        <div class="card-text">
           <h3 class="title">${l.title}</h3>
           <div class="price">€ ${l.ticket_price}</div>
           <div class="desc">${l.description || ""}</div>
