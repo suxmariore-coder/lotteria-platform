@@ -263,6 +263,13 @@ button:active {
 
 <div class="container">
 
+<div class="thumb">
+  ${img
+    ? `<img src="${img}" />`
+    : `<img src="/icon-192.png" style="opacity:.5;object-fit:contain;padding:12px">`
+  }
+</div>
+
 <header class="navbar">
   <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
 </header>
@@ -276,13 +283,6 @@ button:active {
 
 <div id="status"></div>
 <div id="lotteries" class="grid"></div>
-
-<div class="thumb">
-  ${img
-    ? `<img src="${img}" />`
-    : `<img src="/icon-192.png" style="opacity:.5;object-fit:contain;padding:12px">`
-  }
-</div>
 
 <br><br><br>
 
