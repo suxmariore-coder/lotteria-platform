@@ -379,6 +379,36 @@
   transform: translate(-50%, -140%) scale(1);
 }
 
+
+.gallery-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.gallery-modal.show {
+  display: flex;
+}
+
+.gallery-modal img {
+  max-width: 95%;
+  max-height: 85%;
+  border-radius: 12px;
+  transition: transform .25s ease;
+}
+
+.gallery-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  color: white;
+  font-size: 26px;
+  cursor: pointer;
+}
   </style>
 </head>
 <body>
@@ -599,6 +629,9 @@ if (lot.revolut_link && lot.revolut_link.trim() !== "") {
 }
 
 /* GALLERY */
+let GALLERY = [];
+let currentIndex = 0;
+
 function renderGallery(images) {
   const gallery = document.getElementById("prize-gallery");
   let arr = [];
@@ -613,15 +646,14 @@ function renderGallery(images) {
     return;
   }
 
-  gallery.style.display = "flex";
+  GALLERY = arr;
   gallery.innerHTML = "";
 
-  arr.forEach(u => {
-    if (!u) return;
-    const i = document.createElement("img");
-    i.src = u;
-    i.onclick = () => window.open(u, "_blank");
-    gallery.appendChild(i);
+  arr.forEach((url, i) => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.onclick = () => openGallery(i);
+    gallery.appendChild(img);
   });
 }
 
@@ -881,7 +913,47 @@ function showBuyerTooltip(row, element) {
   }, 1800);
 }
 
+const modal = document.getElementById("galleryModal");
+const modalImg = document.getElementById("galleryImage");
+
+function openGallery(i) {
+  currentIndex = i;
+  modal.classList.add("show");
+  modalImg.src = GALLERY[currentIndex];
+}
+
+document.querySelector(".gallery-close").onclick = () => {
+  modal.classList.remove("show");
+};
+
+let startX = 0;
+
+modal.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+modal.addEventListener("touchend", e => {
+  const diff = e.changedTouches[0].clientX - startX;
+
+  if (diff > 60) prev();
+  if (diff < -60) next();
+});
+
+function next() {
+  currentIndex = (currentIndex + 1) % GALLERY.length;
+  modalImg.src = GALLERY[currentIndex];
+}
+
+function prev() {
+  currentIndex = (currentIndex - 1 + GALLERY.length) % GALLERY.length;
+  modalImg.src = GALLERY[currentIndex];
+}
 </script>
+
+<div id="galleryModal" class="gallery-modal">
+  <span class="gallery-close">✕</span>
+  <img id="galleryImage">
+</div>
 
 <!-- FOOTER -->
 <div class="footer">
