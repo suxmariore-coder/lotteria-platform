@@ -383,7 +383,7 @@
 .gallery-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.92);
+  background: rgba(0,0,0,0.96);
   display: none;
   align-items: center;
   justify-content: center;
@@ -399,6 +399,7 @@
   max-height: 85%;
   border-radius: 12px;
   transition: transform .25s ease;
+  touch-action: none;
 }
 
 .gallery-close {
@@ -406,8 +407,9 @@
   top: 18px;
   right: 18px;
   color: white;
-  font-size: 26px;
+  font-size: 28px;
   cursor: pointer;
+  opacity: 0.8;
 }
   </style>
 </head>
@@ -913,36 +915,80 @@ function showBuyerTooltip(row, element) {
   }, 1800);
 }
 
+/* =========================
+   GALLERY PRO MAX 😎
+========================= */
+
 const galleryModal = document.getElementById("galleryModal");
 const galleryImg = document.getElementById("galleryImage");
 
+let startX = 0;
+let scale = 1;
+let lastTap = 0;
+
+/* apertura */
 function openGallery(i) {
   currentIndex = i;
-  galleryModal.classList.add("show");
+  scale = 1;
+  galleryImg.style.transform = "scale(1)";
   galleryImg.src = GALLERY[currentIndex];
+  galleryModal.classList.add("show");
 }
 
+/* chiusura */
 document.querySelector(".gallery-close").onclick = () => {
   galleryModal.classList.remove("show");
 };
 
+/* tap sfondo chiude */
+galleryModal.onclick = (e) => {
+  if (e.target === galleryModal) {
+    galleryModal.classList.remove("show");
+  }
+};
+
+/* swipe */
 galleryModal.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
 });
 
 galleryModal.addEventListener("touchend", e => {
   const diff = e.changedTouches[0].clientX - startX;
-  if (diff > 60) prev();
-  if (diff < -60) next();
+  if (Math.abs(diff) < 50) return;
+
+  if (diff > 0) prev();
+  else next();
+});
+
+/* pinch zoom */
+galleryImg.addEventListener("wheel", e => {
+  e.preventDefault();
+  scale += e.deltaY * -0.001;
+  scale = Math.min(Math.max(.8, scale), 3);
+  galleryImg.style.transform = `scale(${scale})`;
+});
+
+/* doppio tap zoom */
+galleryImg.addEventListener("touchend", () => {
+  const now = Date.now();
+  if (now - lastTap < 300) {
+    scale = scale === 1 ? 2 : 1;
+    galleryImg.style.transform = `scale(${scale})`;
+  }
+  lastTap = now;
 });
 
 function next() {
   currentIndex = (currentIndex + 1) % GALLERY.length;
+  scale = 1;
+  galleryImg.style.transform = "scale(1)";
   galleryImg.src = GALLERY[currentIndex];
 }
 
 function prev() {
   currentIndex = (currentIndex - 1 + GALLERY.length) % GALLERY.length;
+  scale = 1;
+  galleryImg.style.transform = "scale(1)";
   galleryImg.src = GALLERY[currentIndex];
 }
 </script>
