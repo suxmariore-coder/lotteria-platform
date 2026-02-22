@@ -913,40 +913,37 @@ function showBuyerTooltip(row, element) {
   }, 1800);
 }
 
-const modal = document.getElementById("galleryModal");
-const modalImg = document.getElementById("galleryImage");
+const galleryModal = document.getElementById("galleryModal");
+const galleryImg = document.getElementById("galleryImage");
 
 function openGallery(i) {
   currentIndex = i;
-  modal.classList.add("show");
-  modalImg.src = GALLERY[currentIndex];
+  galleryModal.classList.add("show");
+  galleryImg.src = GALLERY[currentIndex];
 }
 
 document.querySelector(".gallery-close").onclick = () => {
-  modal.classList.remove("show");
+  galleryModal.classList.remove("show");
 };
 
-let startX = 0;
-
-modal.addEventListener("touchstart", e => {
+galleryModal.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
 });
 
-modal.addEventListener("touchend", e => {
+galleryModal.addEventListener("touchend", e => {
   const diff = e.changedTouches[0].clientX - startX;
-
   if (diff > 60) prev();
   if (diff < -60) next();
 });
 
 function next() {
   currentIndex = (currentIndex + 1) % GALLERY.length;
-  modalImg.src = GALLERY[currentIndex];
+  galleryImg.src = GALLERY[currentIndex];
 }
 
 function prev() {
   currentIndex = (currentIndex - 1 + GALLERY.length) % GALLERY.length;
-  modalImg.src = GALLERY[currentIndex];
+  galleryImg.src = GALLERY[currentIndex];
 }
 </script>
 
