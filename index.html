@@ -387,10 +387,12 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  pointer-events: none;
 }
 
 .gallery-modal.show {
   display: flex;
+  pointer-events: auto;
 }
 
 .gallery-modal img {
@@ -430,12 +432,12 @@
   </style>
 </head>
 <body>
-<br>
+
 <header class="navbar">
   <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
 </header>
 
-<br><br>
+<br>
 
 <h1 id="lottery-title"></h1>
 <h3 id="lottery-price"></h3>
@@ -969,7 +971,14 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("DOMContentLoaded", () => {
   const closeBtn = document.querySelector(".gallery-close");
   if (closeBtn) {
-    closeBtn.onclick = () => galleryModal.classList.remove("show");
+    closeBtn.onclick = () => {
+  galleryModal.classList.remove("show");
+
+  // 👇 reset immediato immagine + interazione
+  setTimeout(() => {
+    galleryImg.src = "";
+  }, 150);
+};
   }
 });
 });
@@ -1034,6 +1043,3 @@ function prev() {
 
 </body>
 </html>
-
-
-
