@@ -340,7 +340,6 @@
       (100vw - 32px)          /* padding body */
     );
   }
-}
 
 }
 
@@ -938,9 +937,11 @@ function openGallery(i) {
 }
 
 /* chiusura */
-document.querySelector(".gallery-close").onclick = () => {
-  galleryModal.classList.remove("show");
-};
+window.addEventListener("DOMContentLoaded", () => {
+  document.querySelector(".gallery-close").onclick = () => {
+    galleryModal.classList.remove("show");
+  };
+});
 
 /* tap sfondo chiude */
 galleryModal.onclick = (e) => {
