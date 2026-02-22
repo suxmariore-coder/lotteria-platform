@@ -366,10 +366,17 @@ async function loadDashboard(ownerId) {
   lotteries?.forEach(l => {
     let img = null;
 
-if (Array.isArray(l.prize_images) && l.prize_images.length) {
+if (Array.isArray(l.prize_images)) {
   img = l.prize_images[0];
 }
-
+else if (typeof l.prize_images === "string") {
+  try {
+    const parsed = JSON.parse(l.prize_images);
+    if (Array.isArray(parsed) && parsed.length) {
+      img = parsed[0];
+    }
+  } catch {}
+}
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
