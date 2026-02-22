@@ -420,6 +420,16 @@ I risultati del Lotto sono utilizzati unicamente come riferimento pubblico e ver
 <script>
 const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
+const LOTTERY_ID = new URLSearchParams(location.search).get("id");
+
+const grid = document.getElementById("grid");
+const modal = document.getElementById("modal");
+const modalContent = document.querySelector(".modal-content");
+
+let currentRow = null;
+let PAYMENT_METHODS = { stripe: true/false, paypal: false, revolut: false };
+let LOTTERY_EXPIRED = false;
+let LOTTERY_STATUS = "active"; // active/closed/finished
 
 async function loadStats() {
   try {
