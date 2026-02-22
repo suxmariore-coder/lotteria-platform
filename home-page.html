@@ -553,6 +553,13 @@ async function resetPassword(e) {
   document.getElementById("result").innerText =
     "✅ Email di recupero inviata. Controlla la tua casella.";
 }
+
+(async () => {
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) {
+    location.href = "dashboard.html";
+  }
+})();
 </script>
 
 </body>
