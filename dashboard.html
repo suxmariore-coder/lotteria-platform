@@ -1,168 +1,420 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#1E3A8A">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1E3A8A">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Lotteriffa">
-<link rel="apple-touch-icon" href="/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Lotteriffa">
+  <link rel="apple-touch-icon" href="/icon-192.png">
 
-<meta charset="UTF-8">
-<title>Dashboard Owner</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Dashboard Owner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-<style>
-body{
-  font-family:Arial,sans-serif;
-  background:#FCD34D;
-  margin:0;
-  padding:20px;
-  overflow-x:hidden;
-}
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "e3470c97-a9e9-4a27-b151-833457d130ed"
+      });
+    });
+  </script>
 
-/* Palline */
-.ball{
-  position:absolute;
-  width:90px;height:90px;border-radius:50%;
-  background:#fff;color:#1E3A8A;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;font-size:22px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.08);
-  pointer-events:none;
-  z-index:0;
-}
-.ball1{top:40px;left:-30px;}
-.ball2{top:10px;right:-40px;}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #FCD34D; /* 💛 GIALLO COME LOGIN */
+      margin: 0;
+      padding: 20px;
+      overflow-x: hidden;
+      overscroll-behavior-x: none;
+    }
 
-.container{
-  max-width:500px;
-  margin:40px auto;
-  position:relative;
-  z-index:2;
-}
+    /* Palline identiche */
+    .ball {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: white;
+      color: #1E3A8A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 22px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      pointer-events: none; /* ✅ non blocca click */
+      z-index: 0;           /* ✅ dietro */
+    }
 
-/* NAVBAR */
-.navbar{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  margin-bottom:10px;
-}
+    .ball1 { top: 40px; left: -30px; }
+    .ball2 { top: 10px; right: -40px; }
 
-.logo{
-  height:250px;
-  width:auto;
-  display:block;
-  pointer-events:none;   /* ⭐ non blocca click */
-  user-select:none;
-}
+    .container {
+      max-width: 500px;
+      margin: 60px auto;
+      position: relative;
+      z-index: 2; /* ✅ sopra le palline */
+    }
 
-/* BOTTONI */
-.top-actions{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  margin:10px 0 20px;
-  position:relative;
-  z-index:5;
-}
+    /* ✅ Miglior centratura su mobile */
+    @media (max-width: 520px) {
+      body { padding: 16px; }
+      .container { margin: 40px auto; max-width: 100%; }
+      .ball1 { top: 18px; left: -45px; }
+      .ball2 { top: -10px; right: -55px; }
+    }
 
-button{
-  width:100%;
-  padding:16px;
-  border-radius:18px;
-  font-size:16px;
-  font-weight:600;
-  border:none;
-  cursor:pointer;
-}
+    /* Titolo stile brand */
+    h1 {
+      text-align: center;
+      font-size: 42px;
+      color: #1E3A8A;
+      margin-bottom: 25px;
+    }
 
-.primary{background:#1E3A8A;color:#fff;}
-.secondary{background:transparent;color:#0F1E4A;border:2px solid #0F1E4A;}
+    /* ✅ NAVBAR: niente altezza fissa che “taglia” e crea hitbox strane */
+    .navbar{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 16px;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 10px;
+    }
 
-#status{text-align:center;margin:10px 0 20px;font-size:14px;}
+    /* ✅ Logo grande, ma NON deve mai bloccare click */
+    .logo{
+      height:250px;              /* ⭐ rimane grande */
+      width:auto;
+      display:block;
+      padding-top:70px;
+      margin-right:35px;
+      pointer-events:none;       /* ⭐ fondamentale */
+      user-select:none;
+      -webkit-user-drag:none;
+    }
 
-.grid{display:flex;flex-direction:column;gap:18px;}
+    /* Bottoni top */
+    .top-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
 
-.card{
-  background:rgba(255,255,255,0.7);
-  backdrop-filter:blur(4px);
-  border-radius:18px;
-  padding:16px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.06);
-}
+      /* ✅ assicurati che i bottoni stiano sopra e siano cliccabili */
+      position: relative;
+      z-index: 10;
+    }
 
-.card-top{display:flex;gap:14px;}
-.card-text{flex:1;min-width:0;}
+    button {
+      width: 100%;
+      padding: 16px;
+      border-radius: 18px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
 
-.thumb{
-  width:90px;aspect-ratio:1;border-radius:12px;
-  background:#eee;overflow:hidden;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-}
-.thumb img{width:100%;height:100%;object-fit:cover;}
+    button:active {
+      transform: scale(0.98);
+    }
 
-.title{margin:0;font-size:16px;color:#0F1E4A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.price{font-weight:bold;color:#1E3A8A;margin-top:6px;}
+    .primary {
+      background: #1E3A8A;
+      color: white;
+    }
 
-.desc{
-  font-size:13px;color:#555;margin-top:6px;
-  display:-webkit-box;-webkit-line-clamp:2;
-  -webkit-box-orient:vertical;overflow:hidden;
-}
+    .secondary {
+      background: transparent;
+      color: #0F1E4A;
+      border: 2px solid #0F1E4A;
+    }
 
-.lottery-badge{
-  margin-top:8px;background:#fff;border-radius:12px;
-  padding:8px 10px;font-size:12px;color:#1E3A8A;
-  height:48px;display:flex;flex-direction:column;justify-content:center;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
+    #status {
+      text-align: center;
+      margin: 10px 0 20px;
+      font-size: 14px;
+    }
 
-.actions{display:flex;gap:10px;margin-top:10px;}
-.actions button{flex:1;padding:14px;border-radius:14px;font-size:14px;}
+    /* Card */
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
 
-.open{background:#1E3A8A;color:#fff;}
-.manage{background:transparent;border:2px solid #0F1E4A;color:#0F1E4A;}
+    .card {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(4px);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-.footer{font-size:13px;margin:50px 0 30px;opacity:0.9;text-align:center;}
-</style>
+    .card-top {
+      display: flex;
+      gap: 14px;
+    }
+
+    .card-text {
+      flex: 1;
+      min-width: 0;   /* ⭐ fondamentale per evitare overflow flex */
+    }
+
+    .thumb {
+      width: 90px;
+      aspect-ratio: 1 / 1;   /* ⭐ sempre quadrato */
+      border-radius: 12px;
+      background: #eee;
+      overflow: hidden;
+
+      flex-shrink: 0;        /* ⭐ NON si restringe */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 16px;
+      color: #0F1E4A;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .price {
+      font-weight: bold;
+      color: #1E3A8A;
+      margin-top: 6px;
+    }
+
+    .desc {
+      font-size: 13px;
+      color: #555;
+      margin-top: 6px;
+
+      display: -webkit-box;
+      -webkit-line-clamp: 2;      /* max 2 righe */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .lottery-badge {
+      margin-top: 8px;
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #1E3A8A;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      height: 48px;              /* ⭐ blocca dimensione */
+      justify-content: center;
+
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid rgba(30,58,138,0.18);
+    }
+
+    .lottery-badge span {
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .actions button {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .open {
+      background: #1E3A8A;
+      color: white;
+    }
+
+    .manage {
+      background: transparent;
+      border: 2px solid #0F1E4A;
+      color: #0F1E4A;
+    }
+
+    /* FOOTER */
+    .footer {
+      font-size: 13px;
+      margin: 50px 0 30px 0;
+      opacity: 0.9;
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="ball ball1">12</div>
-<div class="ball ball2">37</div>
+  <div class="ball ball1">12</div>
+  <div class="ball ball2">37</div>
 
-<div class="container">
+  <div class="container">
 
-<header class="navbar">
-  <img src="/lotteriffa-real.svg" class="logo">
-</header>
+    <header class="navbar">
+      <img src="/lotteriffa-real.svg" alt="LotteRiffa" class="logo">
+    </header>
 
-<div class="top-actions">
-  <button id="btnCreate" class="primary">➕ Crea nuova lotteria</button>
-  <button id="btnLogout" class="secondary">Esci</button>
-</div>
+    <!-- ✅ IMPORTANTISSIMO: bottoni DENTRO container -->
+    <div class="top-actions">
+      <button id="btnCreate" class="primary">➕ Crea nuova lotteria</button>
+      <button id="btnLogout" class="secondary">Esci</button>
+    </div>
 
-<div id="status"></div>
-<div id="lotteries" class="grid"></div>
+    <div id="status"></div>
+    <div id="lotteries" class="grid"></div>
 
-</div>
-
-<div class="footer">© 2026 LotteRiffa</div>
+    <div class="footer">© 2026 LotteRiffa</div>
+  </div>
 
 <script>
-const SUPABASE_URL="https://fkgxomjctgvbpvgfgfko.supabase.co";
-const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const SUPABASE_URL = "https://fkgxomjctgvbpvgfgfko.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrZ3hvbWpjdGd2YnB2Z2ZnZmtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTA4NjYsImV4cCI6MjA4MDYyNjg2Nn0.Ogun4Qs4zGosOOify0yKC4NgO9vy3QPtvy6F96zo6Gk";
 
-document.getElementById("btnCreate").onclick=()=>location.href="crea-lotteria.html";
-document.getElementById("btnLogout").onclick=async()=>{await sb.auth.signOut();location.href="home-page.html";}
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const elGrid = document.getElementById("lotteries");
+const elStatus = document.getElementById("status");
+
+document.getElementById("btnCreate").onclick = () => {
+  location.href = "crea-lotteria.html";
+};
+
+document.getElementById("btnLogout").onclick = async () => {
+  await sb.auth.signOut();
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.logout();
+  });
+
+  location.href = "home-page.html";
+};
+
+function formatDate(dateStr) {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return "—";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = d.getFullYear();
+  return `${dd}/${mm}/${yy}`;
+}
+
+async function getUserSafe() {
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) {
+    location.href = "home-page.html";
+    return null;
+  }
+  return data.user;
+}
+
+async function loadDashboard(ownerId) {
+  elGrid.innerHTML = "";
+  elStatus.textContent = "Caricamento…";
+
+  const { data: lotteries } = await sb
+    .from("lotteries")
+    .select("id,title,ticket_price,description,prize_images,created_at,wheel,draw_date")
+    .eq("owner_id", ownerId)
+    .order("created_at", { ascending: false });
+
+  elStatus.textContent = "";
+
+  lotteries?.forEach(l => {
+    let img = null;
+
+    if (Array.isArray(l.prize_images)) {
+      img = l.prize_images[0];
+    } else if (typeof l.prize_images === "string") {
+      try {
+        const parsed = JSON.parse(l.prize_images);
+        if (Array.isArray(parsed) && parsed.length) {
+          img = parsed[0];
+        }
+      } catch {}
+    }
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="thumb">
+          ${img ? `<img src="${img}" />` : "Nessuna foto"}
+        </div>
+        <div class="card-text">
+          <h3 class="title">${l.title}</h3>
+          <div class="price">€ ${l.ticket_price}</div>
+          <div class="desc">${l.description || ""}</div>
+
+          <div class="lottery-badge">
+            <div>🎯 Ruota: <span>${l.wheel || "—"}</span></div>
+            <div>📅 Estrazione: <span>${formatDate(l.draw_date)}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="open">Apri</button>
+        <button class="manage">Gestisci</button>
+      </div>
+    `;
+
+    card.querySelector(".open").onclick = () =>
+      window.open(`index.html?id=${l.id}`, "_blank");
+
+    card.querySelector(".manage").onclick = () =>
+      location.href = `manage-lottery.html?id=${l.id}`;
+
+    elGrid.appendChild(card);
+  });
+}
+
+(async () => {
+  const user = await getUserSafe();
+  if (!user) return;
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    const permission = await OneSignal.Notifications.permission;
+    if (permission !== "granted") {
+      await OneSignal.Notifications.requestPermission();
+    }
+    await OneSignal.login(user.id);
+  });
+
+  await loadDashboard(user.id);
+})();
 </script>
 
 </body>
