@@ -1,7 +1,10 @@
 {
+  "id": "/",
   "name": "Lotteriffa",
   "short_name": "Lotteriffa",
-  "start_url": "/",
+  "description": "Piattaforma SaaS per la gestione e creazione di estrazioni e campagne.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1E3A8A",
