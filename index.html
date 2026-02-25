@@ -728,22 +728,21 @@ async function loadNumbers() {
 
     if (canBuy) {
   if (LOTTERY_PRICE === 0) {
-    d.onclick = () => claimFreeNumber(row);
+    d.addEventListener('click', () => claimFreeNumber(row));
   } else {
-    d.onclick = () => openModal(row);
+    d.addEventListener('click', () => openModal(row));
   }
 } else {
-      d.style.cursor = "not-allowed";
-      d.style.opacity = "0.85";
-    }
-
-    if (cls === "sold") {
-    d.onclick = () => showBuyerTooltip(row, d);
-    }
-
-    grid.appendChild(d);
-  });
+  d.style.cursor = "not-allowed";
+  d.style.opacity = "0.85";
 }
+
+if (cls === "sold") {
+  d.addEventListener('click', () => showBuyerTooltip(row, d));
+}
+
+grid.appendChild(d);
+
 
 function openModal(row) {
   currentRow = row;
