@@ -136,7 +136,7 @@
     <textarea id="description" placeholder="Descrivi cosa si vince..."></textarea>
 
     <label>Prezzo singolo biglietto (€)</label>
-    <input id="ticket_price" type="number" min="1" placeholder="1€, 2€, 3€...decidi il prezzo">
+    <input id="ticket_price" type="number" min="0" placeholder="0€ benefica oppure 1€, 2€, 3€...decidi il prezzo">
 
     <label>Password Amministratore (per gestire i numeri)</label>
     <input id="admin_password" type="password" placeholder="Scegli una password sicura">
@@ -276,7 +276,7 @@ async function createLottery() {
   const lottery_payload = {
     title: document.getElementById("title").value.trim(),
     description: document.getElementById("description").value.trim(),
-    ticket_price: Number(document.getElementById("ticket_price").value),
+    ticket_price: Number(document.getElementById("ticket_price").value || 0),
     admin_password: document.getElementById("admin_password").value,
     draw_date: document.getElementById("draw_date").value || null,
     wheel: document.getElementById("wheel").value || null,
