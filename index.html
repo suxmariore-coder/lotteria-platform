@@ -490,6 +490,7 @@ const modal = document.getElementById("modal");
 const modalContent = document.querySelector(".modal-content");
 
 let currentRow = null;
+let LOTTERY_PRICE = 0;
 let PAYMENT_METHODS = { stripe: true/false, paypal: false, revolut: false };
 let LOTTERY_EXPIRED = false;
 let LOTTERY_STATUS = "active"; // active/closed/finished
@@ -598,6 +599,7 @@ if (lot.revolut_link && lot.revolut_link.trim() !== "") {
   document.getElementById("lottery-title").textContent = lot.title || "";
   document.getElementById("lottery-price").textContent =
     `Prezzo biglietto: € ${lot.ticket_price ?? ""}`;
+  LOTTERY_PRICE = Number(lot.ticket_price || 0);
   document.getElementById("lottery-description-text").textContent =
     lot.description || "";
 
@@ -724,19 +726,21 @@ async function loadNumbers() {
 
     const canBuy = (cls === "available") && !LOTTERY_EXPIRED && LOTTERY_STATUS === "active";
 
-    if (canBuy) {
-      d.onclick = () => openModal(row);
-    } else {
-      d.style.cursor = "not-allowed";
-      d.style.opacity = "0.85";
-    }
-
     if (cls === "sold") {
-    d.onclick = () => showBuyerTooltip(row, d);
-    }
+  d.onclick = () => showBuyerTooltip(row, d);
+}
+else if (canBuy) {
 
-    grid.appendChild(d);
-  });
+  if (LOTTERY_PRICE === 0) {
+    d.onclick = () => claimFreeNumber(row);
+  } else {
+    d.onclick = () => openModal(row);
+  }
+
+}
+else {
+  d.style.cursor = "not-allowed";
+  d.style.opacity = "0.85";
 }
 
 function openModal(row) {
@@ -1034,6 +1038,29 @@ function prev() {
   galleryImg.style.transform = "scale(1)";
   galleryImg.src = GALLERY[currentIndex];
 }
+
+async function claimFreeNumber(row) {
+
+  const name = prompt("Inserisci il tuo nome");
+  if (!name) return;
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/claim-free-number`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify({
+      lottery_id: LOTTERY_ID,
+      number_id: row.id,
+      buyer_name: name
+    })
+  });
+
+  if (!res.ok) return alert("Errore");
+
+  loadNumbers();
+}
 </script>
 
 <!-- FOOTER -->
@@ -1043,4 +1070,3 @@ function prev() {
 
 </body>
 </html>
-
