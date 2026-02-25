@@ -201,7 +201,7 @@ const ticketInput = document.getElementById("ticket_price");
 const createBtn = document.getElementById("createBtn");
 
 async function fetchFeeFromPricing(price) {
-  if (!price || price <= 0) return null;
+  if (price === "" || price < 0) return null;
 
   const { data, error } = await sb
     .from("pricing_rules")
@@ -222,7 +222,7 @@ async function fetchFeeFromPricing(price) {
 async function updateButtonText() {
   const price = Number(ticketInput.value);
 
-  if (!price || price <= 0) {
+  if (price === "" || price < 0) {
     createBtn.innerText = "🚀 Crea Lotteria";
     return;
   }
@@ -317,6 +317,5 @@ async function createLottery() {
 
 </body>
 </html>
-
 
 
