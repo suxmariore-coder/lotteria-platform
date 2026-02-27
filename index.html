@@ -970,8 +970,12 @@ modalContent.innerHTML = `
   loadNumbers();
 }
 
-loadLottery();
-loadNumbers();
+async function init(){
+  await loadLottery();
+  await loadNumbers();
+}
+
+init();
 
 function showBuyer(row){
   modalContent.innerHTML = `
