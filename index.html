@@ -1049,41 +1049,25 @@ function prev() {
   galleryImg.src = GALLERY[currentIndex];
 }
 
-async function claimFreeNumber(row, element) {
+async function claimFreeNumber(row,el){
+if(el)el.style.pointerEvents="none";
 
-  if (element) element.style.pointerEvents = "none";
+const name=prompt("Inserisci nome");
+if(!name){if(el)el.style.pointerEvents="auto";return;}
 
-  const name = prompt("Inserisci il tuo nome");
-  if (!name) {
-    if (element) element.style.pointerEvents = "auto";
-    return;
-  }
+const res=await fetch(`${SUPABASE_URL}/functions/v1/claim-free-number`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+apikey:SUPABASE_ANON_KEY,
+Authorization:`Bearer ${SUPABASE_ANON_KEY}`
+},
+body:JSON.stringify({lottery_id:LOTTERY_ID,number_id:row.id,buyer_name:name})
+});
 
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/claim-free-number`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-    },
-    body: JSON.stringify({
-      lottery_id: LOTTERY_ID,
-      number_id: row.id,
-      buyer_name: name
-    })
-  });
+if(!res.ok){alert("Errore");if(el)el.style.pointerEvents="auto";return;}
 
-  if (!res.ok) {
-    if (element) element.style.pointerEvents = "auto";
-    alert("Errore");
-    return;
-  }
-
-  if (navigator.vibrate) navigator.vibrate(40);
-
-  showToast("Numero assegnato 🎉");
-
-  loadNumbers();
+loadNumbers();
 }
 
 function showToast(msg){
