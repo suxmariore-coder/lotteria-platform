@@ -736,24 +736,21 @@ async function loadNumbers() {
   d.style.opacity = "0.85";
 }
 
-if (cls === "sold") {
-  d.addEventListener('click', () => showBuyerTooltip(row, d));
+if(cls==="sold"){
+d.onclick=()=>alert(row.buyer_name||"Acquistato");
 }
-else if (canBuy) {
-  if (LOTTERY_PRICE === 0) {
-    d.addEventListener('click', () => claimFreeNumber(row, d));
-  } else {
-    d.addEventListener('click', () => openModal(row));
-  }
+else if(canBuy){
+if(LOTTERY_PRICE===0){
+d.onclick=()=>claimFreeNumber(row,d);
+}else{
+d.onclick=()=>alert("Pagamento");
 }
-else {
-  d.style.cursor = "not-allowed";
-  d.style.opacity = "0.85";
+}else{
+d.style.cursor="not-allowed";
 }
 
 grid.appendChild(d);
-
-  });
+});
 }
 
 function openModal(row) {
