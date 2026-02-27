@@ -576,12 +576,15 @@ function openFreeModal(row) {
     btn.disabled = true;
     btn.style.opacity = "0.7";
 
-    await claimFreeNumber(row, name);
+    const ok = await claimFreeNumber(row, name);
+if (!ok) {
+  btn.disabled = false;
+  btn.style.opacity = "1";
+  return;
+}
 
-    // chiudo e aggiorno UI
-    closeModal();
-    loadNumbers();
-  };
+closeModal();
+loadNumbers();  };
 
   modal.classList.add("show");
 }
@@ -782,7 +785,7 @@ async function loadNumbers() {
 
     if (canBuy) {
   if (LOTTERY_PRICE === 0) {
-    d.addEventListener('click', () => claimFreeNumber(row));
+    d.addEventListener('click', () => openFreeNumber(row));
   } else {
     d.addEventListener('click', () => openModal(row));
   }
@@ -1096,32 +1099,30 @@ function prev() {
   galleryImg.src = GALLERY[currentIndex];
 }
 
-async function claimFreeNumber(row) {
-
-  const name = prompt("Inserisci il tuo nome");
-  if (!name) return;
-
+async function claimFreeNumber(row, buyer_name) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/claim-free-number`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`
     },
     body: JSON.stringify({
       lottery_id: LOTTERY_ID,
       number_id: row.id,
-      buyer_name: name
+      buyer_name
     })
   });
 
+  const data = await res.json().catch(() => ({}));
+
   if (!res.ok) {
-    const d = await res.json().catch(()=>null);
-    alert(d?.error || "Errore");
-    return;
+    alert(data?.error || "Numero già preso");
+    return false;
   }
 
-  loadNumbers();
+  if (navigator.vibrate) navigator.vibrate(35);
+  return true;
 }
 </script>
 
