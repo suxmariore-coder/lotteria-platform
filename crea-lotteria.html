@@ -137,6 +137,20 @@
 
     <label>Prezzo singolo biglietto (€)</label>
     <input id="ticket_price" type="number" min="0" placeholder="0€ benefica oppure 1€, 2€, 3€...decidi il prezzo">
+<div id="freeBadge" style="
+  display:none;
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  background: rgba(255,255,255,0.65);
+  border: 2px dashed #0F1E4A;
+  color:#0F1E4A;
+  font-weight:700;
+  font-size:13px;
+  text-align:center;
+">
+  💛 Lotteria gratuita / benefica
+</div>
 
     <label>Password Amministratore (per gestire i numeri)</label>
     <input id="admin_password" type="password" placeholder="Scegli una password sicura">
@@ -220,23 +234,44 @@ async function fetchFeeFromPricing(price) {
 }
 
 async function updateButtonText() {
-  const price = Number(ticketInput.value);
+  const badge = document.getElementById("freeBadge");
+  const raw = ticketInput.value;
 
-  if (price === "" || price < 0) {
+  // se vuoto
+  if (raw === "") {
     createBtn.innerText = "🚀 Crea Lotteria";
+    if (badge) badge.style.display = "none";
     return;
   }
 
+  const price = Number(raw);
+
+  // se non valido
+  if (Number.isNaN(price) || price < 0) {
+    createBtn.innerText = "🚀 Crea Lotteria";
+    if (badge) badge.style.display = "none";
+    return;
+  }
+
+  // ✅ caso GRATIS
+  if (price === 0) {
+    createBtn.innerText = "🚀 Crea lotteria gratuita";
+    if (badge) badge.style.display = "block";
+    return;
+  }
+
+  // caso normale: calcolo fee
+  if (badge) badge.style.display = "none";
+
   const fee = await fetchFeeFromPricing(price);
 
-  if (!fee) {
+  if (fee === null || fee === undefined) {
     createBtn.innerText = "🚀 Crea Lotteria";
     return;
   }
 
   createBtn.innerText = `🚀 Crea Lotteria al costo di ${Number(fee).toFixed(2)} €`;
 }
-
 ticketInput.addEventListener("input", updateButtonText);
 
 async function createLottery() {
@@ -317,5 +352,4 @@ async function createLottery() {
 
 </body>
 </html>
-
 
