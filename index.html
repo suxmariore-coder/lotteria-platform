@@ -739,6 +739,17 @@ async function loadNumbers() {
 if (cls === "sold") {
   d.addEventListener('click', () => showBuyerTooltip(row, d));
 }
+else if (canBuy) {
+  if (LOTTERY_PRICE === 0) {
+    d.addEventListener('click', () => claimFreeNumber(row, d));
+  } else {
+    d.addEventListener('click', () => openModal(row));
+  }
+}
+else {
+  d.style.cursor = "not-allowed";
+  d.style.opacity = "0.85";
+}
 
 grid.appendChild(d);
 
@@ -1090,12 +1101,6 @@ function showToast(msg){
   },1800);
 }
 </script>
-
-<!-- FOOTER -->
-<div class="footer">
-
-© 2026 LotteRiffa
-
 <div id="iosToast" style="
 position:fixed;
 bottom:40px;
@@ -1114,6 +1119,11 @@ backdrop-filter:blur(8px);
 ">
 Numero assegnato 🎉
 </div>
+
+<!-- FOOTER -->
+<div class="footer">
+
+© 2026 LotteRiffa
 
 </body>
 </html>
