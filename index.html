@@ -531,6 +531,60 @@ function buildPurchaseModalHTML() {
     </button>
   `;
 }
+function buildFreeClaimModalHTML() {
+  return `
+    <h3 style="text-align:center;margin-top:0" id="modalTitle">🎟️ Prenota gratis</h3>
+
+    <label class="field-label">Il tuo nome</label>
+    <input id="nameField" placeholder="Es. Mario Rossi" />
+
+    <div class="divider"></div>
+
+    <button class="btn whatsapp full" id="btnClaimFree">
+      ✅ Conferma
+    </button>
+
+    <button class="btn cancel full" onclick="closeModal()">
+      Annulla
+    </button>
+  `;
+}
+
+function openFreeModal(row) {
+  currentRow = row;
+  modalContent.innerHTML = buildFreeClaimModalHTML();
+
+  // titolo coerente con l'altra modale
+  const t = modalContent.querySelector("#modalTitle");
+  if (t) t.textContent = `Prenota numero ${row.number}`;
+
+  const input = modalContent.querySelector("#nameField");
+  const btn = modalContent.querySelector("#btnClaimFree");
+
+  // focus automatico
+  setTimeout(() => input?.focus(), 50);
+
+  // Enter = conferma
+  input?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") btn?.click();
+  });
+
+  btn.onclick = async () => {
+    const name = input?.value.trim() || "";
+    if (!name) return alert("Inserisci il nome");
+
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
+
+    await claimFreeNumber(row, name);
+
+    // chiudo e aggiorno UI
+    closeModal();
+    loadNumbers();
+  };
+
+  modal.classList.add("show");
+}
 
 /* WHATSAPP */
 function shareWhatsapp() {
@@ -1042,32 +1096,26 @@ function prev() {
   galleryImg.src = GALLERY[currentIndex];
 }
 
-async function claimFreeNumber(row) {
-
-  const name = prompt("Inserisci il tuo nome");
-  if (!name) return;
-
+async function claimFreeNumber(row, buyer_name) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/claim-free-number`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`
     },
     body: JSON.stringify({
       lottery_id: LOTTERY_ID,
       number_id: row.id,
-      buyer_name: name
+      buyer_name
     })
   });
 
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const d = await res.json().catch(()=>null);
-    alert(d?.error || "Errore");
+    alert(data?.error || "Errore");
     return;
   }
-
-  loadNumbers();
 }
 </script>
 
