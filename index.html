@@ -785,7 +785,7 @@ async function loadNumbers() {
 
     if (canBuy) {
   if (LOTTERY_PRICE === 0) {
-    d.addEventListener('click', () => openFreeNumber(row));
+    d.addEventListener('click', () => openFreeModal(row));
   } else {
     d.addEventListener('click', () => openModal(row));
   }
