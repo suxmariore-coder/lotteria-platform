@@ -1102,9 +1102,6 @@ function prev() {
 
 async function claimFreeNumber(row, buyer_name) {
 
-const name = prompt("Inserisci il tuo nome");
-  if (!name) return;
-
   const res = await fetch(`${SUPABASE_URL}/functions/v1/claim-free-number`, {
     method: "POST",
     headers: {
