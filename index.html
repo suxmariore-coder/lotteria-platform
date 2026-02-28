@@ -913,38 +913,33 @@ if (method === "revolut" && data.instructions.revolut) {
   if (!paymentUrl) return alert("Metodo di pagamento non disponibile (verifica dati owner)");
 
   // riepilogo nel modal + bottone Vai al pagamento
-  modalContent.innerHTML = `
+modalContent.innerHTML = `
   <h3>💳 Completa l’acquisto</h3>
 
   <p>
     <b>Numero scelto:</b> ${numberLabel}<br>
     <b>Metodo:</b> ${method.toUpperCase()}<br>
-    <b>Importo:</b> ${amount ?? "-"}
+    <b>Importo:</b> ${amount ?? "-"} <span style="color:#666;">(su Revolut lo inserisci manualmente)</span><br><br>
   </p>
 
   <div class="divider"></div>
+
+  <p style="font-size:15px; color:#444;">
+    💡 <b>Come funziona:</b><br>
+    ⏳ Numero prenotato! Hai 30 minuti per pagare.<br>
+    L’Owner confermerà l’operazione e il numero sarà tuo 🎉.
+  </p>
 
   <button class="btn ${method}" id="goPayBtn">
     👉 Vai al pagamento
   </button>
 
-  <button class="btn cancel" onclick="closeModal()">Annulla</button>
+  <button class="btn cancel" onclick="closeModal()">Chiudi</button>
 `;
 
-const goBtn = document.getElementById("goPayBtn");
-
-goBtn.onclick = () => {
-  goBtn.disabled = true;
-  goBtn.style.opacity = "0.6";
-
+document.getElementById("goPayBtn").onclick = () => {
   window.open(paymentUrl, "_blank");
-
-  setTimeout(() => {
-    closeModal();
-  }, 300);
 };
-
-await loadNumbers();
 
 // 🔒 disabilita pulsanti per evitare doppi click
 modalContent.querySelectorAll("button").forEach(b => b.disabled = true);
