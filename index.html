@@ -570,21 +570,22 @@ function openFreeModal(row) {
   });
 
   btn.onclick = async () => {
-    const name = input?.value.trim() || "";
-    if (!name) return alert("Inserisci il nome");
+  const name = input?.value.trim() || "";
+  if (!name) return alert("Inserisci il nome");
 
-    btn.disabled = true;
-    btn.style.opacity = "0.7";
+  btn.disabled = true;
+  btn.style.opacity = "0.7";
 
-    const ok = await claimFreeNumber(row, name);
-if (!ok) {
-  btn.disabled = false;
-  btn.style.opacity = "1";
-  return;
-}
+  const ok = await claimFreeNumber(row, name);
 
-closeModal();
-loadNumbers();  };
+  if (ok) {
+    closeModal();
+    await loadNumbers();
+  } else {
+    btn.disabled = false;
+    btn.style.opacity = "1";
+  }
+};
 
   modal.classList.add("show");
 }
@@ -785,7 +786,7 @@ async function loadNumbers() {
 
     if (canBuy) {
   if (LOTTERY_PRICE === 0) {
-    d.addEventListener('click', () => openFreeModal(row));
+    d.addEventListener('click', () => claimFreeNumber(row));
   } else {
     d.addEventListener('click', () => openModal(row));
   }
@@ -970,12 +971,8 @@ modalContent.innerHTML = `
   loadNumbers();
 }
 
-async function init(){
-  await loadLottery();
-  await loadNumbers();
-}
-
-init();
+loadLottery();
+loadNumbers();
 
 function showBuyer(row){
   modalContent.innerHTML = `
@@ -1121,11 +1118,10 @@ async function claimFreeNumber(row, buyer_name) {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    alert(data?.error || "Numero già preso");
+    alert(data?.error || "Errore");
     return false;
   }
 
-  if (navigator.vibrate) navigator.vibrate(35);
   return true;
 }
 </script>
