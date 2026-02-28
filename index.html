@@ -531,12 +531,13 @@ function buildPurchaseModalHTML() {
     </button>
   `;
 }
+
 function buildFreeClaimModalHTML() {
   return `
-    <h3 style="text-align:center;margin-top:0" id="modalTitle">🎟️ Prenota gratis</h3>
+    <h3 id="modalTitle" style="text-align:center;margin-top:0"></h3>
 
     <label class="field-label">Il tuo nome</label>
-    <input id="nameField" placeholder="Es. Mario Rossi" />
+    <input id="freeNameField" placeholder="Es. Mario Rossi" />
 
     <div class="divider"></div>
 
@@ -554,38 +555,34 @@ function openFreeModal(row) {
   currentRow = row;
   modalContent.innerHTML = buildFreeClaimModalHTML();
 
-  // titolo coerente con l'altra modale
-  const t = modalContent.querySelector("#modalTitle");
-  if (t) t.textContent = `Prenota numero ${row.number}`;
+  modalContent.querySelector("#modalTitle").textContent = `Prenota numero ${row.number}`;
 
-  const input = modalContent.querySelector("#nameField");
+  const input = modalContent.querySelector("#freeNameField");
   const btn = modalContent.querySelector("#btnClaimFree");
 
-  // focus automatico
-  setTimeout(() => input?.focus(), 50);
+  setTimeout(() => input.focus(), 50);
 
-  // Enter = conferma
-  input?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") btn?.click();
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") btn.click();
   });
 
   btn.onclick = async () => {
-  const name = input?.value.trim() || "";
-  if (!name) return alert("Inserisci il nome");
+    const name = input.value.trim();
+    if (!name) return alert("Inserisci il nome");
 
-  btn.disabled = true;
-  btn.style.opacity = "0.7";
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
 
-  const ok = await claimFreeNumber(row, name);
+    const ok = await claimFreeNumber(row, name);
+    if (!ok) {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      return;
+    }
 
-  if (ok) {
     closeModal();
-    await loadNumbers();
-  } else {
-    btn.disabled = false;
-    btn.style.opacity = "1";
-  }
-};
+    loadNumbers();
+  };
 
   modal.classList.add("show");
 }
@@ -786,7 +783,7 @@ async function loadNumbers() {
 
     if (canBuy) {
   if (LOTTERY_PRICE === 0) {
-    d.addEventListener('click', () => claimFreeNumber(row));
+    d.addEventListener('click', () => openFreeModal(row));
   } else {
     d.addEventListener('click', () => openModal(row));
   }
