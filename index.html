@@ -930,16 +930,15 @@ modalContent.innerHTML = `
     L’Owner confermerà l’operazione e il numero sarà tuo 🎉.
   </p>
 
-  <button class="btn ${method}" id="goPayBtn">
-    👉 Vai al pagamento
-  </button>
+  <h3><button class="btn ${method}" id="goPayBtn" style="width:60%;">
+    👉 Acquista
+  </button><h3>
 
-  <button class="btn cancel" onclick="closeModal()">Chiudi</button>
+  <button class="btn cancel" onclick="closeModal()" style="width:60%;">Annulla</button>
 `;
 
-document.getElementById("goPayBtn").onclick = () => {
-  window.open(paymentUrl, "_blank");
-};
+  document.getElementById("goPayBtn").onclick = () => {
+    window.open(paymentUrl, "_blank");
 
 // 🔒 disabilita pulsanti per evitare doppi click
 modalContent.querySelectorAll("button").forEach(b => b.disabled = true);
@@ -963,6 +962,10 @@ modalContent.innerHTML = `
 
   <button class="btn cancel" onclick="closeModal()">Chiudi</button>
 `;
+
+     // importantissimo: chiudi/reset così non resta incastrato
+    closeModal();
+  };
 
   // aggiorna la griglia (numero diventa giallo)
   loadNumbers();
