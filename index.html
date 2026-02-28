@@ -939,7 +939,12 @@ if (method === "revolut" && data.instructions.revolut) {
 `;
 
   document.getElementById("goPayBtn").onclick = () => {
-    window.open(paymentUrl, "_blank");
+  window.open(paymentUrl, "_blank");
+
+  setTimeout(() => {
+    closeModal();
+  }, 300);
+};
 // 🔒 disabilita pulsanti per evitare doppi click
 modalContent.querySelectorAll("button").forEach(b => b.disabled = true);
 
@@ -962,10 +967,6 @@ modalContent.innerHTML = `
 
   <button class="btn cancel" onclick="closeModal()">Chiudi</button>
 `;
-
-    // importantissimo: chiudi/reset così non resta incastrato
-    closeModal();
-  };
 
   // aggiorna la griglia (numero diventa giallo)
   loadNumbers();
