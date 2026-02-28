@@ -781,9 +781,9 @@ async function loadNumbers() {
 
     const canBuy = (cls === "available") && !LOTTERY_EXPIRED && LOTTERY_STATUS === "active";
 
-     if (canBuy) {
+    if (canBuy) {
   if (LOTTERY_PRICE === 0) {
-    d.addEventListener('click', () => claimFreeNumber(row));
+    d.addEventListener('click', () => openFreeModal(row));
   } else {
     d.addEventListener('click', () => openModal(row));
   }
