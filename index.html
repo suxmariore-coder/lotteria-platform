@@ -531,6 +531,64 @@ function buildPurchaseModalHTML() {
     </button>
   `;
 }
+function buildFreeClaimModalHTML() {
+  return `
+    <h3 style="text-align:center;margin-top:0" id="modalTitle">🎟️ Prenota gratis</h3>
+
+    <label class="field-label">Il tuo nome</label>
+    <input id="nameField" placeholder="Es. Mario Rossi" />
+
+    <div class="divider"></div>
+
+    <button class="btn whatsapp full" id="btnClaimFree">
+      ✅ Conferma
+    </button>
+
+    <button class="btn cancel full" onclick="closeModal()">
+      Annulla
+    </button>
+  `;
+}
+
+function openFreeModal(row) {
+  currentRow = row;
+  modalContent.innerHTML = buildFreeClaimModalHTML();
+
+  // titolo coerente con l'altra modale
+  const t = modalContent.querySelector("#modalTitle");
+  if (t) t.textContent = `Prenota numero ${row.number}`;
+
+  const input = modalContent.querySelector("#nameField");
+  const btn = modalContent.querySelector("#btnClaimFree");
+
+  // focus automatico
+  setTimeout(() => input?.focus(), 50);
+
+  // Enter = conferma
+  input?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") btn?.click();
+  });
+
+  btn.onclick = async () => {
+  const name = input?.value.trim() || "";
+  if (!name) return alert("Inserisci il nome");
+
+  btn.disabled = true;
+  btn.style.opacity = "0.7";
+
+  const ok = await claimFreeNumber(row, name);
+
+  if (ok) {
+    closeModal();
+    await loadNumbers();
+  } else {
+    btn.disabled = false;
+    btn.style.opacity = "1";
+  }
+};
+
+  modal.classList.add("show");
+}
 
 /* WHATSAPP */
 function shareWhatsapp() {
@@ -855,7 +913,7 @@ if (method === "revolut" && data.instructions.revolut) {
   if (!paymentUrl) return alert("Metodo di pagamento non disponibile (verifica dati owner)");
 
   // riepilogo nel modal + bottone Vai al pagamento
-  modalContent.innerHTML = `
+modalContent.innerHTML = `
   <h3>💳 Completa l’acquisto</h3>
 
   <p>
@@ -869,19 +927,20 @@ if (method === "revolut" && data.instructions.revolut) {
   <p style="font-size:15px; color:#444;">
     💡 <b>Come funziona:</b><br>
     ⏳ Numero prenotato! Hai 30 minuti per pagare.<br>
-       L’Owner confermerà l’operazione e il numero<br>
-       sarà tuo 🎉.
+    L’Owner confermerà l’operazione e il numero sarà tuo 🎉.
   </p>
 
-  <h3><button class="btn ${method}" id="goPayBtn" style="width:60%;">
-    👉 Acquista
-  </button><h3>
+  <button class="btn ${method}" id="goPayBtn">
+    👉 Vai al pagamento
+  </button>
 
-  <button class="btn cancel" onclick="closeModal()" style="width:60%;">Annulla</button>
+  <button class="btn cancel" onclick="closeModal()">Chiudi</button>
 `;
 
-  document.getElementById("goPayBtn").onclick = () => {
-    window.open(paymentUrl, "_blank");
+document.getElementById("goPayBtn").onclick = () => {
+  window.open(paymentUrl, "_blank");
+};
+
 // 🔒 disabilita pulsanti per evitare doppi click
 modalContent.querySelectorAll("button").forEach(b => b.disabled = true);
 
@@ -904,10 +963,6 @@ modalContent.innerHTML = `
 
   <button class="btn cancel" onclick="closeModal()">Chiudi</button>
 `;
-
-    // importantissimo: chiudi/reset così non resta incastrato
-    closeModal();
-  };
 
   // aggiorna la griglia (numero diventa giallo)
   loadNumbers();
@@ -1042,32 +1097,28 @@ function prev() {
   galleryImg.src = GALLERY[currentIndex];
 }
 
-async function claimFreeNumber(row) {
-
-  const name = prompt("Inserisci il tuo nome");
-  if (!name) return;
-
+async function claimFreeNumber(row, buyer_name) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/claim-free-number`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      apikey: SUPABASE_ANON_KEY
     },
     body: JSON.stringify({
       lottery_id: LOTTERY_ID,
       number_id: row.id,
-      buyer_name: name
+      buyer_name
     })
   });
 
+  const data = await res.json().catch(() => ({}));
+
   if (!res.ok) {
-    const d = await res.json().catch(()=>null);
-    alert(d?.error || "Errore");
-    return;
+    alert(data?.error || "Errore");
+    return false;
   }
 
-  loadNumbers();
+  return true;
 }
 </script>
 
